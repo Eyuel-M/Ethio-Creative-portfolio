@@ -1,0 +1,81 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/inter-tight';
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views';
+@source '../../app';
+
+@theme {
+    --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Inter Tight Variable', 'Inter Tight', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+    --color-canvas: #f3f4f6;
+    --color-ink: #0c0c10;
+    --color-ink-soft: #3f3f46;
+    --color-muted: #71717a;
+    --color-faint: #a1a1aa;
+    --color-line: #ebebef;
+    --color-brand: #2f6bff;
+    --color-brand-soft: #eaf0ff;
+    --color-violet: #8b5cf6;
+    --color-leaf: #34c759;
+    --color-leaf-dark: #15803d;
+    --color-leaf-soft: #ecfbef;
+}
+
+@layer base {
+    html { -webkit-font-smoothing: antialiased; }
+    body { @apply bg-canvas text-ink font-sans; }
+    h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
+    [x-cloak] { display: none !important; }
+    :focus-visible { @apply outline-2 outline-offset-2 outline-brand; }
+}
+
+@layer components {
+    .card { @apply bg-white rounded-2xl border border-line; }
+    .card-pad { @apply p-5 sm:p-6; }
+    .panel-title { @apply text-xl font-semibold tracking-tight; }
+
+    .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 h-11 text-sm font-semibold transition whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed; }
+    .btn-sm { @apply h-9 px-3 rounded-lg text-[13px]; }
+    .btn-dark { @apply bg-ink text-white hover:bg-black; box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 6px 16px -6px rgba(12,12,16,.55); }
+    .btn-light { @apply bg-white text-ink border border-line hover:bg-zinc-50; }
+    .btn-brand { @apply bg-brand text-white hover:bg-[#2459e0]; box-shadow: 0 8px 20px -8px rgba(47,107,255,.7); }
+    .btn-ghost { @apply text-ink-soft hover:bg-zinc-100; }
+    .btn-danger { @apply bg-white text-rose-600 border border-rose-200 hover:bg-rose-50; }
+    .btn-muted { @apply bg-zinc-200/80 text-zinc-400 cursor-default; }
+    .btn-pill { @apply rounded-full; }
+
+    .input { @apply w-full rounded-xl border border-line bg-white px-3.5 h-11 text-sm text-ink placeholder:text-faint focus:border-ink focus:ring-0 focus:outline-none transition; }
+    textarea.input { @apply h-auto py-3 leading-relaxed; }
+    select.input { @apply pr-9 appearance-none bg-no-repeat; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5.5 7.5 10 12l4.5-4.5' stroke='%2371717a' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-size: 18px; background-position: right 12px center; }
+    .label { @apply block text-sm font-medium text-ink mb-1.5; }
+    .hint { @apply text-xs text-muted mt-1.5; }
+    .error { @apply text-xs text-rose-600 mt-1.5; }
+    .checkbox { @apply size-4 rounded border-zinc-300 accent-ink; }
+
+    .chip { @apply inline-flex items-center rounded-lg border border-line bg-white px-2.5 py-1 text-xs font-medium text-ink-soft; }
+    .pill { @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset; }
+    .eyebrow { @apply inline-flex items-center rounded-full border border-line bg-white px-3 py-1 text-xs font-medium text-ink-soft; }
+    .meta { @apply inline-flex items-center gap-1.5 text-[13px] text-ink-soft; }
+    .divider-dot { @apply h-3.5 w-px bg-line; }
+
+    .nav-link { @apply flex items-center gap-3 rounded-xl px-3 h-11 text-[15px] text-muted hover:text-ink hover:bg-white/70 transition; }
+    .nav-link.active { @apply bg-white text-ink font-semibold border border-line; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+
+    .table-head { @apply text-left text-xs font-medium text-muted uppercase tracking-wide; }
+
+    .hero-gradient {
+        background:
+            radial-gradient(60% 70% at 15% 0%, rgba(167,139,250,.28), transparent 60%),
+            radial-gradient(50% 60% at 90% 10%, rgba(96,165,250,.30), transparent 60%),
+            radial-gradient(70% 60% at 50% 100%, rgba(244,114,182,.10), transparent 70%),
+            linear-gradient(180deg, #eef1ff 0%, #f6f4ff 60%, #fbfbfd 100%);
+    }
+    .grid-lines {
+        background-image: linear-gradient(to right, rgba(12,12,16,.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(12,12,16,.045) 1px, transparent 1px);
+        background-size: 56px 56px;
+    }
+}

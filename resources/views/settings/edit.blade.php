@@ -51,16 +51,16 @@
     <div class="mt-6 grid gap-5 md:grid-cols-2">
         <div class="rounded-2xl border border-line p-5">
             <p class="flex items-center gap-2 font-semibold"><x-icon name="bank" class="size-5"/> Commercial Bank of Ethiopia</p>
-            <p class="mt-1 text-sm text-muted">Saved: <span class="font-mono">{{ $maskedCbe ?? 'not provided' }}</span></p>
+            <p class="mt-1 text-sm text-muted">Saved: <span class="tabular-nums tracking-wide">{{ $maskedCbe ?? 'not provided' }}</span></p>
             <label class="label mt-4" for="cbe">{{ $maskedCbe ? 'Replace account number' : 'Account number' }}</label>
-            <input id="cbe" name="cbe_account_number" inputmode="numeric" autocomplete="off" class="input font-mono" :type="show ? 'text' : 'password'" placeholder="1000xxxxxxxxx"><x-field-error name="cbe_account_number"/>
+            <input id="cbe" name="cbe_account_number" inputmode="numeric" autocomplete="off" class="input tabular-nums tracking-wide" :type="show ? 'text' : 'password'" placeholder="1000xxxxxxxxx"><x-field-error name="cbe_account_number"/>
             @if($maskedCbe)<button name="clear" value="cbe" class="mt-2 text-xs text-rose-600 underline" onclick="return confirm('Remove saved CBE account?')">Remove</button>@endif
         </div>
         <div class="rounded-2xl border border-line p-5">
             <p class="flex items-center gap-2 font-semibold"><x-icon name="phone" class="size-5"/> Telebirr</p>
-            <p class="mt-1 text-sm text-muted">Saved: <span class="font-mono">{{ $maskedTelebirr ?? 'not provided' }}</span></p>
+            <p class="mt-1 text-sm text-muted">Saved: <span class="tabular-nums tracking-wide">{{ $maskedTelebirr ?? 'not provided' }}</span></p>
             <label class="label mt-4" for="telebirr">{{ $maskedTelebirr ? 'Replace Telebirr number' : 'Telebirr number' }}</label>
-            <input id="telebirr" name="telebirr_number" inputmode="tel" autocomplete="off" class="input font-mono" :type="show ? 'text' : 'password'" placeholder="09xxxxxxxx"><x-field-error name="telebirr_number"/>
+            <input id="telebirr" name="telebirr_number" inputmode="tel" autocomplete="off" class="input tabular-nums tracking-wide" :type="show ? 'text' : 'password'" placeholder="09xxxxxxxx"><x-field-error name="telebirr_number"/>
             @if($maskedTelebirr)<button name="clear" value="telebirr" class="mt-2 text-xs text-rose-600 underline" onclick="return confirm('Remove saved Telebirr number?')">Remove</button>@endif
         </div>
     </div>

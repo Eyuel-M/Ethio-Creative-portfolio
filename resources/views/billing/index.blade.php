@@ -25,7 +25,7 @@
         <thead class="border-y border-line bg-zinc-50/70"><tr><th class="table-head px-6 py-3">Service</th><th class="table-head px-4 py-3">Reference</th><th class="table-head px-4 py-3">Amount</th><th class="table-head px-4 py-3">Status</th><th class="table-head px-4 py-3">Date</th></tr></thead>
         <tbody class="divide-y divide-line">
             @forelse($orders as $o)
-                <tr><td class="px-6 py-3"><a href="{{ route('billing.order', $o) }}" class="font-medium hover:underline">{{ $o->product->name }}</a>@if($o->jobPost)<p class="text-xs text-muted">{{ $o->jobPost->title }}</p>@endif</td><td class="px-4 py-3 font-mono text-xs text-muted">{{ $o->provider_reference }}</td><td class="px-4 py-3">{{ \App\Support\Money::format($o->amount_minor, $o->currency) }}</td><td class="px-4 py-3"><x-status :status="$o->status"/></td><td class="px-4 py-3 text-muted">{{ $o->created_at->format('M j, Y') }}</td></tr>
+                <tr><td class="px-6 py-3"><a href="{{ route('billing.order', $o) }}" class="font-medium hover:underline">{{ $o->product->name }}</a>@if($o->jobPost)<p class="text-xs text-muted">{{ $o->jobPost->title }}</p>@endif</td><td class="px-4 py-3 tabular-nums tracking-wide text-xs text-muted">{{ $o->provider_reference }}</td><td class="px-4 py-3">{{ \App\Support\Money::format($o->amount_minor, $o->currency) }}</td><td class="px-4 py-3"><x-status :status="$o->status"/></td><td class="px-4 py-3 text-muted">{{ $o->created_at->format('M j, Y') }}</td></tr>
             @empty
                 <tr><td colspan="5" class="px-6 py-8 text-center text-muted">No purchases yet.</td></tr>
             @endforelse

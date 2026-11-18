@@ -5,7 +5,7 @@
         <p class="text-sm text-muted">Pay {{ config('marketplace.brand') }}</p>
         <p class="mt-1 font-display text-4xl font-bold">{{ \App\Support\Money::format($order->amount_minor, $order->currency) }}</p>
         <p class="mt-2 text-sm">{{ $order->product->name }}@if($order->jobPost) · {{ $order->jobPost->title }}@endif</p>
-        <p class="mt-1 font-mono text-xs text-muted">{{ $order->provider_reference }}</p>
+        <p class="mt-1 tabular-nums tracking-wide text-xs text-muted">{{ $order->provider_reference }}</p>
         @if($order->status === 'pending_provider')
             <form method="POST" action="{{ route('sandbox.complete', $order) }}" class="mt-8 space-y-2">@csrf
                 <button name="outcome" value="success" class="btn btn-dark h-12 w-full">Simulate successful payment</button>

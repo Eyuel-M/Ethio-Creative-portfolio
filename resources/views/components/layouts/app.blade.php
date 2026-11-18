@@ -29,7 +29,7 @@
     {{-- Sidebar --}}
     <div x-show="nav" x-cloak x-transition.opacity class="fixed inset-0 z-30 bg-black/30 lg:hidden" @click="nav = false"></div>
     <aside :class="nav ? 'translate-x-0' : '-translate-x-full'"
-           style="view-transition-name: app-sidebar" class="fixed inset-y-0 left-0 z-40 flex w-[280px] -translate-x-full flex-col overflow-y-auto bg-canvas px-5 pb-5 pt-7 transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:transition-none">
+           class="fixed inset-y-0 left-0 z-40 flex w-[280px] -translate-x-full flex-col overflow-y-auto bg-canvas px-5 pb-5 pt-7 transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:transition-none">
         <div class="flex h-11 items-center justify-between px-2">
             <x-logo/>
             <button class="btn-ghost rounded-lg p-1.5 lg:hidden" @click="nav = false" aria-label="Close menu"><x-icon name="x"/></button>
@@ -80,7 +80,7 @@
 
     {{-- Main --}}
     <div class="min-w-0 flex-1 p-3 sm:p-4 lg:pl-0">
-        <header style="view-transition-name: app-header" class="relative z-30 mb-3 flex h-14 items-center justify-between gap-3 rounded-2xl bg-white px-3 sm:px-4 lg:mb-4 lg:mt-0 lg:h-[60px]">
+        <header class="relative z-30 mb-3 flex h-14 items-center justify-between gap-3 rounded-2xl bg-white px-3 sm:px-4 lg:mb-4 lg:mt-0 lg:h-[60px]">
             <div class="flex items-center gap-3">
                 <button @click="nav = true" class="grid size-10 place-items-center rounded-xl hover:bg-zinc-100 lg:hidden" aria-label="Open menu"><x-icon name="menu"/></button>
                 <x-logo class="lg:hidden"/>

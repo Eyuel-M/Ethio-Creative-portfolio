@@ -17,7 +17,7 @@
         <div class="flex justify-between"><dt class="text-muted">Service</dt><dd>{{ $order->product->name }}</dd></div>
         @if($order->jobPost)<div class="flex justify-between gap-4"><dt class="text-muted">Job</dt><dd class="truncate">{{ $order->jobPost->title }}</dd></div>@endif
         <div class="flex justify-between"><dt class="text-muted">Amount</dt><dd>{{ \App\Support\Money::format($order->amount_minor, $order->currency) }}</dd></div>
-        <div class="flex justify-between"><dt class="text-muted">Reference</dt><dd class="font-mono text-xs">{{ $order->provider_reference }}</dd></div>
+        <div class="flex justify-between"><dt class="text-muted">Reference</dt><dd class="tabular-nums tracking-wide text-xs">{{ $order->provider_reference }}</dd></div>
     </dl>
     <div class="mt-6 flex justify-center gap-2">
         @if($order->jobPost && $order->status === 'paid')<a href="{{ route('jobs.show', $order->jobPost) }}" class="btn btn-dark">View live job</a>@endif

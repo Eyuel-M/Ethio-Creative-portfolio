@@ -7,6 +7,6 @@
 </div>
 <section class="card card-pad">
     <div class="flex justify-between"><h2 class="panel-title">Recent audited actions</h2><a href="{{ route('admin.audit') }}" class="text-sm text-muted">All</a></div>
-    <ul class="mt-4 divide-y divide-line text-sm">@forelse($recent as $l)<li class="flex justify-between gap-3 py-2.5"><span><span class="font-mono text-xs">{{ $l->action }}</span> · {{ $l->actor?->name ?? 'System' }} {{ $l->target_type ? '→ '.$l->target_type : '' }}</span><span class="text-muted">{{ $l->created_at->diffForHumans() }}</span></li>@empty<li class="py-3 text-muted">No entries.</li>@endforelse</ul>
+    <ul class="mt-4 divide-y divide-line text-sm">@forelse($recent as $l)<li class="flex justify-between gap-3 py-2.5"><span><span class="tabular-nums tracking-wide text-xs">{{ $l->action }}</span> · {{ $l->actor?->name ?? 'System' }} {{ $l->target_type ? '→ '.$l->target_type : '' }}</span><span class="text-muted">{{ $l->created_at->diffForHumans() }}</span></li>@empty<li class="py-3 text-muted">No entries.</li>@endforelse</ul>
 </section>
 </x-layouts.app>

@@ -47,6 +47,20 @@ Run the acceptance tests: `php artisan test`
 | Platform billing | Server-priced orders, sandbox hosted checkout, HMAC-signed idempotent webhooks; entitlements granted only from verified events |
 | Admin | Overview metrics, user status with reasons, job moderation/featuring, orders, reports, audit log |
 
+## Typography rule (enforced)
+
+The whole site uses **exactly two font families**:
+
+| Family | Used for | Tailwind |
+|---|---|---|
+| Inter | all body and UI text, forms, tables, numbers | `font-sans` (default) |
+| Inter Tight | headings (`h1`–`h3`) and display text | `font-display` |
+
+- Both are self-hosted; their Latin subsets are **embedded in the stylesheet**, so text is never drawn in another font and never flickers between pages.
+- `font-mono` / `font-serif` are aliased to Inter; numbers use `tabular-nums` instead of a monospace font.
+- Don't add `@font-face` rules, font `<link>`s (Google Fonts, Bunny…), inline `font-family` styles or `font-[…]` utilities.
+- `tests/Feature/FontPolicyTest.php` fails the build if this rule is broken.
+
 ## Deliberate placeholders (owner decisions still open — spec §10/§20)
 
 - **Payment provider**: `SandboxGateway` stands in behind the `PaymentGateway` interface. Swap in the approved provider (e.g. Chapa, Telebirr merchant) once eligibility is confirmed.

@@ -54,3 +54,18 @@ Run the acceptance tests: `php artisan test`
 - **Prices, quotas, retention days**: proposed defaults in `config/marketplace.php` and the seeder.
 - **Disputes / evidence archive** (Phase 3, milestone 12) are not built yet; cancellation and file-event records are in place for it.
 - `QUEUE_CONNECTION=sync` locally; use the database queue + a worker in production.
+
+## Production note: cache built assets
+
+Files in `public/build/assets` have content hashes in their names, so they can be cached forever. In the Nginx
+server block add:
+
+```nginx
+location /build/assets/ {
+    add_header Cache-Control "public, max-age=31536000, immutable";
+    try_files $uri =404;
+}
+```
+
+(`php artisan serve` sends no cache headers, so locally the fonts are re-fetched per page; the preload +
+`font-display: block` setup keeps text from flashing in a fallback font either way.)

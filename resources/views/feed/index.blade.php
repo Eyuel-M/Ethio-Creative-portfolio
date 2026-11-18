@@ -9,6 +9,14 @@
 @endphp
 <x-dynamic-component :component="$user ? 'layouts.discover' : 'layouts.public'" title="Explore">
 
+@guest
+<section class="mx-auto max-w-[1600px] px-4 pb-2 pt-6 sm:px-6">
+    <span class="eyebrow">Explore</span>
+    <h1 class="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">Creative work from Ethiopia</h1>
+    <p class="mt-3 max-w-2xl text-lg text-ink-soft">A first look at what our creatives are making. Join free to see everything.</p>
+</section>
+@endguest
+@auth
 {{-- Toolbar: Filter · Search (Projects / People / Jobs) · Sort --}}
 <form method="GET" action="{{ route($feedRoute) }}" x-data="{ filters: {{ $filterCount ? 'true' : 'false' }}, tab: 'projects', actions: { projects: @js(route($feedRoute)), people: @js(route('freelancers.index')), jobs: @js(route('jobs.index')) } }"
       :action="actions[tab]" @submit="if (tab !== 'projects') $el.querySelectorAll('[data-feed-only]').forEach(e => e.disabled = true)" class="border-b border-line">
@@ -57,6 +65,7 @@
         </div>
     </div>
 </form>
+@endauth
 
 {{-- Category tiles --}}
 <div class="relative" x-data="{ el: null, end: false, update() { this.end = this.el.scrollLeft + this.el.clientWidth >= this.el.scrollWidth - 4 } }" x-init="el = $refs.row; update()">
@@ -64,9 +73,11 @@
         <a href="{{ route($feedRoute, $keep(['category' => null])) }}" class="flex h-12 shrink-0 items-center gap-2 rounded-lg bg-gradient-to-br from-[#3b7bff] to-brand px-5 text-[15px] font-bold text-white shadow-sm {{ empty($f['category']) ? 'ring-2 ring-ink ring-offset-2' : 'opacity-90 hover:opacity-100' }}">
             <x-icon name="star" class="size-5"/> For You
         </a>
+        @auth
         <a href="{{ route($feedRoute, ['sort' => 'most_liked']) }}" class="flex h-12 shrink-0 items-center gap-2 rounded-lg bg-ink px-5 text-[15px] font-bold text-white {{ $sort === 'most_liked' && empty($f['category']) ? 'ring-2 ring-ink ring-offset-2' : '' }}">
             <x-icon name="heart" class="size-5"/> Most Loved
         </a>
+        @endauth
         @foreach($categories as $c)
             @php $active = ($f['category'] ?? '') === $c->slug; $img = $categoryCovers[$c->id] ?? null; @endphp
             <a href="{{ route($feedRoute, $keep(['category' => $c->slug])) }}" class="relative flex h-12 min-w-[150px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-zinc-800 px-5 text-[15px] font-bold text-white {{ $active ? 'ring-2 ring-ink ring-offset-2' : '' }}">
@@ -160,16 +171,51 @@
                           this.next = doc.querySelector('[data-next]')?.dataset.next || null;
                           this.loading = false;
                       } }">
-            <div id="feed-grid" x-ref="grid" class="grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1700px]:grid-cols-5">
-                @foreach($projects as $p)
+            @php
+                $all = $projects->getCollection();
+                $blurred = $user ? collect() : $all->slice(max(4, $all->count() - 8))->values();
+                $shown = $user ? $all : $all->take($all->count() - $blurred->count());
+                $gridClass = 'grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1700px]:grid-cols-5';
+            @endphp
+            <div id="feed-grid" x-ref="grid" class="{{ $gridClass }}">
+                @foreach($shown as $p)
                     <x-feed-card :project="$p" :liked="in_array($p->id, $likedIds)"/>
                 @endforeach
             </div>
+
+            @guest
+                {{-- Preview wall: the rest is blurred; members see everything --}}
+                <div class="relative mt-8">
+                    @if($blurred->isNotEmpty())
+                        <div class="max-h-[560px] overflow-hidden" inert aria-hidden="true">
+                            <div class="{{ $gridClass }} pointer-events-none select-none blur-[7px] saturate-75">
+                                @foreach($blurred as $p)
+                                    <x-feed-card :project="$p"/>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#fbfbfd]/0 via-[#fbfbfd]/60 to-[#fbfbfd]"></div>
+                    @endif
+                    <div class="{{ $blurred->isNotEmpty() ? 'absolute inset-0' : '' }} flex items-center justify-center px-4 py-10">
+                        <div class="w-full max-w-md rounded-3xl border border-line bg-white/95 p-7 text-center shadow-[0_30px_60px_-30px_rgba(12,12,16,.35)] backdrop-blur">
+                            <span class="mx-auto grid size-12 place-items-center rounded-2xl bg-ink text-white"><x-icon name="sparkles" class="size-6"/></span>
+                            <h2 class="mt-4 font-display text-2xl font-bold">See all {{ number_format($projects->total()) }} projects</h2>
+                            <p class="mt-2 text-ink-soft">Join free to browse everything, search and filter, like work and connect with creatives.</p>
+                            <div class="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
+                                <a href="{{ route('register') }}" class="btn btn-dark h-12 px-7">Join free</a>
+                                <a href="{{ route('login') }}" class="btn btn-light h-12 px-7">Sign in</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endguest
             <span data-next="{{ $projects->nextPageUrl() }}" hidden></span>
+            @auth
             <div class="mt-10 text-center" x-show="next">
                 <button type="button" class="btn btn-light btn-pill px-8" @click="more()" :disabled="loading"><span x-text="loading ? 'Loading…' : 'Load more'"></span></button>
             </div>
             <noscript>{{ $projects->links() }}</noscript>
+            @endauth
         </div>
     @endif
 </div>

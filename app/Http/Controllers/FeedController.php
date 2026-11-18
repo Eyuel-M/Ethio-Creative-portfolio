@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 /** Signed-in home: a Behance-style discovery feed of published portfolio projects. */
 class FeedController extends Controller
 {
+    /** Projects a visitor sees on /explore before being asked to sign up (last rows are blurred). */
+    public const PREVIEW = 24;
+
     public function index(Request $request)
     {
         $f = $request->validate([
@@ -20,8 +23,12 @@ class FeedController extends Controller
             'pro' => 'nullable|boolean',
             'min_likes' => 'nullable|integer|in:0,5,10',
         ]);
-        $sort = $f['sort'] ?? 'recommended';
         $user = $request->user();
+        // Visitors get a preview: categories only — no search, filters, sorting or further pages.
+        if (! $user) {
+            $f = ['category' => $f['category'] ?? null];
+        }
+        $sort = $f['sort'] ?? 'recommended';
 
         $base = fn () => PortfolioProject::discoverable()
             ->with(['profile.user', 'category'])
@@ -36,7 +43,7 @@ class FeedController extends Controller
                 ->orderByRaw('views + 20 * (select count(*) from portfolio_likes pl where pl.portfolio_project_id = portfolio_projects.id) desc')
                 ->take(5)->get()
             : collect();
-        $useBento = $candidates->count() >= 3;
+        $useBento = $user && $candidates->count() >= 3;
         $bentoIds = $useBento ? $candidates->pluck('id') : collect();
         $bento = $useBento && (int) $request->query('page', 1) === 1 ? $candidates : collect();
 
@@ -61,7 +68,9 @@ class FeedController extends Controller
                 ->latest('published_at'),
         };
 
-        $projects = $query->paginate(24)->withQueryString();
+        $projects = $user
+            ? $query->paginate(24)->withQueryString()
+            : $query->paginate(self::PREVIEW, ['*'], 'page', 1);
         $all = $bento->concat($projects->getCollection());
 
         $ratings = Review::whereIn('reviewee_id', $all->pluck('profile.user_id')->unique())

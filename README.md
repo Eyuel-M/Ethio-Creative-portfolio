@@ -15,7 +15,8 @@ holds, escrows or takes commission from project payments, and never sells contac
 composer install && npm install
 cp .env.example .env && php artisan key:generate
 touch database/database.sqlite
-php artisan migrate --seed      # synthetic demo data + generated artwork
+php artisan migrate
+php artisan demo:seed           # optional placeholder content (removable)
 php artisan storage:link
 npm run build
 php artisan serve
@@ -30,6 +31,16 @@ Demo logins (password `password`):
 | Super admin | `admin@demo.test` |
 
 Run the acceptance tests: `php artisan test`
+
+### Placeholder content
+
+| Command | What it does |
+|---|---|
+| `php artisan demo:seed` | Adds placeholder creatives, portfolios, jobs, applications, projects, reviews and messages. Refuses to run twice. |
+| `php artisan demo:clear` | Removes **all** placeholder content. Real accounts and everything they created are kept. |
+
+Placeholder accounts all use `@demo.test` emails — that's how they're found and removed. Don't use that
+domain for real accounts.
 
 ## What's implemented
 

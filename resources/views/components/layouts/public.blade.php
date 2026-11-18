@@ -8,7 +8,7 @@
     <div class="mx-auto flex h-16 max-w-[1320px] items-center justify-between gap-4 rounded-2xl px-4 sm:px-5 {{ $hero ? 'sm:mx-4 lg:mx-auto' : 'border border-line bg-white/90 shadow-[0_1px_2px_rgba(0,0,0,.03)] backdrop-blur' }}">
         <x-logo/>
         <nav class="hidden items-center gap-1 rounded-full border border-white/70 bg-white/60 p-1 text-sm shadow-[0_1px_2px_rgba(0,0,0,.03)] backdrop-blur md:flex">
-            @foreach([['Explore', 'explore'], ['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
+            @foreach([['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
                 <a href="{{ route($route) }}" class="rounded-full px-4 py-2 {{ request()->routeIs($route) ? 'bg-white font-medium text-ink shadow-sm' : 'text-ink-soft hover:text-ink' }}">{{ $label }}</a>
             @endforeach
         </nav>
@@ -23,7 +23,7 @@
         <button class="rounded-lg p-2 md:hidden" @click="nav = !nav" aria-label="Menu"><x-icon name="menu"/></button>
     </div>
     <div x-show="nav" x-cloak x-transition class="mx-4 mb-3 rounded-2xl border border-line bg-white p-2 shadow-lg md:hidden">
-        @foreach([['Explore', 'explore'], ['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
+        @foreach([['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
             <a href="{{ route($route) }}" class="block rounded-xl px-3 py-2.5 text-sm hover:bg-zinc-50">{{ $label }}</a>
         @endforeach
         <div class="mt-2 grid grid-cols-2 gap-2">

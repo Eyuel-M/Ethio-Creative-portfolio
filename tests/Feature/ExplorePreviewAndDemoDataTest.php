@@ -76,4 +76,23 @@ class ExplorePreviewAndDemoDataTest extends MarketplaceTestCase
         $this->assertSame([$realJob->id], JobPost::pluck('id')->all());
         Storage::disk('public')->assertMissing('seed');
     }
+
+    public function test_demo_seed_repairs_half_loaded_placeholder_data(): void
+    {
+        Storage::fake('public');
+        $real = $this->client();
+        // what an earlier crashed run left behind: placeholder accounts, no work, no jobs
+        foreach (['admin@demo.test', 'freelancer@demo.test'] as $email) {
+            User::forceCreate(['name' => 'Leftover', 'email' => $email, 'password' => bcrypt('x')]);
+        }
+        $this->assertFalse(DemoData::complete());
+        $this->assertStringContainsString('INCOMPLETE', DemoData::status()['State']);
+
+        $this->artisan('demo:seed')->assertExitCode(0);
+
+        $this->assertTrue(DemoData::complete());
+        $this->assertSame('loaded', DemoData::status()['State']);
+        $this->assertNotNull($real->fresh());
+        $this->artisan('demo:status')->expectsOutputToContain('Placeholder live jobs')->assertExitCode(0);
+    }
 }

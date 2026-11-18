@@ -20,8 +20,9 @@ class ArtGenerator
 
     public static function make(string $path, int $seed, int $w = 1200, int $h = 900, ?string $label = null): string
     {
-        // Many PHP installs (e.g. php.new on Windows) ship without GD; fall back to SVG artwork.
-        if (! function_exists('imagecreatetruecolor')) {
+        // Some PHP installs ship without GD, or with GD but no JPEG support (e.g. php.new on Windows,
+        // where imagecreatetruecolor() exists but imagejpeg() doesn't). Fall back to SVG artwork.
+        if (! function_exists('imagecreatetruecolor') || ! function_exists('imagejpeg')) {
             return self::svg(preg_replace('/\.\w+$/', '.svg', $path), $seed, $w, $h);
         }
 

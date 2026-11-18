@@ -37,11 +37,21 @@ class DemoSeeder extends Seeder
     public function run(): void
     {
         if (\App\Support\DemoData::present()) {
-            $this->command?->warn('Demo data is already loaded. Run `php artisan demo:clear` first to reload it.');
+            if (\App\Support\DemoData::complete()) {
+                $this->command?->warn('Demo data is already loaded. Run `php artisan demo:seed --fresh` to reload it.');
 
-            return;
+                return;
+            }
+            // Half-loaded (e.g. an earlier run crashed): clean it up and load everything again.
+            $this->command?->warn('Found incomplete placeholder data — removing it and loading a fresh set…');
+            \App\Support\DemoData::clear();
         }
         Storage::disk('public')->deleteDirectory('seed');
+        \Illuminate\Support\Facades\DB::transaction(fn () => $this->load());
+    }
+
+    private function load(): void
+    {
         $realNotifications = Notification::getFacadeRoot();
         Notification::fake(); // seeded history shouldn't spam the mail log; we add a few notifications explicitly below.
 

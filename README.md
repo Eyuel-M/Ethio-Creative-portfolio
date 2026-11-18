@@ -36,7 +36,8 @@ Run the acceptance tests: `php artisan test`
 
 | Command | What it does |
 |---|---|
-| `php artisan demo:seed` | Adds placeholder creatives, portfolios, jobs, applications, projects, reviews and messages. Refuses to run twice. |
+| `php artisan demo:seed` | Adds placeholder creatives, portfolios, jobs, applications, projects, reviews and messages. All-or-nothing; repairs half-loaded data automatically. `--fresh` reloads it. |
+| `php artisan demo:status` | Shows what placeholder and real content is in the database. |
 | `php artisan demo:clear` | Removes **all** placeholder content. Real accounts and everything they created are kept. |
 
 Placeholder accounts all use `@demo.test` emails — that's how they're found and removed. Don't use that

@@ -30,6 +30,33 @@ class DemoData
         return self::users()->exists();
     }
 
+    /** Fully loaded = placeholder creatives with published work AND live placeholder jobs. */
+    public static function complete(): bool
+    {
+        $ids = self::users()->pluck('id');
+
+        return \App\Models\PortfolioProject::where('status', 'published')->whereHas('profile', fn ($q) => $q->whereIn('user_id', $ids))->count() >= 10
+            && \App\Models\JobPost::live()->whereHas('client', fn ($q) => $q->whereIn('user_id', $ids))->count() >= 5;
+    }
+
+    /** @return array<string,int|string> */
+    public static function status(): array
+    {
+        $ids = self::users()->pluck('id');
+
+        return [
+            'Placeholder accounts' => $ids->count(),
+            'Placeholder creatives with work' => \App\Models\FreelancerProfile::whereIn('user_id', $ids)->has('publishedProjects')->count(),
+            'Placeholder projects' => \App\Models\PortfolioProject::whereHas('profile', fn ($q) => $q->whereIn('user_id', $ids))->count(),
+            'Placeholder live jobs' => \App\Models\JobPost::live()->whereHas('client', fn ($q) => $q->whereIn('user_id', $ids))->count(),
+            'All public creatives' => \App\Models\FreelancerProfile::public()->count(),
+            'All published projects' => \App\Models\PortfolioProject::discoverable()->count(),
+            'All live jobs' => \App\Models\JobPost::live()->count(),
+            'Real accounts' => \App\Models\User::where('email', 'not like', '%'.self::DOMAIN)->count(),
+            'State' => ! $ids->count() ? 'not loaded' : (self::complete() ? 'loaded' : 'INCOMPLETE — run: php artisan demo:seed --fresh'),
+        ];
+    }
+
     /** @return array<string,int> counts of what was removed */
     public static function clear(): array
     {

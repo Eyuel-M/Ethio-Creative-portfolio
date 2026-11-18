@@ -25,6 +25,11 @@
     --color-leaf-soft: #ecfbef;
 }
 
+/* Smooth same-site page changes (Chrome/Edge/Safari); the shell stays put, only content swaps. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 120ms; }
+@media (prefers-reduced-motion: reduce) { ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }
+
 @layer base {
     html { -webkit-font-smoothing: antialiased; }
     body { @apply bg-canvas text-ink font-sans; }

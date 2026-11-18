@@ -99,7 +99,7 @@
                         <x-job-card :job="$job" :saved="in_array($job->id, $savedIds)" :applied="in_array($job->id, $appliedIds)"/>
                     @endforeach
                 </div>
-                <div class="card card-pad">{{ $jobs->links() }}</div>
+                @if($jobs->hasPages())<div class="card card-pad">{{ $jobs->links() }}</div>@endif
             @endif
         </section>
     </div>

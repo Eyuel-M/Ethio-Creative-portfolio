@@ -85,6 +85,47 @@
         </div>
     </section>
 
+    {{-- Showcase: wide bento of real portfolio work --}}
+    @if($showcase->count() >= 4)
+    @php
+        // 7 tiles fill a 4×3 grid: big hero, tall, two smalls, small, wide, small.
+        $spans = $showcase->count() >= 7
+            ? ['md:col-span-2 md:row-span-2', 'md:row-span-2', '', '', '', 'md:col-span-2', '']
+            : array_fill(0, 7, '');
+    @endphp
+    <section>
+        <div class="mx-auto max-w-[1600px] px-4 pb-20 pt-4 sm:px-6">
+            <div class="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    <span class="eyebrow">Showcase</span>
+                    <h2 class="mt-4 font-display text-4xl font-semibold tracking-tight sm:text-5xl">Fresh work from
+                        <span class="mx-1 inline-grid size-10 place-items-center rounded-full bg-gradient-to-b from-[#ffb072] to-[#ff7a2f] align-middle text-white"><x-icon name="sparkles" class="size-5"/></span> our creatives</h2>
+                </div>
+                <a href="{{ route('explore') }}" class="btn btn-dark btn-pill h-11 px-6">Explore more <x-icon name="arrow-right" class="size-4"/></a>
+            </div>
+            <div class="mt-10 grid auto-rows-[220px] gap-4 sm:grid-cols-2 md:grid-cols-4 {{ $showcase->count() >= 7 ? '' : 'lg:grid-cols-3' }}">
+                @foreach($showcase as $i => $p)
+                    <a href="{{ route('portfolio.show', $p) }}" class="group relative overflow-hidden rounded-2xl bg-zinc-900 {{ $spans[$i] ?? '' }}">
+                        <img src="{{ $p->coverUrl() }}" alt="{{ $p->cover_alt ?? $p->title }}" class="absolute inset-0 size-full object-cover transition duration-500 group-hover:scale-[1.04]" loading="lazy">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/0 to-black/10 transition group-hover:from-black/80"></div>
+                        @if($p->category)<span class="absolute left-3 top-3 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">{{ $p->category->name }}</span>@endif
+                        <div class="absolute inset-x-0 bottom-0 p-4 text-white">
+                            <p class="font-display font-semibold leading-snug {{ $i === 0 ? 'text-2xl sm:text-3xl' : 'text-[15px]' }}">{{ $p->title }}</p>
+                            <div class="mt-2 flex items-center justify-between gap-3 text-[13px] text-white/85">
+                                <span class="flex min-w-0 items-center gap-2"><x-avatar :user="$p->profile->user" size="size-6" class="text-[10px]"/><span class="truncate">{{ $p->profile->user->displayName() }}</span></span>
+                                <span class="flex shrink-0 items-center gap-3"><span class="flex items-center gap-1"><x-icon name="heart" class="size-3.5"/>{{ $p->likes_count }}</span><span class="flex items-center gap-1"><x-icon name="eye" class="size-3.5"/>{{ $p->views >= 1000 ? round($p->views / 1000, 1).'k' : $p->views }}</span></span>
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+            <div class="mt-10 text-center">
+                <a href="{{ route('explore') }}" class="btn btn-light btn-pill h-11 px-6">See all projects <x-icon name="arrow-right" class="size-4"/></a>
+            </div>
+        </div>
+    </section>
+    @endif
+
     {{-- Categories --}}
     <section class="border-y border-line bg-white">
         <div class="mx-auto max-w-[1320px] px-4 py-20 sm:px-6">
@@ -114,18 +155,6 @@
             </div>
         </div>
     </section>
-
-    {{-- Showcase --}}
-    @if($showcase->isNotEmpty())
-    <section class="mx-auto max-w-[1320px] px-4 py-20 sm:px-6">
-        <h2 class="font-display text-4xl font-semibold tracking-tight">Made on
-            <span class="mx-1 inline-grid size-10 place-items-center rounded-full bg-gradient-to-b from-[#ffb072] to-[#ff7a2f] align-middle text-white"><x-icon name="sparkles" class="size-5"/></span> EthioCreative</h2>
-        <p class="mt-2 text-muted">Recently published case studies from the community.</p>
-        <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            @foreach($showcase as $p)<x-portfolio-tile :project="$p"/>@endforeach
-        </div>
-    </section>
-    @endif
 
     {{-- Jobs --}}
     @if($jobs->isNotEmpty())

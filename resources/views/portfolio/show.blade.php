@@ -1,5 +1,12 @@
 <x-shell :title="$project->title">
 @php $author = $project->profile; @endphp
+@push('meta')
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ $project->title }} — {{ $author->user->displayName() }}">
+<meta property="og:description" content="{{ \Illuminate\Support\Str::limit($project->summary ?? $author->title ?? 'Creative portfolio project', 200) }}">
+<meta property="og:url" content="{{ route('portfolio.show', $project) }}">
+@if($project->coverUrl())<meta property="og:image" content="{{ $project->coverUrl() }}"><meta name="twitter:card" content="summary_large_image">@endif
+@endpush
 <article class="card overflow-hidden">
     @if(! $project->isPublished())<div class="bg-amber-50 px-6 py-2.5 text-center text-sm text-amber-800">Draft preview — only you can see this page.</div>@endif
     <header class="mx-auto max-w-3xl px-5 pb-8 pt-10 text-center sm:pt-14">
@@ -7,7 +14,7 @@
         <h1 class="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">{{ $project->title }}</h1>
         @if($project->summary)<p class="mx-auto mt-4 max-w-2xl text-lg text-ink-soft">{{ $project->summary }}</p>@endif
         <a href="{{ route('freelancers.show', $author) }}" class="mt-6 inline-flex items-center gap-3 rounded-full border border-line py-1.5 pl-1.5 pr-4 hover:bg-zinc-50">
-            <x-avatar :user="$author->user" size="size-9" class="text-xs"/><span class="text-left text-sm"><span class="block font-semibold">{{ $author->user->name }}</span><span class="block text-xs text-muted">{{ $author->title }}</span></span>
+            <x-avatar :user="$author->user" size="size-9" class="text-xs"/><span class="text-left text-sm"><span class="block font-semibold">{{ $author->user->displayName() }}</span><span class="block text-xs text-muted">{{ $author->title }}</span></span>
         </a>
         <div class="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-muted">
             @if($project->project_date)<span>{{ $project->project_date->format('F Y') }}</span>@endif
@@ -24,6 +31,11 @@
             </div>
         @else
             <p class="mt-4 flex items-center justify-center gap-1 text-sm text-muted"><x-icon name="heart" class="size-4"/>{{ $likeCount }} likes</p>
+        @endif
+        @if($project->isPublished())
+            <div class="mt-3 flex justify-center">
+                <x-share :url="route('portfolio.show', $project)" :title="$project->title" :image="$project->coverUrl()" :subtitle="'by '.$author->user->displayName()"/>
+            </div>
         @endif
     </header>
     @if($project->coverUrl())
@@ -52,7 +64,7 @@
 </article>
 @if($more->isNotEmpty())
 <section class="card card-pad">
-    <div class="flex items-center justify-between"><h2 class="panel-title">More by {{ $author->user->name }}</h2><a href="{{ route('freelancers.show', $author) }}" class="text-sm font-medium underline">View profile</a></div>
+    <div class="flex items-center justify-between"><h2 class="panel-title">More by {{ $author->user->displayName() }}</h2><a href="{{ route('freelancers.show', $author) }}" class="text-sm font-medium underline">View profile</a></div>
     <div class="mt-5 grid gap-4 sm:grid-cols-3">@foreach($more as $m)<x-portfolio-tile :project="$m->setRelation('profile', $author)" :showAuthor="false"/>@endforeach</div>
 </section>
 @endif

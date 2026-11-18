@@ -13,7 +13,7 @@
     <div class="absolute inset-x-0 bottom-0 p-4 text-white">
         <p class="font-display text-[15px] font-semibold leading-snug">{{ $project->title }}</p>
         @if($showAuthor)
-            <div class="mt-2 flex items-center gap-2 text-[13px] text-white/85"><x-avatar :user="$project->profile->user" size="size-6" class="text-[10px]"/> {{ $project->profile->user->name }}</div>
+            <div class="mt-2 flex items-center gap-2 text-[13px] text-white/85"><x-avatar :user="$project->profile->user" size="size-6" class="text-[10px]"/> {{ $project->profile->user->displayName() }}</div>
         @endif
     </div>
 </a>

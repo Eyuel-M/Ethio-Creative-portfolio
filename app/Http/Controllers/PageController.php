@@ -21,9 +21,11 @@ class PageController extends Controller
         $featuredTalent = FreelancerProfile::public()->with(['user', 'category', 'skills'])
             ->orderByRaw('CASE WHEN featured_until > ? THEN 0 ELSE 1 END', [now()])
             ->latest('updated_at')->take(8)->get();
-        $showcase = PortfolioProject::where('status', 'published')
-            ->whereHas('profile', fn ($q) => $q->public())
-            ->with('profile.user')->latest('published_at')->take(6)->get();
+        // Bento showcase: strongest recent work (views + likes), covers only.
+        $showcase = PortfolioProject::discoverable()->whereNotNull('cover_path')
+            ->with(['profile.user', 'category'])->withCount('likes')
+            ->orderByRaw('views + 20 * (select count(*) from portfolio_likes pl where pl.portfolio_project_id = portfolio_projects.id) desc')
+            ->take(7)->get();
         $jobs = JobPost::live()->with(['client.user', 'category'])->orderByDesc('is_featured')->latest('published_at')->take(4)->get();
         $stats = [
             'freelancers' => FreelancerProfile::public()->count(),

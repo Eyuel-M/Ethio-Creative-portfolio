@@ -24,6 +24,6 @@
             @endforeach
         </ul>
     </section>
-    <div class="card card-pad">{{ $applications->links() }}</div>
+    @if($applications->hasPages())<div class="card card-pad">{{ $applications->links() }}</div>@endif
 @endif
 </x-layouts.app>

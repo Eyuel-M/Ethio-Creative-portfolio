@@ -51,9 +51,8 @@
             <div class="grid gap-3 sm:grid-cols-2 sm:gap-4 2xl:grid-cols-3">
                 @foreach($profiles as $p)<x-talent-card :profile="$p" :shortlisted="in_array($p->id, $shortlisted)"/>@endforeach
             </div>
-            <div class="card card-pad">{{ $profiles->links() }}</div>
+            @if($profiles->hasPages())<div class="card card-pad">{{ $profiles->links() }}</div>@endif
         @endif
-        <p class="px-1 text-xs text-muted">“Sponsored” profiles paid for promotional placement. Promotion is not a rating and does not guarantee quality.</p>
     </section>
 </div>
 </x-shell>

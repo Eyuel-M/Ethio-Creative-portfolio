@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 // ---------- Public ----------
 Route::get('/', [PageController::class, 'home'])->name('home');
+Route::get('/explore', [\App\Http\Controllers\FeedController::class, 'explore'])->name('explore');
 Route::get('/pricing', [PageController::class, 'pricing'])->name('pricing');
 Route::get('/how-it-works', [PageController::class, 'how'])->name('how');
 Route::get('/freelancers', [FreelancerDirectoryController::class, 'index'])->name('freelancers.index');

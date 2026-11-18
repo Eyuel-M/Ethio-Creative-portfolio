@@ -19,7 +19,6 @@
         <h2 class="font-semibold">Summary</h2>
         <dl class="space-y-2 text-sm"><div class="flex justify-between"><dt class="text-muted">Category</dt><dd>{{ $job->category?->name }}</dd></div><div class="flex justify-between"><dt class="text-muted">Budget</dt><dd>{{ $job->budgetLabel() }}</dd></div><div class="flex justify-between"><dt class="text-muted">Screening questions</dt><dd>{{ $job->questions->count() }}</dd></div></dl>
         <button class="btn btn-dark h-12 w-full">Continue to payment</button>
-        <p class="text-xs text-muted">This fee pays for the platform listing only. Featured placement improves visibility and does not guarantee applicants or a hire. Prices are proposed defaults pending owner approval.</p>
     </aside>
 </form>
 </x-layouts.app>

@@ -51,6 +51,6 @@
             </article>
         @endforeach
     </div>
-    <div class="card card-pad">{{ $jobs->links() }}</div>
+    @if($jobs->hasPages())<div class="card card-pad">{{ $jobs->links() }}</div>@endif
 @endif
 </x-layouts.app>

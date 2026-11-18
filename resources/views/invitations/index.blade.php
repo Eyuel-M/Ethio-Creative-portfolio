@@ -1,5 +1,5 @@
 <x-layouts.app title="Invitations">
-<section class="card card-pad"><h1 class="font-display text-3xl font-bold">Invitations</h1><p class="mt-1 text-muted">Clients who found your portfolio and want to talk. Accepting opens a conversation — it is not accepting the project.</p></section>
+<section class="card card-pad"><h1 class="font-display text-3xl font-bold">Invitations</h1><p class="mt-1 text-muted">Clients who found your portfolio and want to talk.</p></section>
 @if($invitations->isEmpty())
     <x-empty icon="sparkles" title="No invitations yet" text="Keep your portfolio fresh — clients invite creatives whose work stands out."><a href="{{ route('portfolio.index') }}" class="btn btn-dark">Improve portfolio</a></x-empty>
 @else

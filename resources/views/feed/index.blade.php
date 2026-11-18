@@ -1,16 +1,16 @@
 @php
     $user = auth()->user();
-    $ws = $user->workspace();
+    $ws = $user?->workspace();
     $filtered = ($f['q'] ?? null) || ($f['category'] ?? null) || $sort !== 'recommended' || $filterCount;
     $sorts = ['recommended' => 'Recommended', 'newest' => 'Newest', 'most_liked' => 'Most liked', 'most_viewed' => 'Most viewed'];
     $keep = fn (array $over = []) => array_filter(array_merge(['q' => $f['q'] ?? null, 'category' => $f['category'] ?? null, 'sort' => $sort !== 'recommended' ? $sort : null,
         'available' => ($f['available'] ?? false) ? 1 : null, 'pro' => ($f['pro'] ?? false) ? 1 : null, 'min_likes' => ($f['min_likes'] ?? 0) ?: null], $over), fn ($v) => $v !== null && $v !== '');
-    $promo = $ws === 'client' ? 'client' : (($user->freelancerProfile && $user->freelancerProfile->plan !== 'professional') ? 'pro' : null);
+    $promo = ! $user ? null : ($ws === 'client' ? 'client' : (($user->freelancerProfile && $user->freelancerProfile->plan !== 'professional') ? 'pro' : null));
 @endphp
-<x-layouts.discover title="Explore">
+<x-dynamic-component :component="$user ? 'layouts.discover' : 'layouts.public'" title="Explore">
 
 {{-- Toolbar: Filter · Search (Projects / People / Jobs) · Sort --}}
-<form method="GET" action="{{ route('home') }}" x-data="{ filters: {{ $filterCount ? 'true' : 'false' }}, tab: 'projects', actions: { projects: @js(route('home')), people: @js(route('freelancers.index')), jobs: @js(route('jobs.index')) } }"
+<form method="GET" action="{{ route($feedRoute) }}" x-data="{ filters: {{ $filterCount ? 'true' : 'false' }}, tab: 'projects', actions: { projects: @js(route($feedRoute)), people: @js(route('freelancers.index')), jobs: @js(route('jobs.index')) } }"
       :action="actions[tab]" @submit="if (tab !== 'projects') $el.querySelectorAll('[data-feed-only]').forEach(e => e.disabled = true)" class="border-b border-line">
     <div class="flex flex-wrap items-center gap-3 px-4 py-4 sm:px-6 lg:flex-nowrap">
         <button type="button" @click="filters = !filters" :aria-expanded="filters" class="btn btn-light btn-pill h-12 shrink-0 px-5" :class="filters && 'border-ink'">
@@ -51,7 +51,7 @@
                 @endforeach
             </fieldset>
             <div class="ml-auto flex gap-2">
-                <a href="{{ route('home') }}" class="btn btn-sm btn-ghost">Reset</a>
+                <a href="{{ route($feedRoute) }}" class="btn btn-sm btn-ghost">Reset</a>
                 <button class="btn btn-sm btn-dark">Show results</button>
             </div>
         </div>
@@ -61,15 +61,15 @@
 {{-- Category tiles --}}
 <div class="relative" x-data="{ el: null, end: false, update() { this.end = this.el.scrollLeft + this.el.clientWidth >= this.el.scrollWidth - 4 } }" x-init="el = $refs.row; update()">
     <nav x-ref="row" @scroll.debounce.50ms="update()" class="flex gap-2.5 overflow-x-auto scroll-smooth px-4 py-4 [scrollbar-width:none] sm:px-6 [&::-webkit-scrollbar]:hidden" aria-label="Categories">
-        <a href="{{ route('home', $keep(['category' => null])) }}" class="flex h-12 shrink-0 items-center gap-2 rounded-lg bg-gradient-to-br from-[#3b7bff] to-brand px-5 text-[15px] font-bold text-white shadow-sm {{ empty($f['category']) ? 'ring-2 ring-ink ring-offset-2' : 'opacity-90 hover:opacity-100' }}">
+        <a href="{{ route($feedRoute, $keep(['category' => null])) }}" class="flex h-12 shrink-0 items-center gap-2 rounded-lg bg-gradient-to-br from-[#3b7bff] to-brand px-5 text-[15px] font-bold text-white shadow-sm {{ empty($f['category']) ? 'ring-2 ring-ink ring-offset-2' : 'opacity-90 hover:opacity-100' }}">
             <x-icon name="star" class="size-5"/> For You
         </a>
-        <a href="{{ route('home', ['sort' => 'most_liked']) }}" class="flex h-12 shrink-0 items-center gap-2 rounded-lg bg-ink px-5 text-[15px] font-bold text-white {{ $sort === 'most_liked' && empty($f['category']) ? 'ring-2 ring-ink ring-offset-2' : '' }}">
+        <a href="{{ route($feedRoute, ['sort' => 'most_liked']) }}" class="flex h-12 shrink-0 items-center gap-2 rounded-lg bg-ink px-5 text-[15px] font-bold text-white {{ $sort === 'most_liked' && empty($f['category']) ? 'ring-2 ring-ink ring-offset-2' : '' }}">
             <x-icon name="heart" class="size-5"/> Most Loved
         </a>
         @foreach($categories as $c)
             @php $active = ($f['category'] ?? '') === $c->slug; $img = $categoryCovers[$c->id] ?? null; @endphp
-            <a href="{{ route('home', $keep(['category' => $c->slug])) }}" class="relative flex h-12 min-w-[150px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-zinc-800 px-5 text-[15px] font-bold text-white {{ $active ? 'ring-2 ring-ink ring-offset-2' : '' }}">
+            <a href="{{ route($feedRoute, $keep(['category' => $c->slug])) }}" class="relative flex h-12 min-w-[150px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-zinc-800 px-5 text-[15px] font-bold text-white {{ $active ? 'ring-2 ring-ink ring-offset-2' : '' }}">
                 @if($img)<img src="{{ $img }}" alt="" class="absolute inset-0 size-full object-cover opacity-70" loading="lazy">@endif
                 <span class="absolute inset-0 bg-gradient-to-r from-black/55 to-black/25"></span>
                 <span class="relative drop-shadow">{{ $c->name }}</span>
@@ -144,7 +144,7 @@
     @if($filtered)
         <div class="mb-5 flex items-center justify-between">
             <p class="text-sm text-muted"><span class="font-semibold text-ink">{{ number_format($projects->total()) }}</span> projects{{ ($f['q'] ?? null) ? ' for “'.$f['q'].'”' : '' }}</p>
-            <a href="{{ route('home') }}" class="text-sm font-medium text-leaf-dark hover:underline">Clear all</a>
+            <a href="{{ route($feedRoute) }}" class="text-sm font-medium text-leaf-dark hover:underline">Clear all</a>
         </div>
     @endif
 
@@ -173,4 +173,4 @@
         </div>
     @endif
 </div>
-</x-layouts.discover>
+</x-dynamic-component>

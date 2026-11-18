@@ -30,7 +30,6 @@
                 @elseif($active->application)<a href="{{ route('applications.show', $active->application) }}#agreement" class="btn btn-sm btn-light"><x-icon name="file" class="size-4"/> Application &amp; agreement</a>@endif
             </header>
             <div class="min-h-0 flex-1 space-y-3 overflow-y-auto bg-zinc-50/50 p-5" x-init="$el.scrollTop = $el.scrollHeight">
-                <p class="mx-auto max-w-md rounded-xl bg-white px-4 py-2 text-center text-xs text-muted ring-1 ring-line">Keep payment discussions on-platform. Contact and payment details are shared automatically after both of you confirm an agreement.</p>
                 @foreach($messages as $m)
                     @php $mine = $m->user_id === auth()->id(); @endphp
                     <div class="flex {{ $mine ? 'justify-end' : 'justify-start' }}">

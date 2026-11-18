@@ -28,7 +28,7 @@ class FreelancerDirectoryController extends Controller
             ->when($f['level'] ?? null, fn ($q, $l) => $q->whereIn('experience_level', $l))
             ->when($f['availability'] ?? null, fn ($q, $a) => $q->where('availability', $a))
             ->when($f['location'] ?? null, fn ($q, $l) => $q->where('location', 'like', "%{$l}%"))
-            ->with(['user', 'category', 'skills', 'publishedProjects' => fn ($q) => $q->take(3)])
+            ->with(['user', 'category', 'skills', 'publishedProjects' => fn ($q) => $q->take(8)])
             ->withCount('publishedProjects');
 
         // Featured placement is labelled as sponsored and never presented as earned reputation.
@@ -76,7 +76,7 @@ class FreelancerDirectoryController extends Controller
 
     public function saved(Request $request)
     {
-        $profiles = $request->user()->shortlist()->with(['user', 'category', 'skills'])->withCount('publishedProjects')->paginate(12);
+        $profiles = $request->user()->shortlist()->with(['user', 'category', 'skills', 'publishedProjects' => fn ($q) => $q->take(8)])->withCount('publishedProjects')->paginate(12);
 
         return view('freelancers.saved', compact('profiles'));
     }

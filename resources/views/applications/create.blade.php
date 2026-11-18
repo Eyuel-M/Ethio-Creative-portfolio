@@ -15,7 +15,6 @@
                 <div><label class="label" for="estimated_days">Delivery (days)</label><input id="estimated_days" type="number" min="1" name="estimated_days" value="{{ old('estimated_days') }}" class="input" required><x-field-error name="estimated_days"/></div>
                 <div><label class="label" for="availability">Availability</label><input id="availability" name="availability" value="{{ old('availability') }}" class="input" placeholder="Can start Monday"></div>
             </div>
-            <p class="flex gap-2 rounded-xl bg-zinc-50 p-3 text-xs text-muted"><x-icon name="bank" class="size-4 shrink-0"/> Your price is a proposal for the client. If you agree, the client pays you directly — the platform never collects or takes a cut.</p>
         </section>
 
         @if($job->questions->isNotEmpty())
@@ -72,7 +71,6 @@
         </section>
         <section class="card card-pad">
             <button class="btn btn-dark h-12 w-full">Submit application</button>
-            <p class="mt-3 text-xs text-muted">Your phone, email and CBE/Telebirr details are <span class="font-semibold text-ink">not</span> shared by applying.</p>
         </section>
     </aside>
 </form>

@@ -100,7 +100,6 @@
                                 <ul class="mt-2 space-y-1.5">@foreach($current->milestones as $m)<li class="flex justify-between rounded-lg bg-zinc-50 px-3 py-2"><span>{{ $m['title'] }}</span><span class="text-muted">{{ $m['due_date'] ? \Illuminate\Support\Carbon::parse($m['due_date'])->format('M j') : '' }} {{ $m['amount_minor'] ? '· '.Money::format($m['amount_minor'], $current->currency) : '' }}</span></li>@endforeach</ul></div>
                         @endif
                         @if($current->cancellation_terms)<div><p class="text-muted">Cancellation terms</p><p class="mt-1 whitespace-pre-line">{{ $current->cancellation_terms }}</p></div>@endif
-                        <p class="rounded-xl bg-amber-50 p-3 text-xs text-amber-800">The agreed price is recorded for reference only. The client pays the freelancer directly; the platform does not collect, hold or verify project payments.</p>
                     </div>
                     <div class="grid gap-3 border-t border-line p-5 sm:grid-cols-2">
                         @foreach([[$job->client->user, 'Client'], [$fl->user, 'Freelancer']] as [$party, $role])
@@ -169,7 +168,6 @@
                         <button type="button" class="btn btn-danger w-full" @click="o = !o" x-show="!o">Reject</button>
                         <div x-show="o" x-cloak class="space-y-2"><input name="reason" class="input" placeholder="Optional reason shared with the applicant"><button class="btn btn-danger w-full">Confirm rejection</button></div>
                     </form>
-                    <p class="text-xs text-muted">You make the final decision — nothing is rejected automatically.</p>
                 @else
                     <form method="POST" action="{{ route('applications.status', $application) }}" onsubmit="return confirm('Withdraw this application?')">@csrf<input type="hidden" name="status" value="withdrawn"><button class="btn btn-danger w-full">Withdraw application</button></form>
                 @endif
@@ -182,7 +180,6 @@
             <h2 class="font-semibold">Freelancer</h2>
             <div class="mt-3 flex flex-wrap gap-1.5">@foreach($fl->skills->take(8) as $s)<span class="chip">{{ $s->name }}</span>@endforeach</div>
             <a href="{{ route('freelancers.show', $fl) }}" class="btn btn-light mt-4 w-full">View full portfolio</a>
-            <p class="mt-3 flex gap-2 text-xs text-muted"><x-icon name="lock" class="size-4 shrink-0"/> Contact and CBE/Telebirr details unlock only after both of you confirm the same agreement.</p>
         </section>
         @endif
 

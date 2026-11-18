@@ -11,7 +11,6 @@
                 <button name="outcome" value="success" class="btn btn-dark h-12 w-full">Simulate successful payment</button>
                 <button name="outcome" value="fail" class="btn btn-light w-full">Simulate failure</button>
             </form>
-            <p class="mt-4 text-xs text-muted">The sandbox sends an HMAC-signed webhook through the same processor a real provider would use; the browser redirect alone never activates anything.</p>
         @else
             <p class="mt-6"><x-status :status="$order->status"/></p>
             <a href="{{ route('billing.order', $order) }}" class="btn btn-light mt-4 w-full">View order</a>

@@ -44,7 +44,7 @@
 @endif
 
 @if($tab === 'payment' && $fp)
-<div class="grid gap-3 sm:gap-4 xl:grid-cols-[1fr_380px]">
+<div>
 <form method="POST" action="{{ route('settings.payment') }}" class="card card-pad" x-data="{ show: false }">@csrf @method('PUT')
     <div class="flex items-center justify-between gap-3"><h2 class="panel-title">Direct payment details</h2><x-status :status="$pd->status ?? 'not_provided'"/></div>
     <p class="mt-1 text-sm text-muted">Provide a CBE account, a Telebirr number, or both. Clients pay you directly after a confirmed agreement.</p>
@@ -72,12 +72,6 @@
         <button class="btn btn-dark">Save securely</button>
     </div>
 </form>
-<aside class="card card-pad space-y-4 text-sm">
-    <h3 class="font-semibold">How we protect this</h3>
-    @foreach([['lock', 'Encrypted at rest; decrypted only by the project disclosure path.'], ['eye', 'Never on your public profile, directory, applications or chat.'], ['users', 'Revealed only to the client on a project after you both confirm the same agreement version.'], ['shield', 'Every change and reveal is audit-logged. Staff see masked values.'], ['bank', 'We never initiate, receive or verify payments — and saving a number does not prove account ownership.']] as [$i, $t])
-        <p class="flex gap-3 text-ink-soft"><x-icon :name="$i" class="size-5 shrink-0 text-ink"/>{{ $t }}</p>
-    @endforeach
-</aside>
 </div>
 @endif
 
@@ -90,7 +84,7 @@
         <div><label class="label" for="industry">Industry</label><input id="industry" name="industry" value="{{ old('industry', $cp->industry) }}" class="input"></div>
         <div><label class="label" for="cwebsite">Website</label><input id="cwebsite" type="url" name="website" value="{{ old('website', $cp->website) }}" class="input"></div>
         <div><label class="label" for="clocation">Location</label><input id="clocation" name="location" value="{{ old('location', $cp->location) }}" class="input"></div>
-        <div><label class="label" for="cphone">Private phone</label><input id="cphone" name="contact_phone" value="{{ old('contact_phone', $cp->contact_phone) }}" class="input"><p class="hint">Shared with a freelancer only after a confirmed agreement.</p></div>
+        <div><label class="label" for="cphone">Private phone</label><input id="cphone" name="contact_phone" value="{{ old('contact_phone', $cp->contact_phone) }}" class="input"></div>
         <div><label class="label" for="logo">Logo</label><input id="logo" type="file" name="logo" accept="image/*" class="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-2"></div>
     </div>
     <div class="mt-6 text-right"><button class="btn btn-dark">Save client profile</button></div>

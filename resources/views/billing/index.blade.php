@@ -1,5 +1,5 @@
 <x-layouts.app title="Billing">
-<section class="card card-pad"><h1 class="font-display text-3xl font-bold">Billing</h1><p class="mt-1 text-muted">Platform services you've purchased. Project payments between clients and freelancers never pass through here.</p></section>
+<section class="card card-pad"><h1 class="font-display text-3xl font-bold">Billing</h1><p class="mt-1 text-muted">Platform services you've purchased.</p></section>
 @if($upgrades->isNotEmpty())
 <section class="grid gap-4 md:grid-cols-2">
     @foreach($upgrades as $u)

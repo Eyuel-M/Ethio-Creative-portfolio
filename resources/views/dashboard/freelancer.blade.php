@@ -65,7 +65,6 @@
                             <li><a href="{{ route('jobs.show', $j) }}" class="flex items-center justify-between gap-3 py-3"><span class="min-w-0"><span class="block truncate text-sm font-medium">{{ $j->title }}</span><span class="text-xs text-muted">{{ $j->budgetLabel() }} · {{ $j->applications_count }} proposals</span></span><x-icon name="chevron-right" class="size-4 text-muted"/></a></li>
                         @empty<li class="py-3 text-sm text-muted">Set your category in settings to get matches.</li>@endforelse
                     </ul>
-                    <p class="mt-2 text-[11px] text-faint">Matched on your primary category; jobs you applied to are hidden.</p>
                 </section>
             </div>
         </div>

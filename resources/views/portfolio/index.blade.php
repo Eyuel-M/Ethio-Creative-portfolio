@@ -4,7 +4,10 @@
         <h1 class="font-display text-3xl font-bold">My Portfolio</h1>
         <p class="mt-1 text-muted">Structured case studies are what clients look at first.</p>
     </div>
-    <div class="flex items-center gap-4">
+    <div class="flex flex-wrap items-center gap-4">
+        @if($profile->is_public)
+            <x-share :url="route('freelancers.show', $profile)" :title="auth()->user()->name.' — '.($profile->title ?? 'Portfolio')" :image="$projects->firstWhere('status', 'published')?->coverUrl()" :subtitle="$projects->where('status', 'published')->count().' published projects'" label="Share portfolio"/>
+        @endif
         <div class="w-44">
             <div class="flex justify-between text-xs"><span class="text-muted">Projects used</span><span class="font-semibold">{{ $projects->count() }} / {{ $limit }}</span></div>
             <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-zinc-100"><div class="h-full rounded-full {{ $projects->count() >= $limit ? 'bg-amber-500' : 'bg-leaf' }}" style="width: {{ min(100, $projects->count() / max(1, $limit) * 100) }}%"></div></div>
@@ -35,6 +38,7 @@
                     <div class="mt-4 flex gap-2">
                         <a href="{{ route('portfolio.edit', $p) }}" class="btn btn-sm btn-light flex-1"><x-icon name="pen" class="size-4"/> Edit</a>
                         <a href="{{ route('portfolio.show', $p) }}" class="btn btn-sm btn-light" aria-label="Preview"><x-icon name="eye" class="size-4"/></a>
+                        @if($p->isPublished())<x-share :url="route('portfolio.show', $p)" :title="$p->title" :image="$p->coverUrl()" :subtitle="'by '.auth()->user()->name" label="Share project" :iconOnly="true"/>@endif
                         <form method="POST" action="{{ route('portfolio.publish', $p) }}">@csrf<button class="btn btn-sm {{ $p->isPublished() ? 'btn-light' : 'btn-dark' }}">{{ $p->isPublished() ? 'Unpublish' : 'Publish' }}</button></form>
                     </div>
                 </div>

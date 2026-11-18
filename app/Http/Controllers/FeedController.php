@@ -74,6 +74,7 @@ class FeedController extends Controller
             ->unique('category_id')->mapWithKeys(fn ($p) => [$p->category_id => $p->coverUrl()]);
 
         return view('feed.index', [
+            'feedRoute' => $user ? 'home' : 'explore',
             'categoryCovers' => $categoryCovers,
             'filterCount' => $filterCount,
             'bento' => $bento,
@@ -84,6 +85,16 @@ class FeedController extends Controller
             'f' => $f,
             'sort' => $sort,
         ]);
+    }
+
+    /** Public gallery for visitors; signed-in users get the same feed at "/". */
+    public function explore(Request $request)
+    {
+        if ($request->user()) {
+            return redirect()->route('home', $request->query());
+        }
+
+        return $this->index($request);
     }
 
     public function toggleLike(Request $request, PortfolioProject $project)

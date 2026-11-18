@@ -53,7 +53,6 @@
         <a href="{{ route('pricing') }}" class="hover:text-ink">Pricing</a>
         <a href="{{ route('how') }}#trust" class="hover:text-ink">Trust &amp; safety</a>
         <a href="{{ route('how') }}#faq" class="hover:text-ink">Help</a>
-        <span class="ml-auto text-faint">Project payments go directly to creatives — no commission</span>
         <x-logo class="scale-75"/>
     </div>
 </footer>

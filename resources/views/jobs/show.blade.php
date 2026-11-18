@@ -84,7 +84,6 @@
                 <div class="rounded-xl bg-zinc-50 p-3"><dt class="text-muted">Jobs posted</dt><dd class="mt-0.5 font-semibold">{{ $clientStats['jobs'] }}</dd></div>
                 <div class="rounded-xl bg-zinc-50 p-3"><dt class="text-muted">Member since</dt><dd class="mt-0.5 font-semibold">{{ $clientStats['since']->format('M Y') }}</dd></div>
             </dl>
-            <p class="mt-4 flex gap-2 text-xs text-muted"><x-icon name="lock" class="size-4 shrink-0"/> Contact details are shared only after both parties confirm a project agreement.</p>
         </div>
 
         @auth

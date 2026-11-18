@@ -65,7 +65,6 @@
                     <li class="rounded-xl bg-zinc-50 p-4 text-sm text-muted">No milestones in this agreement — the project is tracked as a whole.</li>
                 @endforelse
             </ul>
-            <p class="mt-3 text-xs text-muted">Accepting a milestone is a project record. It does not move or confirm any payment.</p>
         </section>
 
         {{-- Files --}}
@@ -95,7 +94,6 @@
                     <li class="p-6 text-center text-sm text-muted">No files yet.</li>
                 @endforelse
             </ul>
-            <p class="mt-3 text-xs text-muted">A download is not acceptance. Receipt confirmation means the file arrived — not that it meets the brief.</p>
         </section>
 
         {{-- Agreement --}}
@@ -126,7 +124,6 @@
         <section class="card card-pad">
             @if($private)
                 <h2 class="flex items-center gap-2 font-semibold"><x-icon name="unlock" class="size-5 text-leaf-dark"/> {{ $isClient ? 'Freelancer contact & payment' : 'Client contact' }}</h2>
-                <p class="mt-1 text-xs text-muted">Visible only to the two of you because you both confirmed agreement v{{ $ag->version }}.</p>
                 <dl class="mt-4 space-y-3 text-sm">
                     <div><dt class="text-muted">Name</dt><dd class="font-medium">{{ $private['party'] }}</dd></div>
                     <div><dt class="text-muted">Email</dt><dd class="font-medium">{{ $private['email'] }}</dd></div>
@@ -144,9 +141,7 @@
                             <p class="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">The freelancer hasn't added payment details yet. Ask them in chat to add CBE or Telebirr in their settings.</p>
                         @endif
                     </div>
-                    <p class="mt-4 rounded-xl bg-zinc-50 p-3 text-xs text-muted">Pay the freelancer directly using the agreed method. The platform does not initiate, receive or verify this payment, and storing an account number does not prove ownership.</p>
                 @else
-                    <p class="mt-4 rounded-xl bg-zinc-50 p-3 text-xs text-muted">The client has your saved CBE/Telebirr details for this project and pays you directly. The platform does not confirm payments.</p>
                 @endif
             @else
                 <h2 class="flex items-center gap-2 font-semibold"><x-icon name="lock" class="size-5"/> Private details locked</h2>
@@ -157,7 +152,7 @@
         @if(! in_array($project->status, ['completed', 'cancelled', 'cancellation_requested']))
         <section class="card card-pad" x-data="{ o: false }">
             <h2 class="font-semibold">Need to stop?</h2>
-            <p class="mt-1 text-sm text-muted">Either party can request cancellation with a reason. The other party gets to respond. Cancellation alone never counts as misconduct.</p>
+            <p class="mt-1 text-sm text-muted">Either party can request cancellation with a reason. The other party gets to respond.</p>
             <button class="btn btn-danger mt-4 w-full" x-show="!o" @click="o = true">Request cancellation</button>
             <form method="POST" action="{{ route('projects.status', $project) }}" x-show="o" x-cloak class="mt-4 space-y-2">@csrf<input type="hidden" name="status" value="cancellation_requested"><textarea name="reason" class="input" rows="2" required minlength="5" placeholder="Reason"></textarea><button class="btn btn-danger w-full">Send request</button></form>
         </section>

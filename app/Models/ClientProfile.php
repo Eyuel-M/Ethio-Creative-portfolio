@@ -28,6 +28,6 @@ class ClientProfile extends Model
 
     public function displayName(): string
     {
-        return $this->type === 'company' && $this->company_name ? $this->company_name : $this->user->name;
+        return $this->type === 'company' && $this->company_name ? $this->company_name : $this->user->displayName();
     }
 }

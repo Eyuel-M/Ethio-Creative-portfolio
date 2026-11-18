@@ -46,7 +46,6 @@
             <div class="flex gap-3"><x-icon name="bank" class="size-5 shrink-0 text-ink"/><p><span class="font-semibold">No commission.</span> <span class="text-muted">Project payments go directly to the freelancer's CBE or Telebirr.</span></p></div>
             <div class="flex gap-3"><x-icon name="megaphone" class="size-5 shrink-0 text-ink"/><p><span class="font-semibold">Promotion is labelled.</span> <span class="text-muted">Featured placement never guarantees work, applicants or hires.</span></p></div>
         </div>
-        <p class="mt-6 text-center text-xs text-faint">Prices shown are proposed defaults pending owner approval.</p>
     </div>
 </section>
 </x-layouts.public>

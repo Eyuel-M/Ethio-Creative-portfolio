@@ -4,6 +4,6 @@
         <x-empty icon="bookmark" title="Your shortlist is empty" text="Save freelancers from the directory to compare them here."><a href="{{ route('freelancers.index') }}" class="btn btn-dark">Browse talent</a></x-empty>
     @else
         <div class="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">@foreach($profiles as $p)<x-talent-card :profile="$p" :shortlisted="true"/>@endforeach</div>
-        <div class="card card-pad">{{ $profiles->links() }}</div>
+        @if($profiles->hasPages())<div class="card card-pad">{{ $profiles->links() }}</div>@endif
     @endif
 </x-layouts.app>

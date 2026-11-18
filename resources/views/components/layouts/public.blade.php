@@ -3,11 +3,12 @@
 <html lang="en">
 <head>@include('partials.head', ['title' => $title])</head>
 <body class="min-h-screen bg-[#fbfbfd]" x-data="{ nav: false }">
-<header class="{{ $hero ? 'absolute inset-x-0 top-0 z-30' : 'sticky top-0 z-30 border-b border-line bg-white/85 backdrop-blur' }}">
-    <div class="mx-auto flex h-20 max-w-[1320px] items-center justify-between gap-4 px-4 sm:px-6">
+{{-- Floating top bar, inset from the top edge on every visitor page (inside the hero card on the home page). --}}
+<header class="{{ $hero ? 'absolute inset-x-0 top-0 z-30 px-3 pt-6 sm:px-4 sm:pt-8' : 'sticky top-0 z-30 bg-gradient-to-b from-[#fbfbfd] via-[#fbfbfd]/95 to-[#fbfbfd]/0 px-3 pb-2 pt-3 sm:px-4 sm:pt-4' }}">
+    <div class="mx-auto flex h-16 max-w-[1320px] items-center justify-between gap-4 rounded-2xl px-4 sm:px-5 {{ $hero ? 'sm:mx-4 lg:mx-auto' : 'border border-line bg-white/90 shadow-[0_1px_2px_rgba(0,0,0,.03)] backdrop-blur' }}">
         <x-logo/>
         <nav class="hidden items-center gap-1 rounded-full border border-white/70 bg-white/60 p-1 text-sm shadow-[0_1px_2px_rgba(0,0,0,.03)] backdrop-blur md:flex">
-            @foreach([['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
+            @foreach([['Explore', 'explore'], ['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
                 <a href="{{ route($route) }}" class="rounded-full px-4 py-2 {{ request()->routeIs($route) ? 'bg-white font-medium text-ink shadow-sm' : 'text-ink-soft hover:text-ink' }}">{{ $label }}</a>
             @endforeach
         </nav>
@@ -22,7 +23,7 @@
         <button class="rounded-lg p-2 md:hidden" @click="nav = !nav" aria-label="Menu"><x-icon name="menu"/></button>
     </div>
     <div x-show="nav" x-cloak x-transition class="mx-4 mb-3 rounded-2xl border border-line bg-white p-2 shadow-lg md:hidden">
-        @foreach([['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
+        @foreach([['Explore', 'explore'], ['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
             <a href="{{ route($route) }}" class="block rounded-xl px-3 py-2.5 text-sm hover:bg-zinc-50">{{ $label }}</a>
         @endforeach
         <div class="mt-2 grid grid-cols-2 gap-2">

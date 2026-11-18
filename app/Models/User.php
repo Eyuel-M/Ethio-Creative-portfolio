@@ -84,6 +84,17 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->status === 'active';
     }
 
+    /** Full name for signed-in viewers; first name only for visitors. Use for anything shown publicly. */
+    public function displayName(): string
+    {
+        return auth()->check() ? $this->name : $this->firstName();
+    }
+
+    public function firstName(): string
+    {
+        return (string) \Illuminate\Support\Str::of($this->name)->trim()->explode(' ')->first();
+    }
+
     public function initials(): string
     {
         return collect(explode(' ', $this->name))->filter()->take(2)->map(fn ($p) => mb_strtoupper(mb_substr($p, 0, 1)))->implode('');

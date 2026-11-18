@@ -69,4 +69,25 @@ class DiscoveryFeedTest extends MarketplaceTestCase
         $this->app['auth']->forgetGuards();
         $this->postJson(route('portfolio.like', $p))->assertUnauthorized();                     // guests can't like
     }
+
+    public function test_sign_in_lands_on_discover(): void
+    {
+        $u = $this->client();
+        $this->post('/login', ['email' => $u->email, 'password' => 'password'])->assertRedirect(route('home'));
+    }
+
+    public function test_sign_up_accepts_optional_photo_and_lands_on_discover_after_verifying(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $this->post('/register', [
+            'name' => 'Abeba Tadesse', 'email' => 'abeba@example.com', 'password' => 'secret123', 'password_confirmation' => 'secret123',
+            'role' => 'client', 'terms' => 1, 'avatar' => \Illuminate\Http\UploadedFile::fake()->image('me.jpg', 300, 300),
+        ])->assertRedirect(route('verification.notice'));
+        $u = \App\Models\User::where('email', 'abeba@example.com')->firstOrFail();
+        $this->assertNotNull($u->avatar_path);
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($u->avatar_path);
+
+        $link = \Illuminate\Support\Facades\URL::temporarySignedRoute('verification.verify', now()->addHour(), ['id' => $u->id, 'hash' => sha1($u->email)]);
+        $this->actingAs($u)->get($link)->assertRedirect(route('home'));
+    }
 }

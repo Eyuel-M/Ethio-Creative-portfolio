@@ -12,7 +12,7 @@ class VerificationController extends Controller
     public function notice(Request $request)
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->route('dashboard');
+            return redirect()->route('home');
         }
         // Local development convenience only: mail goes to the log, so expose the signed link.
         $devLink = app()->isLocal() ? URL::temporarySignedRoute('verification.verify', now()->addHour(), [
@@ -30,7 +30,7 @@ class VerificationController extends Controller
             event(new Verified($user));
         }
 
-        return redirect()->route('dashboard')->with('status', 'Email verified. Welcome aboard!');
+        return redirect()->route('home')->with('status', 'Email verified. Welcome aboard!');
     }
 
     public function send(Request $request)

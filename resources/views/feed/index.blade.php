@@ -27,11 +27,7 @@
             <x-icon name="search" class="size-5 text-muted"/><span class="sr-only">Search projects</span>
             <input name="q" value="{{ $f['q'] ?? '' }}" class="w-full bg-transparent text-[15px] outline-none placeholder:text-faint" placeholder="Search projects, tags or creatives">
         </label>
-        <label class="flex h-12 items-center gap-2 rounded-xl border border-line px-4 text-sm"><span class="text-faint">Sort</span>
-            <select name="sort" @change="$el.form.requestSubmit()" class="cursor-pointer bg-transparent font-semibold outline-none">
-                @foreach(['recommended' => 'Recommended', 'newest' => 'Newest', 'most_liked' => 'Most liked', 'most_viewed' => 'Most viewed'] as $v => $l)<option value="{{ $v }}" @selected($sort === $v)>{{ $l }}</option>@endforeach
-            </select>
-        </label>
+        @if($sort !== 'recommended')<input type="hidden" name="sort" value="{{ $sort }}">@endif
         <button class="btn btn-dark h-12 px-6">Search</button>
     </form>
 
@@ -60,7 +56,17 @@
 {{-- Main grid --}}
 <section class="card card-pad">
     <div class="flex items-center justify-between">
-        <h2 class="panel-title">{{ $filtered ? 'Results' : 'More to explore' }} <span class="text-base font-normal text-faint">({{ number_format($projects->total()) }})</span></h2>
+        <div>
+            <h2 class="panel-title">{{ $filtered ? 'Results' : 'More to explore' }} <span class="text-base font-normal text-faint">({{ number_format($projects->total()) }})</span></h2>
+            <form method="GET" action="{{ route('home') }}" class="mt-1.5 inline-flex items-center gap-1 text-[15px]">
+                @foreach(['q', 'category'] as $k)@if($f[$k] ?? null)<input type="hidden" name="{{ $k }}" value="{{ $f[$k] }}">@endif @endforeach
+                <label for="feed-sort" class="text-faint">Sort by:</label>
+                <select id="feed-sort" name="sort" onchange="this.form.requestSubmit()" class="cursor-pointer appearance-none bg-transparent pr-1 font-semibold outline-none">
+                    @foreach(['recommended' => 'Recommended', 'newest' => 'Newest', 'most_liked' => 'Most liked', 'most_viewed' => 'Most viewed'] as $v => $l)<option value="{{ $v }}" @selected($sort === $v)>{{ $l }}</option>@endforeach
+                </select><x-icon name="chevron-down" class="pointer-events-none size-4"/>
+                <noscript><button class="ml-2 underline">Apply</button></noscript>
+            </form>
+        </div>
         @if($filtered)<a href="{{ route('home') }}" class="text-sm font-medium text-leaf-dark hover:underline">Clear filters</a>@endif
     </div>
     @if($projects->isEmpty())

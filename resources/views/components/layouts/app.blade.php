@@ -3,7 +3,6 @@
     $user = auth()->user();
     $ws = $user->workspace();
     $menu = $ws === 'client' ? [
-        ['Discover', 'home', 'image', ['home']],
         ['Dashboard', 'dashboard', 'grid', ['dashboard']],
         ['My Jobs', 'client.jobs.index', 'briefcase', ['client.jobs.*']],
         ['Find Freelancers', 'freelancers.index', 'user', ['freelancers.*']],
@@ -12,7 +11,6 @@
         ['Message', 'messages.index', 'mail', ['messages.*'], $navCounts['messages'] ?? 0],
         ['Notification', 'notifications.index', 'bell', ['notifications.*'], $navCounts['notifications'] ?? 0],
     ] : [
-        ['Discover', 'home', 'image', ['home']],
         ['Dashboard', 'dashboard', 'grid', ['dashboard']],
         ['Find Project', 'jobs.index', 'search', ['jobs.index', 'jobs.show', 'applications.create']],
         ['My Portfolio', 'portfolio.index', 'layers', ['portfolio.*']],
@@ -26,14 +24,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>@include('partials.head', ['title' => $title])</head>
-<body class="min-h-screen" x-data="{ nav: false }">
+<body class="min-h-screen" x-data="{ nav: false, side: (() => { try { return localStorage.getItem('sidebar') === 'open' } catch (e) { return false } })() }"
+      x-init="$watch('side', v => { try { localStorage.setItem('sidebar', v ? 'open' : 'closed') } catch (e) {} })">
 <div class="flex min-h-screen">
     {{-- Sidebar --}}
     <div x-show="nav" x-cloak x-transition.opacity class="fixed inset-0 z-30 bg-black/30 lg:hidden" @click="nav = false"></div>
-    <aside :class="nav ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-40 flex w-[280px] -translate-x-full flex-col overflow-y-auto bg-canvas px-5 pb-5 pt-7 transition lg:sticky lg:top-0 lg:h-screen lg:translate-x-0">
+    <aside :class="[nav ? 'translate-x-0' : '-translate-x-full', side ? 'lg:w-[280px]' : 'lg:w-[84px]']"
+           class="fixed inset-y-0 left-0 z-40 w-[280px] -translate-x-full overflow-y-auto overflow-x-hidden bg-canvas transition-all duration-200 lg:sticky lg:top-0 lg:h-screen lg:w-[84px] lg:translate-x-0">
+
+        {{-- Collapsed rail (desktop default): avatar first; clicking it expands the full sidebar --}}
+        <div x-show="!side && !nav" class="hidden min-h-full flex-col items-center gap-1 px-3 pb-5 pt-6 lg:flex">
+            <button type="button" @click="side = true" class="group relative rounded-full p-0.5 ring-2 ring-transparent transition hover:ring-ink/15" aria-label="Expand menu" title="{{ $user->name }} — open menu">
+                <x-avatar :user="$user" size="size-12" class="text-sm"/>
+                <span class="absolute -bottom-0.5 -right-0.5 grid size-5 place-items-center rounded-full bg-ink text-white ring-2 ring-canvas"><x-icon name="chevron-right" class="size-3"/></span>
+            </button>
+            <a href="{{ route('home') }}" class="mt-3 grid size-11 place-items-center rounded-xl bg-ink text-white shadow-[0_6px_14px_-6px_rgba(12,12,16,.6)] transition hover:scale-105" title="Discover" aria-label="{{ config('marketplace.brand') }} — Discover">
+                <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 7h10M7 12h7M7 17h10"/><circle cx="18" cy="12" r="1.6" fill="#34c759" stroke="none"/></svg>
+            </a>
+            <div class="my-4 h-px w-8 bg-zinc-200"></div>
+            @foreach($menu as $item)
+                <a href="{{ route($item[1]) }}" title="{{ $item[0] }}" aria-label="{{ $item[0] }}"
+                   class="relative grid size-11 place-items-center rounded-xl transition {{ request()->routeIs(...$item[3]) ? 'border border-line bg-white text-ink shadow-sm' : 'text-muted hover:bg-white/70 hover:text-ink' }}">
+                    <x-icon :name="$item[2]" class="size-5"/>
+                    @if(($item[4] ?? 0) > 0)<span class="absolute right-1.5 top-1.5 size-2 rounded-full bg-leaf ring-2 ring-canvas"></span>@endif
+                </a>
+            @endforeach
+            <div class="my-3 h-px w-8 bg-zinc-200"></div>
+            @foreach(array_filter([['Settings', 'settings', 'settings', ['settings']], ['Billing', 'billing.index', 'dollar', ['billing.*', 'sandbox.*']], $user->isAdmin() ? ['Admin console', 'admin.overview', 'shield', ['admin.*']] : null, ['Help', 'how', 'help', ['how']]]) as $item)
+                <a href="{{ route($item[1]) }}" title="{{ $item[0] }}" aria-label="{{ $item[0] }}"
+                   class="grid size-11 place-items-center rounded-xl transition {{ request()->routeIs(...$item[3]) ? 'border border-line bg-white text-ink shadow-sm' : 'text-muted hover:bg-white/70 hover:text-ink' }}"><x-icon :name="$item[2]" class="size-5"/></a>
+            @endforeach
+        </div>
+
+        {{-- Full sidebar --}}
+        <div x-show="side || nav" x-cloak class="flex min-h-full w-[280px] flex-col px-5 pb-5 pt-7">
         <div class="flex items-center justify-between px-2">
             <x-logo/>
             <button class="btn-ghost rounded-lg p-1.5 lg:hidden" @click="nav = false" aria-label="Close menu"><x-icon name="x"/></button>
+            <button class="hidden rounded-lg p-1.5 text-muted hover:bg-white hover:text-ink lg:block" @click="side = false" aria-label="Collapse menu" title="Collapse menu"><x-icon name="chevron-left"/></button>
         </div>
         <div class="my-6 h-px bg-zinc-200"></div>
 
@@ -109,12 +137,13 @@
                 </div>
             @endif
         </div>
+        </div>
     </aside>
 
     {{-- Main --}}
     <div class="min-w-0 flex-1 p-3 sm:p-4 lg:pl-0">
         <div class="mb-3 flex items-center justify-between rounded-2xl bg-white px-4 py-3 lg:hidden">
-            <button @click="nav = true" class="rounded-lg p-1" aria-label="Open menu"><x-icon name="menu"/></button>
+            <button @click="nav = true" class="rounded-full" aria-label="Open menu"><x-avatar :user="$user" size="size-9" class="text-xs"/></button>
             <x-logo/>
             <a href="{{ route('notifications.index') }}" class="relative rounded-lg p-1" aria-label="Notifications"><x-icon name="bell"/>@if(($navCounts['notifications'] ?? 0) > 0)<span class="absolute right-0 top-0 size-2 rounded-full bg-leaf"></span>@endif</a>
         </div>

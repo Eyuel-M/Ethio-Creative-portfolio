@@ -1,5 +1,15 @@
 <x-auth-card title="Create your account" subtitle="One login — you can add the other workspace later.">
-    <form method="POST" action="{{ route('register') }}" class="space-y-4" x-data="{ role: '{{ old('role', $role === 'client' ? 'client' : 'freelancer') }}' }">@csrf
+    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" class="space-y-4" x-data="{ role: '{{ old('role', $role === 'client' ? 'client' : 'freelancer') }}', name: @js(old('name', '')), photo: null,
+          get initials() { return this.name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('') || '?' } }">@csrf
+        <div class="flex items-center gap-4">
+            <label class="relative grid size-16 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-full bg-indigo-100 text-lg font-semibold text-indigo-700 ring-2 ring-white shadow" title="Add a profile photo">
+                <img x-show="photo" :src="photo" alt="" class="size-full object-cover">
+                <span x-show="!photo" x-text="initials"></span>
+                <span class="absolute bottom-0 right-0 grid size-6 place-items-center rounded-full bg-ink text-white ring-2 ring-white"><x-icon name="camera" class="size-3.5"/></span>
+                <input type="file" name="avatar" accept="image/*" class="sr-only" @change="photo = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null">
+            </label>
+            <div class="text-sm"><p class="font-medium">Profile photo <span class="font-normal text-muted">(optional)</span></p><p class="text-muted">Without one, we'll show your initials.</p><x-field-error name="avatar"/></div>
+        </div>
         <fieldset>
             <legend class="label">I want to</legend>
             <div class="grid grid-cols-2 gap-2">
@@ -11,7 +21,7 @@
                 @endforeach
             </div>
         </fieldset>
-        <div><label class="label" for="name">Full name</label><input id="name" name="name" value="{{ old('name') }}" class="input" required autocomplete="name"><x-field-error name="name"/></div>
+        <div><label class="label" for="name">Full name</label><input id="name" name="name" value="{{ old('name') }}" x-model="name" class="input" required autocomplete="name"><x-field-error name="name"/></div>
         <div><label class="label" for="email">Email</label><input id="email" name="email" type="email" value="{{ old('email') }}" class="input" required autocomplete="email"><x-field-error name="email"/></div>
         <div class="grid gap-3 sm:grid-cols-2">
             <div><label class="label" for="password">Password</label><input id="password" name="password" type="password" class="input" required autocomplete="new-password"></div>

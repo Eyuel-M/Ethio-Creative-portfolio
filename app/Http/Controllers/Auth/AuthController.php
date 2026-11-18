@@ -31,7 +31,7 @@ class AuthController extends Controller
             \App\Models\AuditLog::record('admin.login', $request->user());
         }
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended(route('home'));
     }
 
     public function showRegister(Request $request)
@@ -46,6 +46,7 @@ class AuthController extends Controller
             'email' => 'required|email|max:190|unique:users,email',
             'password' => ['required', 'confirmed', Password::min(8)],
             'role' => 'required|in:freelancer,client',
+            'avatar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120|dimensions:max_width=6000,max_height=6000',
             'terms' => 'accepted',
         ]);
 
@@ -55,6 +56,9 @@ class AuthController extends Controller
                 'email' => strtolower($data['email']),
                 'password' => $data['password'],
             ]);
+            if (request()->hasFile('avatar')) {
+                $user->forceFill(['avatar_path' => \App\Support\Media::store(request()->file('avatar'), 'avatars')])->save();
+            }
             self::enableRole($user, $data['role']);
             $user->forceFill(['active_workspace' => $data['role']])->save();
 

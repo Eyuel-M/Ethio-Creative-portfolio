@@ -2,6 +2,7 @@
 {{-- Share popup: social platforms + copy link (+ native share sheet where available). --}}
 @php
     $text = $title.' — '.config('marketplace.brand');
+    $sid = 'share-link-'.\Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(8));
     $e = fn ($v) => rawurlencode($v);
     $platforms = [
         ['Telegram', 'https://t.me/share/url?url='.$e($url).'&text='.$e($text), '#229ED9', '<path d="M21 4 3 11.2l5.6 2.1L10.8 20l3.3-4.2 5.1 3.9z" fill="currentColor"/><path d="m8.6 13.3 9.2-6.9-7 8.2" stroke="#fff" stroke-width="1.2" fill="none" stroke-linejoin="round"/>'],
@@ -52,9 +53,9 @@
                     @endforeach
                 </div>
 
-                <label class="label mt-5" for="share-link-{{ md5($url) }}">Link</label>
+                <label class="label mt-5" for="{{ $sid }}">Link</label>
                 <div class="flex items-center gap-2 rounded-xl border border-line bg-zinc-50 p-1.5 pl-3.5">
-                    <input id="share-link-{{ md5($url) }}" x-ref="link" readonly value="{{ $url }}" class="min-w-0 flex-1 bg-transparent text-sm text-ink-soft outline-none" @focus="$el.select()">
+                    <input id="{{ $sid }}" x-ref="link" readonly value="{{ $url }}" class="min-w-0 flex-1 bg-transparent text-sm text-ink-soft outline-none" @focus="$el.select()">
                     <button type="button" @click="copy()" class="btn btn-sm shrink-0" :class="copied ? 'bg-leaf text-white' : 'btn-dark'">
                         <x-icon name="copy" class="size-4" x-show="!copied"/><x-icon name="check" class="size-4" x-show="copied" x-cloak/>
                         <span x-text="copied ? 'Copied!' : 'Copy'">Copy</span>

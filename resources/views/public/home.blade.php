@@ -158,7 +158,7 @@
 
     {{-- Jobs --}}
     @if($jobs->isNotEmpty())
-    <section class="mx-auto max-w-[1320px] px-4 pb-20 sm:px-6">
+    <section class="mx-auto max-w-[1320px] px-4 py-20 sm:px-6">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div><span class="eyebrow">Opportunities</span><h2 class="mt-4 font-display text-4xl font-semibold tracking-tight">Fresh creative jobs</h2></div>
             <a href="{{ route('jobs.index') }}" class="btn btn-light btn-pill">Browse all jobs <x-icon name="arrow-right" class="size-4"/></a>

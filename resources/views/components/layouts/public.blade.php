@@ -3,9 +3,9 @@
 <html lang="en">
 <head>@include('partials.head', ['title' => $title])</head>
 <body class="min-h-screen bg-[#fbfbfd]" x-data="{ nav: false }">
-{{-- Floating top bar, inset from the top edge on every visitor page (inside the hero card on the home page). --}}
-<header class="{{ $hero ? 'absolute inset-x-0 top-0 z-30 px-3 pt-6 sm:px-4 sm:pt-8' : 'sticky top-0 z-30 bg-gradient-to-b from-[#fbfbfd] via-[#fbfbfd]/95 to-[#fbfbfd]/0 px-3 pb-2 pt-3 sm:px-4 sm:pt-4' }}">
-    <div class="mx-auto flex h-16 max-w-[1320px] items-center justify-between gap-4 rounded-2xl px-4 sm:px-5 {{ $hero ? 'sm:mx-4 lg:mx-auto' : 'border border-line bg-white/90 shadow-[0_1px_2px_rgba(0,0,0,.03)] backdrop-blur' }}">
+{{-- Top bar: same unboxed look everywhere, inset from the top edge (inside the hero card on the home page). --}}
+<header class="{{ $hero ? 'absolute inset-x-0 top-0' : 'relative' }} z-30 px-3 pt-6 sm:px-4 sm:pt-8">
+    <div class="mx-auto flex h-16 max-w-[1320px] items-center justify-between gap-4 px-4 sm:mx-4 sm:px-5 lg:mx-auto">
         <x-logo/>
         <nav class="hidden items-center gap-1 rounded-full border border-white/70 bg-white/60 p-1 text-sm shadow-[0_1px_2px_rgba(0,0,0,.03)] backdrop-blur md:flex">
             @foreach([['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
@@ -45,7 +45,7 @@
         <div><p class="text-sm font-semibold">Platform</p><ul class="mt-3 space-y-2 text-sm text-muted"><li><a class="hover:text-ink" href="{{ route('how') }}">How it works</a></li><li><a class="hover:text-ink" href="{{ route('how') }}#trust">Trust &amp; safety</a></li><li><a class="hover:text-ink" href="{{ route('how') }}#faq">FAQ</a></li></ul></div>
         <div><p class="text-sm font-semibold">Get started</p><ul class="mt-3 space-y-2 text-sm text-muted"><li><a class="hover:text-ink" href="{{ route('register', ['role' => 'freelancer']) }}">Join as freelancer</a></li><li><a class="hover:text-ink" href="{{ route('register', ['role' => 'client']) }}">Hire talent</a></li><li><a class="hover:text-ink" href="{{ route('login') }}">Sign in</a></li></ul></div>
     </div>
-    <div class="border-t border-line py-5 text-center text-xs text-faint">© {{ date('Y') }} {{ config('marketplace.brand') }}. Platform fees only — project payments are made directly between client and freelancer.</div>
+    <div class="border-t border-line py-5 text-center text-xs text-faint">© {{ date('Y') }} {{ config('marketplace.brand') }}</div>
 </footer>
 <x-flash/>
 </body>

@@ -9,13 +9,6 @@
 @endphp
 <x-dynamic-component :component="$user ? 'layouts.discover' : 'layouts.public'" title="Explore">
 
-@guest
-<section class="mx-auto max-w-[1600px] px-4 pb-2 pt-6 sm:px-6">
-    <span class="eyebrow">Explore</span>
-    <h1 class="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">Creative work from Ethiopia</h1>
-    <p class="mt-3 max-w-2xl text-lg text-ink-soft">A first look at what our creatives are making. Join free to see everything.</p>
-</section>
-@endguest
 @auth
 {{-- Toolbar: Filter · Search (Projects / People / Jobs) · Sort --}}
 <form method="GET" action="{{ route($feedRoute) }}" x-data="{ filters: {{ $filterCount ? 'true' : 'false' }}, tab: 'projects', actions: { projects: @js(route($feedRoute)), people: @js(route('freelancers.index')), jobs: @js(route('jobs.index')) } }"

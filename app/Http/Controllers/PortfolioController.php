@@ -28,9 +28,10 @@ class PortfolioController extends Controller
         if (! $isOwner) {
             $project->increment('views');
         }
-        $more = $project->profile->publishedProjects()->where('id', '!=', $project->id)->take(3)->get();
+        $more = $project->profile->publishedProjects()->where('id', '!=', $project->id)->with('category')->withCount('likes')->take(8)->get();
+        $likedIds = $request->user() ? \Illuminate\Support\Facades\DB::table('portfolio_likes')->where('user_id', $request->user()->id)->whereIn('portfolio_project_id', $more->pluck('id')->push($project->id))->pluck('portfolio_project_id')->all() : [];
 
-        return view('portfolio.show', compact('project', 'more', 'isOwner'));
+        return view('portfolio.show', compact('project', 'more', 'isOwner', 'likedIds'));
     }
 
     public function create(Request $request)

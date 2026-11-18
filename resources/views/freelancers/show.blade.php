@@ -13,9 +13,9 @@
     </div>
     <div class="px-5 pb-6 sm:px-8">
         <div class="flex flex-wrap items-end justify-between gap-4">
-            <div class="relative z-10 -mt-14 flex items-end gap-5">
-                <x-avatar :user="$profile->user" size="size-28" class="text-3xl ring-[6px] ring-white"/>
-                <div class="pb-1">
+            <div class="flex items-end gap-5">
+                <x-avatar :user="$profile->user" size="size-28" class="relative z-10 -mt-14 text-3xl ring-[6px] ring-white"/>
+                <div class="pb-1 pt-4">
                     <h1 class="flex items-center gap-2 font-display text-3xl font-bold">{{ $profile->user->displayName() }} @if($profile->user->hasVerifiedEmail())<x-icon name="verified" class="size-6 text-brand" title="Email verified"/>@endif</h1>
                     <p class="text-ink-soft">{{ $profile->title ?? 'Creative freelancer' }}</p>
                 </div>

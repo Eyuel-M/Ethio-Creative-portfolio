@@ -17,7 +17,7 @@ class DiscoveryFeedTest extends MarketplaceTestCase
 
     public function test_guests_see_the_landing_page(): void
     {
-        $this->get('/')->assertOk()->assertSee('Search Talent')->assertDontSee('Discover creative work');
+        $this->get('/')->assertOk()->assertSee('Search Talent')->assertDontSee('Most Loved');
     }
 
     public function test_signed_in_client_and_freelancer_see_the_feed(): void
@@ -27,7 +27,7 @@ class DiscoveryFeedTest extends MarketplaceTestCase
 
         foreach ([$this->client(), $this->freelancer()] as $user) {
             $this->actingAs($user)->get('/')->assertOk()
-                ->assertSee('Discover creative work')
+                ->assertSee('Most Loved')
                 ->assertSee('Published case study')
                 ->assertDontSee('Secret draft')
                 ->assertDontSee('Search Talent');
@@ -89,5 +89,19 @@ class DiscoveryFeedTest extends MarketplaceTestCase
 
         $link = \Illuminate\Support\Facades\URL::temporarySignedRoute('verification.verify', now()->addHour(), ['id' => $u->id, 'hash' => sha1($u->email)]);
         $this->actingAs($u)->get($link)->assertRedirect(route('home'));
+    }
+
+    public function test_feed_filters_available_and_pro(): void
+    {
+        $busy = $this->freelancer();
+        $busy->freelancerProfile->forceFill(['availability' => 'busy'])->save();
+        $pro = $this->freelancer();
+        $pro->freelancerProfile->forceFill(['plan' => 'professional'])->save();
+        $this->project($busy, 'published', 'Busy person work');
+        $this->project($pro, 'published', 'Pro person work');
+
+        $c = $this->client();
+        $this->actingAs($c)->get('/?available=1')->assertSee('Pro person work')->assertDontSee('Busy person work');
+        $this->actingAs($c)->get('/?pro=1')->assertSee('Pro person work')->assertDontSee('Busy person work');
     }
 }

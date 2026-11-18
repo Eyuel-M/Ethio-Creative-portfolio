@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('messages', fn (Request $r) => Limit::perMinute(30)->by($r->user()?->id ?: $r->ip()));
         RateLimiter::for('uploads', fn (Request $r) => Limit::perMinute(20)->by($r->user()?->id ?: $r->ip()));
 
-        View::composer(['components.layouts.app', 'dashboard.*'], function ($view) {
+        View::composer(['components.layouts.app', 'components.layouts.discover', 'dashboard.*'], function ($view) {
             $user = auth()->user();
             if (! $user) {
                 return;

@@ -20,6 +20,11 @@ class ArtGenerator
 
     public static function make(string $path, int $seed, int $w = 1200, int $h = 900, ?string $label = null): string
     {
+        // Many PHP installs (e.g. php.new on Windows) ship without GD; fall back to SVG artwork.
+        if (! function_exists('imagecreatetruecolor')) {
+            return self::svg(preg_replace('/\.\w+$/', '.svg', $path), $seed, $w, $h);
+        }
+
         mt_srand($seed);
         $p = self::PALETTES[$seed % count(self::PALETTES)];
         $img = imagecreatetruecolor($w, $h);
@@ -81,6 +86,64 @@ class ArtGenerator
         imagejpeg($img, null, 82);
         Storage::disk('public')->put($path, ob_get_clean());
         imagedestroy($img);
+
+        return $path;
+    }
+
+    /** Dependency-free SVG version of the same four compositions. */
+    public static function svg(string $path, int $seed, int $w = 1200, int $h = 900): string
+    {
+        mt_srand($seed);
+        $p = self::PALETTES[$seed % count(self::PALETTES)];
+        $hex = fn ($rgb) => sprintf('#%02x%02x%02x', ...$rgb);
+        [$a, $b, $c] = [$hex($p[0]), $hex($p[1]), $hex($p[2])];
+        $out = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 $w $h' width='$w' height='$h'>"
+            ."<defs><linearGradient id='bg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='$b'/><stop offset='1' stop-color='$a' stop-opacity='.35'/></linearGradient></defs>"
+            ."<rect width='$w' height='$h' fill='$b'/><rect width='$w' height='$h' fill='url(#bg)'/>";
+
+        switch ($seed % 4) {
+            case 0: // concentric circles
+                $cx = mt_rand((int) ($w * .3), (int) ($w * .7));
+                $cy = mt_rand((int) ($h * .3), (int) ($h * .7));
+                for ($r = 450, $i = 0; $r > 30; $r -= 45, $i++) {
+                    $out .= "<circle cx='$cx' cy='$cy' r='$r' fill='".($i % 2 ? $c : $a)."' fill-opacity='.85'/>";
+                }
+                break;
+            case 1: // tilted card mockup
+                $pts = fn ($dx, $dy) => implode(' ', [($w * .22 + $dx).','.($h * .32 + $dy), ($w * .78 + $dx).','.($h * .18 + $dy), ($w * .84 + $dx).','.($h * .7 + $dy), ($w * .28 + $dx).','.($h * .84 + $dy)]);
+                $out .= "<polygon points='".$pts(18, 22)."' fill='#000' fill-opacity='.2'/><polygon points='".$pts(0, 0)."' fill='$a'/>";
+                $out .= "<circle cx='".($w * .42)."' cy='".($h * .48)."' r='60' fill='$c'/>";
+                for ($i = 0; $i < 4; $i++) {
+                    $out .= "<rect x='".($w * .52)."' y='".($h * .44 + $i * 34)."' width='".($w * .2 - $i * 30)."' height='14' fill='$b'/>";
+                }
+                break;
+            case 2: // grid of shapes
+                $cell = 150;
+                for ($x = 0; $x < $w; $x += $cell) {
+                    for ($y = 0; $y < $h; $y += $cell) {
+                        $col = [$a, $c, $b, '#0c0c10'][mt_rand(0, 3)];
+                        $s = $cell - 24;
+                        $out .= match (mt_rand(0, 3)) {
+                            0 => "<circle cx='".($x + $cell / 2)."' cy='".($y + $cell / 2)."' r='".($s / 2)."' fill='$col'/>",
+                            1 => "<rect x='".($x + 12)."' y='".($y + 12)."' width='$s' height='$s' fill='$col'/>",
+                            2 => "<path d='M".($x + 12).','.($y + $cell - 12).' h'.$s.' a'.$s.','.$s.' 0 0 0 -'.$s.',-'.$s." z' fill='$col'/>",
+                            default => "<polygon points='".($x + 12).','.($y + $cell - 12).' '.($x + $cell / 2).','.($y + 12).' '.($x + $cell - 12).','.($y + $cell - 12)."' fill='$col'/>",
+                        };
+                    }
+                }
+                break;
+            default: // device frame + UI blocks
+                $out .= "<rect x='".($w * .14 + 16)."' y='".($h * .14 + 20)."' width='".($w * .72)."' height='".($h * .82)."' fill='#000' fill-opacity='.15'/>"
+                    ."<rect x='".($w * .14)."' y='".($h * .14)."' width='".($w * .72)."' height='".($h * .82)."' fill='#fff'/>"
+                    ."<rect x='".($w * .14)."' y='".($h * .14)."' width='".($w * .72)."' height='".($h * .06)."' fill='$b'/>"
+                    ."<rect x='".($w * .18)."' y='".($h * .26)."' width='".($w * .64)."' height='".($h * .26)."' fill='$a'/>";
+                for ($i = 0; $i < 3; $i++) {
+                    $out .= "<rect x='".($w * .18 + $i * $w * .22)."' y='".($h * .58)."' width='".($w * .19)."' height='".($h * .22)."' fill='".($i === 1 ? $c : '#f4f4f5')."'/>";
+                }
+                $out .= "<rect x='".($w * .18)."' y='".($h * .85)."' width='".($w * .22)."' height='".($h * .05)."' fill='#0c0c10'/>";
+        }
+
+        Storage::disk('public')->put($path, $out.'</svg>');
 
         return $path;
     }

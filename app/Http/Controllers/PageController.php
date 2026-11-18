@@ -10,8 +10,13 @@ use App\Models\Product;
 
 class PageController extends Controller
 {
-    public function home()
+    public function home(\Illuminate\Http\Request $request)
     {
+        // Signed-in users (freelancer or client) get the portfolio discovery feed instead of the landing page.
+        if ($request->user()) {
+            return app(FeedController::class)->index($request);
+        }
+
         $categories = Category::withCount(['freelancers' => fn ($q) => $q->public()])->orderBy('sort_order')->get();
         $featuredTalent = FreelancerProfile::public()->with(['user', 'category', 'skills'])
             ->orderByRaw('CASE WHEN featured_until > ? THEN 0 ELSE 1 END', [now()])

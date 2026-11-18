@@ -32,6 +32,17 @@ class PortfolioProject extends Model
         return $this->hasMany(PortfolioBlock::class)->orderBy('sort_order');
     }
 
+    public function likes()
+    {
+        return $this->belongsToMany(User::class, 'portfolio_likes');
+    }
+
+    /** Published, owned by a public active profile — i.e. safe to show to anyone. */
+    public function scopeDiscoverable($q)
+    {
+        return $q->where('status', 'published')->whereHas('profile', fn ($p) => $p->public());
+    }
+
     public function isPublished(): bool
     {
         return $this->status === 'published';

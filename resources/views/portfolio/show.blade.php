@@ -14,6 +14,17 @@
             @if($project->client_attribution)<span>Client: {{ $project->client_attribution }}</span>@endif
             <span class="flex items-center gap-1"><x-icon name="eye" class="size-4"/>{{ number_format($project->views) }} views</span>
         </div>
+        @php $likeCount = $project->likes()->count(); $likedByMe = auth()->check() && $project->likes()->whereKey(auth()->id())->exists(); @endphp
+        @if(auth()->check() && ! $isOwner && $project->isPublished())
+            <div class="mt-6" x-data="{ liked: @js($likedByMe), count: {{ $likeCount }},
+                async toggle() { const r = await fetch(@js(route('portfolio.like', $project)), { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' } }); if (r.ok) { const d = await r.json(); this.liked = d.liked; this.count = d.count; } } }">
+                <button type="button" @click="toggle()" :aria-pressed="liked" class="btn btn-pill h-12 px-6" :class="liked ? 'bg-rose-500 text-white hover:bg-rose-600' : 'btn-dark'">
+                    <x-icon name="heart" class="size-5" ::class="liked && 'fill-white'"/> <span x-text="liked ? 'Liked' : 'Appreciate'"></span> · <span x-text="count"></span>
+                </button>
+            </div>
+        @else
+            <p class="mt-4 flex items-center justify-center gap-1 text-sm text-muted"><x-icon name="heart" class="size-4"/>{{ $likeCount }} likes</p>
+        @endif
     </header>
     @if($project->coverUrl())
         <img src="{{ $project->coverUrl() }}" alt="{{ $project->cover_alt ?? $project->title }}" class="mx-auto w-full max-w-5xl px-4 sm:px-6">

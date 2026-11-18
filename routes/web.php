@@ -130,6 +130,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/sandbox/checkout/{order}', [BillingController::class, 'sandboxComplete'])->name('sandbox.complete');
 
         Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
+        Route::post('/portfolio/{project}/like', [\App\Http\Controllers\FeedController::class, 'toggleLike'])->middleware('throttle:messages')->name('portfolio.like');
 
         // Admin console
         Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {

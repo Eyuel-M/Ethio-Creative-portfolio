@@ -245,6 +245,12 @@ class DatabaseSeeder extends Seeder
             Review::create(['project_id' => $p->id, 'reviewer_id' => $f->user_id, 'reviewee_id' => $cl->user_id, 'rating' => 5, 'body' => 'Clear brief and respectful of agreed terms.']);
         }
 
+        // --- Likes ("appreciations") on portfolio projects ---
+        $likers = User::where('email', '!=', 'admin@demo.test')->pluck('id');
+        foreach (PortfolioProject::with('profile')->get() as $proj) {
+            $proj->likes()->sync($likers->reject(fn ($id) => $id === $proj->profile->user_id)->shuffle()->take(mt_rand(0, 12))->all());
+        }
+
         // --- A couple of paid orders (platform fees only) ---
         $std = Product::where('code', 'job_post_standard')->first();
         foreach ($jobModels->take(6) as $job) {

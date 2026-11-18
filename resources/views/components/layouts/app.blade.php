@@ -3,6 +3,7 @@
     $user = auth()->user();
     $ws = $user->workspace();
     $menu = $ws === 'client' ? [
+        ['Discover', 'home', 'image', ['home']],
         ['Dashboard', 'dashboard', 'grid', ['dashboard']],
         ['My Jobs', 'client.jobs.index', 'briefcase', ['client.jobs.*']],
         ['Find Freelancers', 'freelancers.index', 'user', ['freelancers.*']],
@@ -11,6 +12,7 @@
         ['Message', 'messages.index', 'mail', ['messages.*'], $navCounts['messages'] ?? 0],
         ['Notification', 'notifications.index', 'bell', ['notifications.*'], $navCounts['notifications'] ?? 0],
     ] : [
+        ['Discover', 'home', 'image', ['home']],
         ['Dashboard', 'dashboard', 'grid', ['dashboard']],
         ['Find Project', 'jobs.index', 'search', ['jobs.index', 'jobs.show', 'applications.create']],
         ['My Portfolio', 'portfolio.index', 'layers', ['portfolio.*']],

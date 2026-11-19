@@ -7,14 +7,30 @@
 @if($projects->first()?->coverUrl())<meta property="og:image" content="{{ $projects->first()->coverUrl() }}"><meta name="twitter:card" content="summary_large_image">@endif
 @endpush
 <section class="card overflow-hidden">
-    <div class="relative h-44 bg-gradient-to-br from-indigo-200 via-violet-100 to-sky-200 sm:h-56">
-        @if($profile->coverUrl())<img src="{{ $profile->coverUrl() }}" alt="" class="size-full object-cover">@elseif($projects->first()?->coverUrl())<img src="{{ $projects->first()->coverUrl() }}" alt="" class="size-full object-cover opacity-90">@endif
+    {{-- Banner: same 5:1 shape as the cover editor's preview, focused where the owner dragged it --}}
+    <div class="group relative aspect-[3/1] bg-gradient-to-br from-indigo-200 via-violet-100 to-sky-200 sm:aspect-[5/1]">
+        @if($profile->coverUrl())<img src="{{ $profile->coverUrl() }}" alt="" class="size-full object-cover" style="object-position: 50% {{ (int) $profile->cover_position }}%">@elseif($projects->first()?->coverUrl())<img src="{{ $projects->first()->coverUrl() }}" alt="" class="size-full object-cover opacity-90">@endif
         @if($profile->isFeatured())<span class="absolute left-4 top-4 pill bg-white/90 text-violet-700 ring-violet-600/15">Sponsored placement</span>@endif
+        @if($isOwner)
+            <button type="button" @click="$dispatch('open-cover-editor')" class="absolute bottom-3 right-3 flex items-center gap-2 rounded-full bg-black/60 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-black/75 focus:opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
+                <x-icon name="camera" class="size-4"/> Change cover
+            </button>
+        @endif
     </div>
     <div class="px-5 pb-6 sm:px-8">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div class="flex items-end gap-5">
-                <x-avatar :user="$profile->user" size="size-28" class="relative z-10 -mt-14 text-3xl ring-[6px] ring-white"/>
+                @if($isOwner)
+                    <button type="button" @click="$dispatch('open-avatar-editor')" class="group/avatar relative z-10 -mt-14 shrink-0 rounded-full" aria-label="Change profile photo">
+                        <x-avatar :user="$profile->user" size="size-28" class="text-3xl ring-[6px] ring-white"/>
+                        <span class="absolute inset-[6px] hidden place-items-center rounded-full bg-black/50 text-xs font-semibold text-white opacity-0 transition sm:grid sm:group-hover/avatar:opacity-100 sm:group-focus-visible/avatar:opacity-100">
+                            <span class="flex flex-col items-center gap-1"><x-icon name="camera" class="size-5"/>Change photo</span>
+                        </span>
+                        <span class="absolute bottom-1 right-1 grid size-9 place-items-center rounded-full bg-ink text-white ring-4 ring-white sm:hidden"><x-icon name="camera" class="size-4"/></span>
+                    </button>
+                @else
+                    <x-avatar :user="$profile->user" size="size-28" class="relative z-10 -mt-14 text-3xl ring-[6px] ring-white"/>
+                @endif
                 <div class="pb-1 pt-4">
                     <h1 class="flex items-center gap-2 font-display text-3xl font-bold">{{ $profile->user->displayName() }} @if($profile->user->hasVerifiedEmail())<x-icon name="verified" class="size-6 text-brand" title="Email verified"/>@endif</h1>
                     <p class="text-ink-soft">{{ $profile->title ?? 'Creative freelancer' }}</p>
@@ -105,4 +121,8 @@
         </div>
     </aside>
 </div>
+@if($isOwner)
+    <x-avatar-editor :user="$profile->user"/>
+    <x-cover-editor :profile="$profile" :fallback="$projects->first()?->coverUrl()"/>
+@endif
 </x-shell>

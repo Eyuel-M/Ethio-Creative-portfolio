@@ -56,15 +56,10 @@ class SettingsController extends Controller
         $user = $request->user();
         $data = $request->validate([
             'name' => 'required|string|max:120',
-            'avatar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
             'current_password' => 'nullable|required_with:password|current_password',
             'password' => ['nullable', 'confirmed', Password::min(8)],
         ]);
         $user->name = $data['name'];
-        if ($request->hasFile('avatar')) {
-            Media::delete($user->avatar_path);
-            $user->avatar_path = Media::store($request->file('avatar'), 'avatars');
-        }
         if (! empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
@@ -93,7 +88,6 @@ class SettingsController extends Controller
             'contact_phone' => 'nullable|string|max:30',
             'contact_email' => 'nullable|email|max:190',
             'is_public' => 'nullable|boolean',
-            'cover' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
         ]);
         $split = fn ($v) => collect(explode(',', (string) $v))->map(fn ($s) => trim($s))->filter()->take(15)->values()->all();
 
@@ -106,14 +100,52 @@ class SettingsController extends Controller
             'website' => $data['website'] ?? null, 'contact_phone' => $data['contact_phone'] ?? null,
             'contact_email' => $data['contact_email'] ?? null, 'is_public' => $request->boolean('is_public'),
         ]);
-        if ($request->hasFile('cover')) {
-            Media::delete($profile->cover_path);
-            $profile->cover_path = Media::store($request->file('cover'), 'covers');
-        }
         $profile->save();
         $profile->skills()->sync(collect($split($data['skills'] ?? ''))->map(fn ($n) => Skill::firstOrCreate(['slug' => Str::slug($n)], ['name' => $n, 'category_id' => $profile->category_id])->id));
 
         return back()->with('status', 'Profile saved.');
+    }
+
+    /** Profile photo: upload a new one or remove it (editor on the profile page / client settings). */
+    public function updateAvatar(Request $request)
+    {
+        $user = $request->user();
+        $data = $request->validate([
+            'avatar' => 'required_without:remove|image|mimes:jpg,jpeg,png,webp|max:5120|dimensions:max_width=6000,max_height=6000',
+            'remove' => 'nullable|boolean',
+        ]);
+        Media::delete($user->avatar_path);
+        $user->avatar_path = $request->boolean('remove') ? null : Media::store($request->file('avatar'), 'avatars');
+        $user->save();
+
+        return back()->with('status', $user->avatar_path ? 'Profile photo updated.' : 'Profile photo removed.');
+    }
+
+    /** Profile banner: upload, reposition (drag), or remove. */
+    public function updateCover(Request $request)
+    {
+        $profile = $request->user()->freelancerProfile;
+        $data = $request->validate([
+            'cover' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240|dimensions:max_width=8000,max_height=8000',
+            'cover_position' => 'required_without:remove|integer|min:0|max:100',
+            'remove' => 'nullable|boolean',
+        ]);
+        if ($request->boolean('remove')) {
+            Media::delete($profile->cover_path);
+            $profile->forceFill(['cover_path' => null, 'cover_position' => 50])->save();
+
+            return back()->with('status', 'Cover removed.');
+        }
+        if ($request->hasFile('cover')) {
+            Media::delete($profile->cover_path);
+            $profile->cover_path = Media::store($request->file('cover'), 'covers');
+        } elseif (! $profile->cover_path) {
+            return back()->withErrors(['cover' => 'Choose an image for your cover.']);
+        }
+        $profile->cover_position = (int) $data['cover_position'];
+        $profile->save();
+
+        return back()->with('status', 'Cover updated.');
     }
 
     public function updatePayment(Request $request)

@@ -61,6 +61,8 @@ Route::middleware(['auth', 'active'])->group(function () {
         // Settings
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings');
         Route::put('/settings/account', [SettingsController::class, 'updateAccount'])->name('settings.account');
+        Route::post('/settings/avatar', [SettingsController::class, 'updateAvatar'])->middleware('throttle:uploads')->name('settings.avatar');
+        Route::post('/settings/cover', [SettingsController::class, 'updateCover'])->middleware(['role:freelancer', 'throttle:uploads'])->name('settings.cover');
         Route::put('/settings/freelancer', [SettingsController::class, 'updateFreelancer'])->middleware('role:freelancer')->name('settings.freelancer');
         Route::put('/settings/payment', [SettingsController::class, 'updatePayment'])->middleware('role:freelancer')->name('settings.payment');
         Route::put('/settings/client', [SettingsController::class, 'updateClient'])->middleware('role:client')->name('settings.client');

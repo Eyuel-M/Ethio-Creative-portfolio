@@ -26,7 +26,6 @@
         <div><label class="label" for="tools">Tools / software</label><input id="tools" name="tools" value="{{ old('tools', implode(', ', $fp->tools ?? [])) }}" class="input" placeholder="Illustrator, Figma"></div>
         <div><label class="label" for="languages">Languages</label><input id="languages" name="languages" value="{{ old('languages', implode(', ', $fp->languages ?? [])) }}" class="input" placeholder="Amharic, English"></div>
         <div><label class="label" for="website">Website</label><input id="website" type="url" name="website" value="{{ old('website', $fp->website) }}" class="input" placeholder="https://"><x-field-error name="website"/></div>
-        <div><label class="label" for="cover">Profile cover image</label><input id="cover" type="file" name="cover" accept="image/*" class="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-2"></div>
     </div>
     <div class="mt-8 rounded-2xl border border-line p-5">
         <h3 class="flex items-center gap-2 font-semibold"><x-icon name="lock" class="size-4"/> Private contact details</h3>
@@ -94,7 +93,14 @@
 @if($tab === 'account')
 <form method="POST" action="{{ route('settings.account') }}" enctype="multipart/form-data" class="card card-pad">@csrf @method('PUT')
     <h2 class="panel-title">Account</h2>
-    <div class="mt-6 flex items-center gap-4"><x-avatar :user="$user" size="size-16" class="text-lg"/><input type="file" name="avatar" accept="image/*" class="text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:px-3 file:py-2"></div>
+    <div class="mt-6 flex flex-wrap items-center gap-4">
+        <x-avatar :user="$user" size="size-16" class="text-lg"/>
+        @if($fp)
+            <a href="{{ route('freelancers.show', $fp) }}" class="btn btn-light"><x-icon name="camera" class="size-4"/> Change photo &amp; cover</a>
+        @else
+            <button type="button" @click="$dispatch('open-avatar-editor')" class="btn btn-light"><x-icon name="camera" class="size-4"/> Change photo</button>
+        @endif
+    </div>
     <div class="mt-6 grid gap-4 md:grid-cols-2">
         <div><label class="label" for="name">Name</label><input id="name" name="name" value="{{ old('name', $user->name) }}" class="input" required></div>
         <div><label class="label">Email</label><input value="{{ $user->email }}" class="input bg-zinc-50" disabled></div>
@@ -111,6 +117,7 @@
         <button class="btn btn-dark">Save account</button>
     </div>
 </form>
+@unless($fp)<x-avatar-editor :user="$user"/>@endunless
 <form id="enable-f" method="POST" action="{{ route('workspace.enable') }}">@csrf<input type="hidden" name="role" value="freelancer"></form>
 <form id="enable-c" method="POST" action="{{ route('workspace.enable') }}">@csrf<input type="hidden" name="role" value="client"></form>
 @endif

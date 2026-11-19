@@ -24,44 +24,53 @@
     @endif
 
     {{-- Project header --}}
-    <header class="mx-auto max-w-[1600px] px-4 pb-8 pt-8 sm:px-6 lg:px-10 lg:pt-10">
-        <div class="flex flex-wrap items-end justify-between gap-6">
-            <div class="flex min-w-0 items-start gap-4">
-                <a href="{{ route('freelancers.show', $author) }}" class="shrink-0"><x-avatar :user="$author->user" size="size-14" class="text-base"/></a>
-                <div class="min-w-0">
-                    <h1 class="font-display text-3xl font-bold leading-tight tracking-tight sm:text-5xl">{{ $project->title }}</h1>
-                    <p class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px] text-ink-soft">
-                        <a href="{{ route('freelancers.show', $author) }}" class="font-semibold text-ink hover:underline">{{ $author->user->displayName() }}</a>
-                        @if($author->title)<span class="text-faint">·</span><span>{{ $author->title }}</span>@endif
-                        @if($project->category)<span class="text-faint">·</span><a href="{{ route(auth()->check() ? 'home' : 'explore', ['category' => $project->category->slug]) }}" class="hover:text-ink">{{ $project->category->name }}</a>@endif
-                    </p>
-                </div>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
+    <header class="mx-auto max-w-[1600px] px-4 pb-10 pt-10 sm:px-6 lg:px-10 lg:pt-14">
+        {{-- Label: category · date · client --}}
+        <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+            @if($project->category)
+                <a href="{{ route(auth()->check() ? 'home' : 'explore', ['category' => $project->category->slug]) }}" class="text-brand hover:underline">{{ $project->category->name }}</a>
+            @endif
+            @if($project->project_date)<span class="text-faint" aria-hidden="true">·</span><span>{{ $project->project_date->format('F Y') }}</span>@endif
+            @if($project->client_attribution)<span class="text-faint" aria-hidden="true">·</span><span>Client: {{ $project->client_attribution }}</span>@endif
+        </p>
+
+        {{-- Title + summary share one left edge --}}
+        <h1 class="mt-4 max-w-5xl font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl">{{ $project->title }}</h1>
+        @if($project->summary)
+            <p class="mt-5 max-w-3xl text-lg leading-relaxed text-ink-soft sm:text-xl">{{ $project->summary }}</p>
+        @endif
+
+        {{-- Byline bar: creator · stats · actions on one line --}}
+        <div class="mt-10 flex flex-wrap items-center gap-x-8 gap-y-5 border-t border-line pt-6">
+            <a href="{{ route('freelancers.show', $author) }}" class="group flex min-w-0 items-center gap-3">
+                <x-avatar :user="$author->user" size="size-12" class="text-sm"/>
+                <span class="min-w-0">
+                    <span class="block truncate font-semibold group-hover:underline">{{ $author->user->displayName() }}</span>
+                    @if($author->title)<span class="block truncate text-sm text-muted">{{ $author->title }}</span>@endif
+                </span>
+            </a>
+
+            <dl class="flex items-center gap-5 text-sm">
+                <div class="flex items-center gap-1.5" title="Likes"><dt class="sr-only">Likes</dt><x-icon name="heart" class="size-4 text-muted" ::class="liked && 'fill-rose-500 text-rose-500'"/><dd class="font-semibold" x-text="count">{{ $likeCount }}</dd></div>
+                <div class="flex items-center gap-1.5" title="Views"><dt class="sr-only">Views</dt><x-icon name="eye" class="size-4 text-muted"/><dd class="font-semibold">{{ number_format($project->views) }}</dd></div>
+            </dl>
+
+            <div class="flex w-full flex-wrap items-center gap-2 sm:ml-auto sm:w-auto">
                 @if($canLike)
-                    <button type="button" @click="toggle()" :aria-pressed="liked" class="btn btn-pill h-11 px-5" :class="liked ? 'bg-rose-500 text-white hover:bg-rose-600' : 'btn-dark'">
+                    <button type="button" @click="toggle()" :aria-pressed="liked" class="btn btn-pill h-11 flex-1 px-5 sm:flex-none" :class="liked ? 'bg-rose-500 text-white hover:bg-rose-600' : 'btn-dark'">
                         <x-icon name="heart" class="size-5" ::class="liked && 'fill-white'"/> <span x-text="liked ? 'Appreciated' : 'Appreciate'">Appreciate</span>
                     </button>
                 @elseif(! auth()->check() && $project->isPublished())
-                    <a href="{{ route('login') }}" class="btn btn-dark btn-pill h-11 px-5"><x-icon name="heart" class="size-5"/> Appreciate</a>
+                    <a href="{{ route('login') }}" class="btn btn-dark btn-pill h-11 flex-1 px-5 sm:flex-none"><x-icon name="heart" class="size-5"/> Appreciate</a>
                 @endif
                 @if($project->isPublished())
-                    <x-share :url="route('portfolio.show', $project)" :title="$project->title" :image="$project->coverUrl()" :subtitle="'by '.$author->user->displayName()"/>
+                    <x-share :url="route('portfolio.show', $project)" :title="$project->title" :image="$project->coverUrl()" :subtitle="'by '.$author->user->displayName()" :pill="true"/>
                 @endif
                 @if($isOwner)
-                    <a href="{{ route('portfolio.edit', $project) }}" class="btn btn-light"><x-icon name="pen" class="size-4"/> Edit</a>
+                    <a href="{{ route('portfolio.edit', $project) }}" class="btn btn-light btn-pill h-11 px-5"><x-icon name="pen" class="size-4"/> Edit</a>
                 @endif
             </div>
         </div>
-        <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted">
-            <span class="flex items-center gap-1.5"><x-icon name="heart" class="size-4"/><span x-text="count">{{ $likeCount }}</span> likes</span>
-            <span class="flex items-center gap-1.5"><x-icon name="eye" class="size-4"/>{{ number_format($project->views) }} views</span>
-            @if($project->project_date)<span class="flex items-center gap-1.5"><x-icon name="calendar" class="size-4"/>{{ $project->project_date->format('F Y') }}</span>@endif
-            @if($project->client_attribution)<span class="flex items-center gap-1.5"><x-icon name="briefcase" class="size-4"/>Client: {{ $project->client_attribution }}</span>@endif
-        </div>
-        @if($project->summary)
-            <p class="mt-5 max-w-3xl text-lg leading-relaxed text-ink-soft">{{ $project->summary }}</p>
-        @endif
     </header>
 
     {{-- The work: edge to edge --}}
@@ -100,7 +109,7 @@
                 <a href="{{ route('login') }}" class="btn btn-dark btn-pill h-12 px-6"><x-icon name="heart" class="size-5"/> Appreciate · {{ $likeCount }}</a>
             @endif
             @if($project->isPublished())
-                <x-share :url="route('portfolio.show', $project)" :title="$project->title" :image="$project->coverUrl()" :subtitle="'by '.$author->user->displayName()"/>
+                <x-share :url="route('portfolio.show', $project)" :title="$project->title" :image="$project->coverUrl()" :subtitle="'by '.$author->user->displayName()" :pill="true"/>
             @endif
             <a href="{{ route('freelancers.show', $author) }}" class="btn btn-light btn-pill h-12 px-6">View profile</a>
         </div>

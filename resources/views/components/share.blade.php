@@ -1,4 +1,4 @@
-@props(['url', 'title', 'image' => null, 'subtitle' => null, 'label' => 'Share', 'iconOnly' => false])
+@props(['url', 'title', 'image' => null, 'subtitle' => null, 'label' => 'Share', 'iconOnly' => false, 'pill' => false])
 {{-- Share popup: social platforms + copy link (+ native share sheet where available). --}}
 @php
     $text = $title.' — '.config('marketplace.brand');
@@ -21,7 +21,7 @@
               },
               async native() { try { await navigator.share({ title: @js($title), url: @js($url) }); } catch (e) {} } }"
      @keydown.escape.window="open = false" {{ $attributes->merge(['class' => 'inline-flex']) }}>
-    <button type="button" @click="open = true" class="{{ $iconOnly ? 'btn btn-sm btn-light w-9 px-0' : 'btn btn-light' }}" aria-haspopup="dialog" :aria-expanded="open" @if($iconOnly) aria-label="{{ $label }}" title="{{ $label }}" @endif>
+    <button type="button" @click="open = true" class="{{ $iconOnly ? 'btn btn-sm btn-light w-9 px-0' : ($pill ? 'btn btn-light btn-pill h-11 px-5' : 'btn btn-light') }}" aria-haspopup="dialog" :aria-expanded="open" @if($iconOnly) aria-label="{{ $label }}" title="{{ $label }}" @endif>
         <x-icon name="share" class="size-4"/>@unless($iconOnly) {{ $label }}@endunless
     </button>
 

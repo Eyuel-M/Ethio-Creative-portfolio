@@ -1,6 +1,5 @@
 @php
     $user = auth()->user();
-    $gx = $user ? 'sm:px-6' : 'sm:px-8'; // align with the member / visitor top bar
     $ws = $user?->workspace();
     $filtered = ($f['q'] ?? null) || ($f['category'] ?? null) || $sort !== 'recommended' || $filterCount;
     $sorts = ['recommended' => 'Recommended', 'newest' => 'Newest', 'most_liked' => 'Most liked', 'most_viewed' => 'Most viewed'];
@@ -14,7 +13,7 @@
 {{-- Toolbar: Filter · Search (Projects / People / Jobs) · Sort --}}
 <form method="GET" action="{{ route($feedRoute) }}" x-data="{ filters: {{ $filterCount ? 'true' : 'false' }}, tab: 'projects', actions: { projects: @js(route($feedRoute)), people: @js(route('freelancers.index')), jobs: @js(route('jobs.index')) } }"
       :action="actions[tab]" @submit="if (tab !== 'projects') $el.querySelectorAll('[data-feed-only]').forEach(e => e.disabled = true)" class="border-b border-line">
-    <div class="flex flex-wrap items-center gap-3 px-4 py-4 {{ $gx }} lg:flex-nowrap">
+    <div class="flex flex-wrap items-center gap-3 px-4 py-4 sm:px-6 lg:flex-nowrap">
         <button type="button" @click="filters = !filters" :aria-expanded="filters" class="btn btn-light btn-pill h-12 shrink-0 px-5" :class="filters && 'border-ink'">
             <x-icon name="filter" class="size-5"/> Filter
             @if($filterCount)<span class="grid size-5 place-items-center rounded-full bg-ink text-[11px] text-white">{{ $filterCount }}</span>@endif
@@ -43,7 +42,7 @@
     </div>
 
     {{-- Filter panel --}}
-    <div x-show="filters" x-cloak x-transition class="border-t border-line bg-zinc-50/60 px-4 py-4 {{ $gx }}">
+    <div x-show="filters" x-cloak x-transition class="border-t border-line bg-zinc-50/60 px-4 py-4 sm:px-6">
         <div class="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm">
             <label class="flex items-center gap-2"><input type="checkbox" name="available" data-feed-only value="1" class="checkbox" @checked($f['available'] ?? false)> Available for hire</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="pro" data-feed-only value="1" class="checkbox" @checked($f['pro'] ?? false)> Pro creators</label>
@@ -63,7 +62,7 @@
 
 {{-- Category tiles --}}
 <div class="relative" x-data="{ el: null, end: false, update() { this.end = this.el.scrollLeft + this.el.clientWidth >= this.el.scrollWidth - 4 } }" x-init="el = $refs.row; update()">
-    <nav x-ref="row" @scroll.debounce.50ms="update()" class="flex gap-2.5 overflow-x-auto scroll-smooth px-4 py-4 [scrollbar-width:none] {{ $gx }} [&::-webkit-scrollbar]:hidden" aria-label="Categories">
+    <nav x-ref="row" @scroll.debounce.50ms="update()" class="flex gap-2.5 overflow-x-auto scroll-smooth px-4 py-4 [scrollbar-width:none] sm:px-6 [&::-webkit-scrollbar]:hidden" aria-label="Categories">
         <a href="{{ route($feedRoute, $keep(['category' => null])) }}" class="flex h-12 shrink-0 items-center gap-2 rounded-lg bg-gradient-to-br from-[#3b7bff] to-brand px-5 text-[15px] font-bold text-white shadow-sm {{ empty($f['category']) ? 'ring-2 ring-ink ring-offset-2' : 'opacity-90 hover:opacity-100' }}">
             <x-icon name="star" class="size-5"/> For You
         </a>
@@ -92,7 +91,7 @@
 <section x-data="{ show: (() => { try { return localStorage.getItem('promo-{{ $promo }}') !== 'hidden' } catch (e) { return true } })() }" x-show="show" x-cloak
          class="relative bg-zinc-100">
     <button type="button" @click="show = false; try { localStorage.setItem('promo-{{ $promo }}', 'hidden') } catch (e) {}" class="absolute right-4 top-4 z-10 grid size-8 place-items-center rounded-full text-muted hover:bg-white hover:text-ink" aria-label="Dismiss"><x-icon name="x" class="size-4"/></button>
-    <div class="grid gap-6 px-4 py-8 {{ $gx }} xl:grid-cols-[320px_1fr] xl:pr-16">
+    <div class="grid gap-6 px-4 py-8 sm:px-6 xl:grid-cols-[320px_1fr] xl:pr-16">
         <div class="flex flex-col justify-center">
             <div class="relative w-fit">
                 <x-avatar :user="$user" size="size-20" class="text-xl ring-4 ring-white"/>
@@ -102,7 +101,7 @@
             <p class="mt-2 text-[15px] leading-relaxed text-ink-soft">{{ $promo === 'pro' ? 'More portfolio space, detailed analytics and optional featured placement to get seen by more clients.' : 'Publish a job with screening questions, compare applicants side by side, and pay creatives directly — no commission.' }}</p>
             <a href="{{ $promo === 'pro' ? route('billing.index') : route('client.jobs.create') }}" class="btn btn-light btn-pill mt-5 h-11 w-fit px-6 shadow-sm">{{ $promo === 'pro' ? 'See Professional plan' : 'Post a job' }}</a>
         </div>
-        <div class="-mx-4 flex gap-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:-mx-6 {{ $gx }} xl:mx-0 xl:grid xl:grid-cols-3 xl:px-0">
+        <div class="-mx-4 flex gap-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:-mx-6 sm:px-6 xl:mx-0 xl:grid xl:grid-cols-3 xl:px-0">
             @php
                 $features = $promo === 'pro' ? [
                     ['layers', 'More portfolio space', config('marketplace.portfolio_limits.professional').' case studies instead of '.config('marketplace.portfolio_limits.free').', with a bigger media allowance.', 'from-[#1d2b64] to-[#2f6bff]'],
@@ -133,7 +132,7 @@
 </section>
 @endif
 
-<div class="px-4 pb-10 pt-6 {{ $gx }}">
+<div class="px-4 pb-10 pt-6 sm:px-6">
     {{-- Bento: featured work --}}
     @if($bento->isNotEmpty())
         <div class="mb-3 flex items-baseline justify-between"><h2 class="font-display text-lg font-bold">Featured this season</h2><span class="text-xs text-muted">Most viewed &amp; liked recently</span></div>

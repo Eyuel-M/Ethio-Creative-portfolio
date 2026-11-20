@@ -3,7 +3,6 @@
     $likeCount = $project->likes()->count();
     $likedByMe = in_array($project->id, $likedIds ?? [], true);
     $canLike = auth()->check() && ! $isOwner && $project->isPublished();
-    $gx = auth()->check() ? 'sm:px-6' : 'sm:px-8'; // align with the member / visitor top bar
 @endphp
 <x-dynamic-component :component="auth()->check() ? 'layouts.discover' : 'layouts.public'" :title="$project->title">
 @push('meta')
@@ -25,7 +24,7 @@
     @endif
 
     {{-- Project header --}}
-    <header class="px-4 pb-10 pt-10 {{ $gx }} lg:pt-14">
+    <header class="mx-auto max-w-[1600px] px-4 pb-10 pt-10 sm:px-6 lg:px-10 lg:pt-14">
         {{-- Label: category · date · client --}}
         <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted">
             @if($project->category)
@@ -85,12 +84,12 @@
             @elseif($block->type === 'image' && $block->mediaUrl())
                 <figure>
                     <img src="{{ $block->mediaUrl() }}" alt="{{ $block->alt ?? '' }}" class="block h-auto w-full" loading="lazy">
-                    @if($block->caption)<figcaption class="px-4 py-3 text-sm text-muted {{ $gx }}">{{ $block->caption }}</figcaption>@endif
+                    @if($block->caption)<figcaption class="mx-auto max-w-[1600px] px-4 py-3 text-sm text-muted sm:px-6 lg:px-10">{{ $block->caption }}</figcaption>@endif
                 </figure>
             @elseif($block->type === 'embed' && $block->embedSrc())
                 <figure>
                     <div class="aspect-video w-full bg-black"><iframe src="{{ $block->embedSrc() }}" class="size-full" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="{{ $block->caption ?? 'Video' }}" sandbox="allow-scripts allow-same-origin allow-presentation"></iframe></div>
-                    @if($block->caption)<figcaption class="px-4 py-3 text-sm text-muted {{ $gx }}">{{ $block->caption }}</figcaption>@endif
+                    @if($block->caption)<figcaption class="mx-auto max-w-[1600px] px-4 py-3 text-sm text-muted sm:px-6 lg:px-10">{{ $block->caption }}</figcaption>@endif
                 </figure>
             @endif
         @endforeach
@@ -124,7 +123,7 @@
 
 {{-- More by the creator: full width, matching the work above --}}
 @if($more->isNotEmpty())
-<section class="px-4 py-14 {{ $gx }}">
+<section class="mx-auto max-w-[1600px] px-4 py-14 sm:px-6 lg:px-10">
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div class="flex items-center gap-3">
             <x-avatar :user="$author->user" size="size-11" class="text-sm"/>

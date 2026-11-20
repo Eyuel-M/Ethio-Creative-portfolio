@@ -52,7 +52,7 @@
     </section>
 
     {{-- Features --}}
-    <section class="px-4 py-20 sm:px-8">
+    <section class="mx-auto max-w-[1320px] px-4 py-20 sm:px-6">
         <div class="grid items-center gap-10 lg:grid-cols-[1.35fr_1fr]">
             <div class="grid gap-4 sm:grid-cols-3">
                 @foreach([
@@ -94,7 +94,7 @@
             : array_fill(0, 7, '');
     @endphp
     <section>
-        <div class="px-4 pb-20 pt-4 sm:px-8">
+        <div class="mx-auto max-w-[1600px] px-4 pb-20 pt-4 sm:px-6">
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <span class="eyebrow">Showcase</span>
@@ -128,7 +128,7 @@
 
     {{-- Categories --}}
     <section class="border-y border-line bg-white">
-        <div class="px-4 py-20 sm:px-8">
+        <div class="mx-auto max-w-[1320px] px-4 py-20 sm:px-6">
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <span class="eyebrow">Talent</span>
@@ -158,7 +158,7 @@
 
     {{-- Jobs --}}
     @if($jobs->isNotEmpty())
-    <section class="px-4 py-20 sm:px-8">
+    <section class="mx-auto max-w-[1320px] px-4 py-20 sm:px-6">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div><span class="eyebrow">Opportunities</span><h2 class="mt-4 font-display text-4xl font-semibold tracking-tight">Fresh creative jobs</h2></div>
             <a href="{{ route('jobs.index') }}" class="btn btn-light btn-pill">Browse all jobs <x-icon name="arrow-right" class="size-4"/></a>
@@ -170,7 +170,7 @@
     @endif
 
     {{-- CTA --}}
-    <section class="px-4 sm:px-8">
+    <section class="mx-auto max-w-[1320px] px-4 sm:px-6">
         <div class="relative overflow-hidden rounded-[28px] bg-ink px-6 py-16 text-center text-white sm:px-12">
             <div class="grid-lines absolute inset-0 opacity-[.15] invert"></div>
             <div class="relative">

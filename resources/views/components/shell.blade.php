@@ -3,5 +3,5 @@
 @auth
     <x-layouts.app :title="$title">{{ $slot }}</x-layouts.app>
 @else
-    <x-layouts.public :title="$title"><div class="space-y-3 px-4 pb-16 pt-4 sm:space-y-4 sm:px-8">{{ $slot }}</div></x-layouts.public>
+    <x-layouts.public :title="$title"><div class="mx-auto max-w-[1320px] space-y-3 px-4 pb-16 pt-4 sm:space-y-4 sm:px-6">{{ $slot }}</div></x-layouts.public>
 @endauth

@@ -2,8 +2,8 @@
 <x-layouts.public :title="$title">
     <section class="relative overflow-hidden">
         <div class="hero-gradient absolute inset-x-0 top-0 h-[420px]"></div>
-        <div class="relative grid items-center gap-10 px-4 py-14 sm:px-8 lg:grid-cols-[1fr_440px] lg:gap-16 lg:py-20 xl:grid-cols-[1fr_480px]">
-            <div class="hidden max-w-2xl flex-col justify-center lg:flex">
+        <div class="relative mx-auto grid max-w-[1100px] gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_440px] lg:py-20">
+            <div class="hidden flex-col justify-center lg:flex">
                 <span class="eyebrow w-fit">EthioCreative</span>
                 <h1 class="mt-5 font-display text-5xl font-bold leading-[1.05] tracking-tight">Where Ethiopian creative work gets discovered.</h1>
                 <ul class="mt-8 space-y-3 text-ink-soft">

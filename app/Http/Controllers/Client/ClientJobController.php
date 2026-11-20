@@ -137,7 +137,7 @@ class ClientJobController extends Controller
             ->when($f['skill'] ?? null, fn ($q, $s) => $q->whereHas('freelancer.skills', fn ($w) => $w->where('name', 'like', "%{$s}%")))
             ->when($f['max_budget'] ?? null, fn ($q, $b) => $q->where('proposed_amount_minor', '<=', Money::toMinor($b)))
             ->when($f['level'] ?? null, fn ($q, $l) => $q->whereHas('freelancer', fn ($w) => $w->where('experience_level', $l)))
-            ->with(['freelancer.user', 'freelancer.skills', 'answers', 'portfolioProjects']);
+            ->with(['freelancer.user', 'freelancer.skills', 'answers', 'portfolioProjects', 'conversation']);
         $q = match ($f['sort'] ?? 'newest') {
             'price_low' => $q->orderBy('proposed_amount_minor'),
             'price_high' => $q->orderByDesc('proposed_amount_minor'),
@@ -147,8 +147,11 @@ class ClientJobController extends Controller
         $applications = $q->get();
         $view = $request->query('view', 'cards');
         $counts = $job->applications()->selectRaw('status, count(*) c')->groupBy('status')->pluck('c', 'status');
+        $stats = $job->applications()->selectRaw('avg(proposed_amount_minor) price, avg(estimated_days) days, min(proposed_amount_minor) low')->first();
+        $ratings = \App\Models\Review::whereIn('reviewee_id', $applications->pluck('freelancer.user_id'))
+            ->selectRaw('reviewee_id, avg(rating) avg, count(*) c')->groupBy('reviewee_id')->get()->keyBy('reviewee_id');
 
-        return view('client.jobs.applicants', compact('job', 'applications', 'f', 'view', 'counts'));
+        return view('client.jobs.applicants', compact('job', 'applications', 'f', 'view', 'counts', 'stats', 'ratings'));
     }
 
     private function authorizeOwner(Request $request, JobPost $job): void

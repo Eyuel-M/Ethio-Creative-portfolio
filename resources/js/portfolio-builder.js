@@ -1,0 +1,141 @@
+/**
+ * Case-study builder: a block canvas with drag-and-drop, insert-anywhere, duplicate,
+ * per-block style settings and undo for deletes. All values are submitted through
+ * ordinary form inputs (blocks[key][...]); settings travel as one JSON string per block.
+ */
+export function portfolioBuilder({ blocks, defaults, labels }) {
+    let n = 0;
+    const clone = (o) => JSON.parse(JSON.stringify(o));
+    const fresh = (type) => ({
+        key: ++n, type, body: '', caption: '', alt: '', embed_url: '',
+        existing: null, preview: null, gallery: [], pending: [],
+        settings: clone(defaults[type] || {}),
+    });
+
+    return {
+        blocks: blocks.map((b) => ({ ...fresh(b.type), ...b, key: ++n, pending: [], settings: { ...clone(defaults[b.type] || {}), ...(b.settings || {}) } })),
+        defaults, labels,
+        selected: null,
+        tab: 'add',
+        picker: null,       // index where the inline "+" picker is open
+        drag: null,         // { from: index } or { type }
+        dropAt: null,
+        trash: null,        // last deleted { block, index }
+
+        get current() { return this.blocks.find((b) => b.key === this.selected) || null; },
+
+        select(b) { this.selected = b.key; this.tab = 'style'; this.picker = null; },
+        deselect() { this.selected = null; if (this.tab === 'style') this.tab = 'add'; },
+
+        insert(type, at = null) {
+            const b = fresh(type);
+            const i = at ?? (this.current ? this.blocks.indexOf(this.current) + 1 : this.blocks.length);
+            this.blocks.splice(i, 0, b);
+            this.picker = null;
+            this.select(b);
+            this.$nextTick(() => {
+                const el = document.getElementById(`block-${b.key}`);
+                el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el?.querySelector('textarea, input[type=url]')?.focus({ preventScroll: true });
+            });
+        },
+        move(i, d) {
+            const j = i + d;
+            if (j < 0 || j >= this.blocks.length) return;
+            this.blocks.splice(j, 0, this.blocks.splice(i, 1)[0]);
+        },
+        duplicate(i) {
+            const src = this.blocks[i];
+            const copy = { ...clone({ ...src, pending: [] }), key: ++n, pending: [] };
+            if (copy.preview && copy.preview.startsWith('blob:') && !copy.existing) copy.preview = null; // unsaved uploads can't be copied
+            copy.gallery = (src.gallery || []).filter((g) => g.path);
+            this.blocks.splice(i + 1, 0, copy);
+            this.select(copy);
+        },
+        remove(i) {
+            const [b] = this.blocks.splice(i, 1);
+            this.trash = { block: b, index: i };
+            if (this.selected === b.key) this.deselect();
+            clearTimeout(this._t);
+            this._t = setTimeout(() => (this.trash = null), 6000);
+        },
+        undo() {
+            if (!this.trash) return;
+            this.blocks.splice(this.trash.index, 0, this.trash.block);
+            this.select(this.trash.block);
+            this.trash = null;
+        },
+
+        // ── drag & drop ──
+        startDrag(e, payload) {
+            this.drag = payload;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', 'block');
+        },
+        over(e, i) {
+            if (!this.drag) return;
+            const r = e.currentTarget.getBoundingClientRect();
+            this.dropAt = e.clientY - r.top > r.height / 2 ? i + 1 : i;
+        },
+        drop() {
+            if (!this.drag || this.dropAt === null) return this.endDrag();
+            if (this.drag.type) {
+                this.insert(this.drag.type, this.dropAt);
+            } else {
+                const from = this.drag.from;
+                let to = this.dropAt;
+                if (to > from) to--;
+                if (to !== from) this.blocks.splice(to, 0, this.blocks.splice(from, 1)[0]);
+            }
+            this.endDrag();
+        },
+        endDrag() { this.drag = null; this.dropAt = null; },
+
+        // ── media ──
+        pickImage(b, e) {
+            const f = e.target.files[0];
+            if (f) b.preview = URL.createObjectURL(f);
+        },
+        addGallery(b, e) {
+            const input = e.target;
+            const room = 12 - b.gallery.length - b.pending.length;
+            const files = [...input.files].slice(0, Math.max(0, room));
+            b.pending = [...b.pending, ...files.map((f) => ({ file: f, url: URL.createObjectURL(f) }))];
+            this.syncFiles(b);
+        },
+        removePending(b, idx) { b.pending.splice(idx, 1); this.syncFiles(b); },
+        syncFiles(b) {
+            const input = document.getElementById(`gal-${b.key}`);
+            if (!input) return;
+            const dt = new DataTransfer();
+            b.pending.forEach((p) => dt.items.add(p.file));
+            input.files = dt.files;
+        },
+
+        embedSrc(url) {
+            let m = (url || '').match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+            if (m) return `https://www.youtube-nocookie.com/embed/${m[1]}`;
+            m = (url || '').match(/vimeo\.com\/(\d+)/);
+            return m ? `https://player.vimeo.com/video/${m[1]}` : null;
+        },
+
+        // ── canvas styling (mirrors portfolio/_block.blade.php) ──
+        wrap(b) {
+            const s = b.settings;
+            return [
+                { none: '', light: 'bg-zinc-50', dark: 'bg-ink text-white', accent: 'bg-violet-50' }[s.bg] || '',
+                { none: 'py-0', s: 'py-5', m: 'py-9', l: 'py-14' }[s.pad] ?? 'py-9',
+            ].join(' ');
+        },
+        inner(b) {
+            const s = b.settings;
+            return [
+                { full: '', wide: 'px-6 sm:px-10', narrow: 'mx-auto max-w-2xl px-6' }[s.width] ?? 'px-6 sm:px-10',
+                s.align === 'center' ? 'text-center' : '',
+            ].join(' ');
+        },
+        set(key, value) { if (this.current) this.current.settings[key] = value; },
+        has(key) { return this.current && key in (this.defaults[this.current.type] || {}); },
+        grow(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; },
+    };
+}

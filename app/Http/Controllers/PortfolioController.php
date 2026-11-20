@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\PortfolioBlock;
 use App\Models\PortfolioProject;
 use App\Support\Media;
 use Illuminate\Http\Request;
@@ -121,6 +122,9 @@ class PortfolioController extends Controller
         Media::delete($project->cover_path);
         foreach ($project->blocks as $b) {
             Media::delete($b->media_path);
+            foreach (array_column($b->media ?? [], 'path') as $p) {
+                Media::delete($p);
+            }
         }
         $project->delete();
 
@@ -129,7 +133,7 @@ class PortfolioController extends Controller
 
     private function publish(PortfolioProject $project): void
     {
-        if (! $project->cover_path && ! $project->blocks()->where('type', 'image')->exists()) {
+        if (! $project->cover_path && ! $project->blocks()->where(fn ($q) => $q->whereNotNull('media_path')->orWhereNotNull('media'))->exists()) {
             throw ValidationException::withMessages(['cover' => 'Add a cover image or at least one image block before publishing.']);
         }
         $project->forceFill(['status' => 'published', 'published_at' => $project->published_at ?? now()])->save();
@@ -142,7 +146,7 @@ class PortfolioController extends Controller
 
     private function validated(Request $request, ?PortfolioProject $project): array
     {
-        $existing = $project ? $project->blocks()->whereNotNull('media_path')->pluck('media_path')->all() : [];
+        $existing = $project ? $project->blocks()->get()->flatMap(fn ($b) => array_merge([$b->media_path], array_column($b->media ?? [], 'path')))->filter()->values()->all() : [];
         $max = config('marketplace.max_upload_kb.image');
         $v = $request->validate([
             'title' => 'required|string|max:140',
@@ -154,7 +158,13 @@ class PortfolioController extends Controller
             'cover' => "nullable|image|mimes:jpg,jpeg,png,webp,gif|max:{$max}|dimensions:max_width=8000,max_height=8000",
             'cover_alt' => 'nullable|string|max:200',
             'blocks' => 'nullable|array|max:40',
-            'blocks.*.type' => 'required|in:text,image,embed',
+            'blocks.*.type' => 'required|in:'.implode(',', PortfolioBlock::TYPES),
+            'blocks.*.settings' => 'nullable|string|max:1000',
+            'blocks.*.gallery' => 'nullable|array|max:12',
+            'blocks.*.gallery.*.path' => ['required', 'string', Rule::in($existing)],
+            'blocks.*.gallery.*.alt' => 'nullable|string|max:200',
+            'blocks.*.images' => 'nullable|array|max:12',
+            'blocks.*.images.*' => "image|mimes:jpg,jpeg,png,webp,gif|max:{$max}|dimensions:max_width=8000,max_height=8000",
             'blocks.*.body' => 'nullable|string|max:5000',
             'blocks.*.caption' => 'nullable|string|max:200',
             'blocks.*.alt' => 'nullable|string|max:200',
@@ -184,34 +194,54 @@ class PortfolioController extends Controller
         $project->blocks()->delete();
         $i = 0;
         foreach ($blocks as $key => $b) {
-            $path = $b['existing'] ?? null;
-            $file = $request->file("blocks.{$key}.image");
-            if ($b['type'] === 'image' && $file) {
+            $type = $b['type'];
+            $usesImage = in_array($type, ['image', 'image_text'], true);
+            $path = $usesImage ? ($b['existing'] ?? null) : null;
+            if ($usesImage && ($file = $request->file("blocks.{$key}.image"))) {
                 $path = Media::store($file, 'portfolio');
             }
-            if ($b['type'] === 'text' && blank($b['body'] ?? null)) {
+            $gallery = [];
+            if ($type === 'gallery') {
+                foreach ($b['gallery'] ?? [] as $g) {
+                    $gallery[] = ['path' => $g['path'], 'alt' => $g['alt'] ?? null];
+                }
+                foreach ($request->file("blocks.{$key}.images") ?? [] as $file) {
+                    if (count($gallery) < 12) {
+                        $gallery[] = ['path' => Media::store($file, 'portfolio'), 'alt' => null];
+                    }
+                }
+            }
+            $body = $b['body'] ?? null;
+            $empty = match ($type) {
+                'heading', 'text', 'quote' => blank($body),
+                'image' => ! $path,
+                'image_text' => ! $path && blank($body),
+                'gallery' => ! $gallery,
+                'embed' => blank($b['embed_url'] ?? null),
+                default => false,
+            };
+            if ($empty) {
                 continue;
             }
-            if ($b['type'] === 'image' && ! $path) {
-                continue;
-            }
-            if ($b['type'] === 'embed' && blank($b['embed_url'] ?? null)) {
-                continue;
-            }
-            $kept[] = $path;
+            $kept = array_merge($kept, [$path], array_column($gallery, 'path'));
+            $settings = json_decode((string) ($b['settings'] ?? ''), true);
             $project->blocks()->create([
-                'type' => $b['type'],
-                'body' => $b['type'] === 'text' ? $b['body'] : null,
-                'media_path' => $b['type'] === 'image' ? $path : null,
-                'caption' => $b['caption'] ?? null,
-                'alt' => $b['alt'] ?? null,
-                'embed_url' => $b['type'] === 'embed' ? $b['embed_url'] : null,
+                'type' => $type,
+                'body' => in_array($type, ['heading', 'text', 'quote', 'image_text'], true) ? $body : null,
+                'media_path' => $path,
+                'media' => $gallery ?: null,
+                'caption' => in_array($type, ['image', 'embed', 'quote', 'gallery'], true) ? ($b['caption'] ?? null) : null,
+                'alt' => $usesImage ? ($b['alt'] ?? null) : null,
+                'embed_url' => $type === 'embed' ? $b['embed_url'] : null,
+                'settings' => PortfolioBlock::cleanSettings($type, is_array($settings) ? $settings : []),
                 'sort_order' => $i++,
             ]);
         }
         foreach ($old as $o) {
-            if ($o->media_path && ! in_array($o->media_path, $kept, true)) {
-                Media::delete($o->media_path);
+            foreach (array_merge([$o->media_path], array_column($o->media ?? [], 'path')) as $p) {
+                if ($p && $p !== $project->cover_path && ! in_array($p, $kept, true)) {
+                    Media::delete($p);
+                }
             }
         }
     }

@@ -332,10 +332,19 @@ class DemoSeeder extends Seeder
             'project_date' => now()->subMonths(mt_rand(1, 24)), 'status' => 'published', 'published_at' => now()->subDays(mt_rand(1, 120)),
             'views' => mt_rand(20, 1500), 'sort_order' => $k,
         ]);
-        $p->blocks()->create(['type' => 'text', 'body' => "The brief\nThe client needed a fresh direction that felt modern while staying true to its Ethiopian roots.", 'sort_order' => 0]);
-        $p->blocks()->create(['type' => 'image', 'media_path' => ArtGenerator::make("seed/{$seed}-a.jpg", $seed * 13 + 1), 'caption' => 'Early exploration', 'alt' => 'Exploration sketches', 'sort_order' => 1]);
-        $p->blocks()->create(['type' => 'text', 'body' => "Process & outcome\nWe ran two rounds of concepts, tested them with real customers and refined the strongest route into a complete system.", 'sort_order' => 2]);
-        $p->blocks()->create(['type' => 'image', 'media_path' => ArtGenerator::make("seed/{$seed}-b.jpg", $seed * 17 + 3), 'caption' => 'Final application', 'alt' => 'Final design applied', 'sort_order' => 3]);
+        $a = ArtGenerator::make("seed/{$seed}-a.jpg", $seed * 13 + 1);
+        $b = ArtGenerator::make("seed/{$seed}-b.jpg", $seed * 17 + 3);
+        $blocks = [
+            ['type' => 'heading', 'body' => 'The brief'],
+            ['type' => 'text', 'body' => 'The client needed a fresh direction that felt modern while staying true to its Ethiopian roots.'],
+            ['type' => 'image', 'media_path' => $a, 'caption' => 'Early exploration', 'alt' => 'Exploration sketches'],
+            ['type' => 'image_text', 'media_path' => $b, 'alt' => 'Final design applied', 'body' => "Process & outcome\nWe ran two rounds of concepts, tested them with real customers and refined the strongest route into a complete system."],
+            ['type' => 'quote', 'body' => 'They understood our customers better than we expected. The new look paid for itself within a season.', 'caption' => 'Client feedback'],
+            ['type' => 'gallery', 'media' => [['path' => $a, 'alt' => null], ['path' => $b, 'alt' => null]], 'caption' => 'Final applications'],
+        ];
+        foreach ($blocks as $i => $block) {
+            $p->blocks()->create($block + ['sort_order' => $i, 'settings' => \App\Models\PortfolioBlock::cleanSettings($block['type'], [])]);
+        }
     }
 
     private function taxonomy(): array

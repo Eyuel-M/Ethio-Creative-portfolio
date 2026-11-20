@@ -79,19 +79,7 @@
             <img src="{{ $project->coverUrl() }}" alt="{{ $project->cover_alt ?? $project->title }}" class="block h-auto w-full">
         @endif
         @foreach($project->blocks as $block)
-            @if($block->type === 'text')
-                <div class="mx-auto max-w-3xl whitespace-pre-line px-5 py-14 text-lg leading-relaxed text-ink-soft first-line:font-display first-line:text-2xl first-line:font-bold first-line:text-ink sm:py-20">{{ $block->body }}</div>
-            @elseif($block->type === 'image' && $block->mediaUrl())
-                <figure>
-                    <img src="{{ $block->mediaUrl() }}" alt="{{ $block->alt ?? '' }}" class="block h-auto w-full" loading="lazy">
-                    @if($block->caption)<figcaption class="mx-auto max-w-[1600px] px-4 py-3 text-sm text-muted sm:px-6 lg:px-10">{{ $block->caption }}</figcaption>@endif
-                </figure>
-            @elseif($block->type === 'embed' && $block->embedSrc())
-                <figure>
-                    <div class="aspect-video w-full bg-black"><iframe src="{{ $block->embedSrc() }}" class="size-full" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="{{ $block->caption ?? 'Video' }}" sandbox="allow-scripts allow-same-origin allow-presentation"></iframe></div>
-                    @if($block->caption)<figcaption class="mx-auto max-w-[1600px] px-4 py-3 text-sm text-muted sm:px-6 lg:px-10">{{ $block->caption }}</figcaption>@endif
-                </figure>
-            @endif
+            @include('portfolio._block', ['block' => $block])
         @endforeach
     </div>
 

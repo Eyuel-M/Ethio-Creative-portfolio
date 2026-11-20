@@ -63,7 +63,7 @@
             <div class="mt-3 flex flex-wrap gap-1.5">@foreach($profile->skills->take(4) as $s)<span class="chip">{{ $s->name }}</span>@endforeach</div>
         @endif
         <div class="mt-auto flex items-center justify-between gap-2 pt-5">
-            <span class="text-sm"><span class="font-semibold">{{ $profile->hourly_rate_minor ? \App\Support\Money::format($profile->hourly_rate_minor, $profile->currency) : '—' }}</span><span class="text-muted"> /hour</span></span>
+            <span class="whitespace-nowrap text-sm"><span class="font-semibold">{{ $profile->hourly_rate_minor ? \App\Support\Money::format($profile->hourly_rate_minor, $profile->currency) : '—' }}</span><span class="text-muted"> /hour</span></span>
             <div class="flex items-center gap-2">
                 @auth
                     @if(auth()->user()->is_client && auth()->id() !== $profile->user_id)

@@ -59,6 +59,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/workspace/enable', [SettingsController::class, 'enableRole'])->name('workspace.enable');
 
         // Settings
+        Route::get('/profile', [SettingsController::class, 'profile'])->name('profile');
         Route::get('/settings', [SettingsController::class, 'edit'])->name('settings');
         Route::put('/settings/account', [SettingsController::class, 'updateAccount'])->name('settings.account');
         Route::post('/settings/avatar', [SettingsController::class, 'updateAvatar'])->middleware('throttle:uploads')->name('settings.avatar');

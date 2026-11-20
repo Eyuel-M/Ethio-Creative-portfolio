@@ -32,6 +32,30 @@ class SettingsController extends Controller
         ]);
     }
 
+    /** "Profile" menu: freelancers go to their public profile (with photo/cover editors); clients get their own page. */
+    public function profile(Request $request)
+    {
+        $user = $request->user()->load(['freelancerProfile', 'clientProfile']);
+        if ($user->workspace() === 'freelancer' && $user->freelancerProfile) {
+            return redirect()->route('freelancers.show', $user->freelancerProfile);
+        }
+        if (! $user->clientProfile) {
+            return redirect()->route('settings');
+        }
+        $client = $user->clientProfile;
+        $jobs = $client->jobPosts();
+        $stats = [
+            'jobs' => (clone $jobs)->whereNotIn('status', ['draft', 'pending_payment'])->count(),
+            'live' => (clone $jobs)->live()->count(),
+            'hires' => \App\Models\Project::where('client_user_id', $user->id)->count(),
+            'rating' => round((float) \App\Models\Review::where('reviewee_id', $user->id)->avg('rating'), 1),
+            'reviews' => \App\Models\Review::where('reviewee_id', $user->id)->count(),
+        ];
+        $reviews = \App\Models\Review::where('reviewee_id', $user->id)->with('reviewer')->latest()->take(5)->get();
+
+        return view('profile.client', compact('user', 'client', 'stats', 'reviews'));
+    }
+
     public function switchWorkspace(Request $request)
     {
         $data = $request->validate(['workspace' => 'required|in:freelancer,client']);

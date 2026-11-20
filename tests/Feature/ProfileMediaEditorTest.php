@@ -75,13 +75,24 @@ class ProfileMediaEditorTest extends MarketplaceTestCase
         $this->actingAs($this->client())->post(route('settings.cover'), ['cover' => UploadedFile::fake()->image('c.jpg'), 'cover_position' => 50])->assertRedirect(route('settings'));
     }
 
-    public function test_settings_no_longer_has_the_old_file_fields(): void
+    public function test_settings_account_has_no_photo_controls(): void
+    {
+        foreach ([$this->freelancer(), $this->client()] as $u) {
+            $this->actingAs($u)->get(route('settings', ['tab' => 'account']))->assertOk()
+                ->assertDontSee('name="avatar"', false)->assertDontSee('open-avatar-editor')->assertDontSee('Change photo');
+        }
+        $this->actingAs($this->freelancer())->get(route('settings', ['tab' => 'profile']))->assertOk()->assertDontSee('name="cover"', false);
+    }
+
+    public function test_profile_menu_goes_to_your_profile(): void
     {
         $f = $this->freelancer();
-        $this->actingAs($f)->get(route('settings', ['tab' => 'account']))->assertOk()->assertDontSee('name="avatar"', false)->assertSee('Change photo &amp; cover', false);
-        $this->actingAs($f)->get(route('settings', ['tab' => 'profile']))->assertOk()->assertDontSee('name="cover"', false);
+        $this->actingAs($f)->get(route('dashboard'))->assertSee(route('profile'));
+        $this->actingAs($f)->get(route('profile'))->assertRedirect(route('freelancers.show', $f->freelancerProfile));
 
-        // client-only accounts have no profile page, so the photo editor lives in settings
-        $this->actingAs($this->client())->get(route('settings', ['tab' => 'account']))->assertOk()->assertSee('open-avatar-editor')->assertSee(route('settings.avatar'));
+        $c = $this->client();
+        $this->actingAs($c)->get(route('dashboard'))->assertSee(route('profile'));
+        $this->actingAs($c)->get(route('profile'))->assertOk()->assertSee($c->name)->assertSee('open-avatar-editor')->assertSee(route('settings.avatar'))->assertSee('Edit details');
     }
+
 }

@@ -4,10 +4,10 @@
     $user = auth()->user();
     $ws = $user->workspace();
     $workspace = $ws === 'client' ? [
-        ['Dashboard', 'dashboard', 'grid'], ['My Jobs', 'client.jobs.index', 'briefcase'], ['Post a job', 'client.jobs.create', 'plus'],
+        ['Dashboard', 'dashboard', 'grid'], ['Profile', 'profile', 'user'], ['My Jobs', 'client.jobs.index', 'briefcase'], ['Post a job', 'client.jobs.create', 'plus'],
         ['Saved Talent', 'client.saved', 'bookmark'], ['Projects', 'projects.index', 'folder'],
     ] : [
-        ['Dashboard', 'dashboard', 'grid'], ['My Portfolio', 'portfolio.index', 'layers'], ['My Proposals', 'applications.mine', 'file'],
+        ['Dashboard', 'dashboard', 'grid'], ['Profile', 'profile', 'user'], ['My Portfolio', 'portfolio.index', 'layers'], ['My Proposals', 'applications.mine', 'file'],
         ['Invitations', 'invitations.index', 'sparkles'], ['Saved jobs', 'jobs.saved', 'bookmark'], ['Projects', 'projects.index', 'folder'],
     ];
     $msg = (int) ($counts['messages'] ?? 0);
@@ -44,9 +44,7 @@
                     <div class="my-1 h-px bg-line"></div>
                 </div>
             @endif
-            @if($user->is_freelancer && $user->freelancerProfile)
-                <a href="{{ route('freelancers.show', $user->freelancerProfile) }}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-zinc-50"><x-icon name="user" class="size-4 text-muted"/> View public profile</a>
-            @endif
+            <a href="{{ route('profile') }}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-zinc-50"><x-icon name="user" class="size-4 text-muted"/> My profile</a>
             <a href="{{ route('settings') }}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-zinc-50"><x-icon name="settings" class="size-4 text-muted"/> Settings</a>
             <a href="{{ route('billing.index') }}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-zinc-50"><x-icon name="dollar" class="size-4 text-muted"/> Billing</a>
             @if($user->isAdmin())

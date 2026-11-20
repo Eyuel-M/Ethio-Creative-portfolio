@@ -4,14 +4,16 @@
     $ws = $user->workspace();
     $menu = $ws === 'client' ? [
         ['Dashboard', 'dashboard', 'grid', ['dashboard']],
+        ['Profile', 'profile', 'user', ['profile']],
         ['My Jobs', 'client.jobs.index', 'briefcase', ['client.jobs.*']],
-        ['Find Freelancers', 'freelancers.index', 'user', ['freelancers.*']],
+        ['Find Freelancers', 'freelancers.index', 'users', ['freelancers.*']],
         ['Saved Talent', 'client.saved', 'bookmark', ['client.saved']],
         ['Projects', 'projects.index', 'folder', ['projects.*']],
         ['Message', 'messages.index', 'mail', ['messages.*'], $navCounts['messages'] ?? 0],
         ['Notification', 'notifications.index', 'bell', ['notifications.*'], $navCounts['notifications'] ?? 0],
     ] : [
         ['Dashboard', 'dashboard', 'grid', ['dashboard']],
+        ['Profile', 'profile', 'user', ['profile']],
         ['Find Project', 'jobs.index', 'search', ['jobs.index', 'jobs.show', 'applications.create']],
         ['My Portfolio', 'portfolio.index', 'layers', ['portfolio.*']],
         ['My Proposal', 'applications.mine', 'file', ['applications.mine', 'applications.show']],
@@ -20,6 +22,8 @@
         ['Message', 'messages.index', 'mail', ['messages.*'], $navCounts['messages'] ?? 0],
         ['Notification', 'notifications.index', 'bell', ['notifications.*'], $navCounts['notifications'] ?? 0],
     ];
+    // Your own freelancer profile counts as "Profile", not "Find Freelancers".
+    $ownProfile = request()->routeIs('freelancers.show') && optional(request()->route('profile'))->user_id === $user->id;
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -39,7 +43,8 @@
         <p class="px-3 text-[11px] font-medium uppercase tracking-wider text-faint">Menu</p>
         <nav class="mt-3 space-y-1">
             @foreach($menu as $item)
-                <a href="{{ route($item[1]) }}" class="nav-link {{ request()->routeIs(...$item[3]) ? 'active' : '' }}">
+                @php $isActive = $item[1] === 'profile' ? (request()->routeIs('profile') || $ownProfile) : (request()->routeIs(...$item[3]) && ! ($ownProfile && $item[1] === 'freelancers.index')); @endphp
+                <a href="{{ route($item[1]) }}" class="nav-link {{ $isActive ? 'active' : '' }}" @if($isActive) aria-current="page" @endif>
                     <x-icon :name="$item[2]" class="size-5"/>
                     <span class="flex-1">{{ $item[0] }}</span>
                     @if(($item[4] ?? 0) > 0)<span class="grid h-5 min-w-5 place-items-center rounded-full bg-leaf px-1.5 text-[11px] font-semibold text-white">{{ $item[4] }}</span>@endif

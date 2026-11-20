@@ -93,14 +93,6 @@
 @if($tab === 'account')
 <form method="POST" action="{{ route('settings.account') }}" enctype="multipart/form-data" class="card card-pad">@csrf @method('PUT')
     <h2 class="panel-title">Account</h2>
-    <div class="mt-6 flex flex-wrap items-center gap-4">
-        <x-avatar :user="$user" size="size-16" class="text-lg"/>
-        @if($fp)
-            <a href="{{ route('freelancers.show', $fp) }}" class="btn btn-light"><x-icon name="camera" class="size-4"/> Change photo &amp; cover</a>
-        @else
-            <button type="button" @click="$dispatch('open-avatar-editor')" class="btn btn-light"><x-icon name="camera" class="size-4"/> Change photo</button>
-        @endif
-    </div>
     <div class="mt-6 grid gap-4 md:grid-cols-2">
         <div><label class="label" for="name">Name</label><input id="name" name="name" value="{{ old('name', $user->name) }}" class="input" required></div>
         <div><label class="label">Email</label><input value="{{ $user->email }}" class="input bg-zinc-50" disabled></div>
@@ -117,7 +109,6 @@
         <button class="btn btn-dark">Save account</button>
     </div>
 </form>
-@unless($fp)<x-avatar-editor :user="$user"/>@endunless
 <form id="enable-f" method="POST" action="{{ route('workspace.enable') }}">@csrf<input type="hidden" name="role" value="freelancer"></form>
 <form id="enable-c" method="POST" action="{{ route('workspace.enable') }}">@csrf<input type="hidden" name="role" value="client"></form>
 @endif

@@ -53,3 +53,14 @@ Artisan::command('demo:clear {--force : Skip the confirmation}', function () {
     $counts = \App\Support\DemoData::clear();
     $this->info('Removed: '.collect($counts)->map(fn ($v, $k) => "$v $k")->implode(', ').'.');
 })->purpose('Remove all placeholder content, keeping real accounts');
+
+Artisan::command('media:prune-uploads', function () {
+    $old = \App\Models\MediaUpload::where('created_at', '<', now()->subHours(\App\Models\MediaUpload::KEEP_HOURS))->get();
+    foreach ($old as $u) {
+        \App\Support\Media::delete($u->path);
+        $u->delete();
+    }
+    $this->info("Removed {$old->count()} unused uploads.");
+})->purpose('Delete images that were uploaded but never saved into a project');
+
+\Illuminate\Support\Facades\Schedule::command('media:prune-uploads')->daily();

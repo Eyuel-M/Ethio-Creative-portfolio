@@ -45,10 +45,26 @@
     ];
     $swatch = ['none' => 'bg-white', 'light' => 'bg-zinc-100', 'dark' => 'bg-ink', 'accent' => 'bg-violet-100'];
     $seg = 'flex-1 rounded-lg px-2 py-1.5 text-xs font-medium transition';
+    // Upload state shown over an image: progress while uploading, size saved when done, retry on failure.
+    $progress = fn (string $t, string $d) => <<<HTML
+        <template x-if="{$t}.up">
+            <div class="absolute inset-0 z-[6] grid place-items-center transition" :class="{$t}.up.status === 'error' ? 'bg-rose-950/60' : ({$t}.up.status === 'done' ? 'bg-transparent' : 'bg-black/40')" @click.prevent.stop>
+                <div x-show="{$t}.up.status === 'uploading'" class="w-2/3 max-w-[220px] text-center text-white">
+                    <p class="text-xs font-semibold drop-shadow" x-text="{$t}.up.stage === 'Uploading' ? 'Uploading ' + {$t}.up.progress + '%' : {$t}.up.stage"></p>
+                    <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/30"><div class="h-full rounded-full bg-white transition-all" :style="'width:' + {$t}.up.progress + '%'"></div></div>
+                </div>
+                <div x-show="{$t}.up.status === 'done'" class="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 5 5L20 7"/></svg><span x-text="{$t}.up.note"></span></div>
+                <div x-show="{$t}.up.status === 'error'" class="px-3 text-center text-white">
+                    <p class="text-xs font-semibold" x-text="{$t}.up.error"></p>
+                    <button type="button" @click.stop="retry({$t}, {$d})" class="mt-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-ink hover:bg-zinc-100">Retry</button>
+                </div>
+            </div>
+        </template>
+    HTML;
 @endphp
 <x-layouts.app :title="$project->exists ? 'Edit project' : 'New project'">
 <form method="POST" enctype="multipart/form-data" action="{{ $project->exists ? route('portfolio.update', $project) : route('portfolio.store') }}"
-      x-data="portfolioBuilder({ blocks: @js($blocks), defaults: @js(PortfolioBlock::TYPE_SETTINGS), labels: @js($labels) })"
+      x-data="portfolioBuilder({ blocks: @js($blocks), defaults: @js(PortfolioBlock::TYPE_SETTINGS), labels: @js($labels), uploadUrl: @js(route('media.uploads.store')), cover: @js(old('cover_upload') ? $url(old('cover_upload')) : $project->coverUrl()), coverPath: @js(old('cover_upload')) })" @submit="beforeSubmit($event)"
       @keydown.escape.window="deselect(); picker = null" @dragend.window="endDrag()" class="space-y-3 sm:space-y-4">
     @csrf @if($project->exists) @method('PUT') @endif
 
@@ -61,11 +77,13 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
             @if($project->exists)<a href="{{ route('portfolio.show', $project) }}" target="_blank" class="btn btn-light h-10"><x-icon name="eye" class="size-4"/> <span class="hidden sm:inline">Preview</span></a>@endif
-            <button name="publish" value="0" class="btn btn-light h-10">Save draft</button>
-            <button name="publish" value="1" class="btn btn-dark h-10">{{ $project->isPublished() ? 'Save & update' : 'Publish' }}</button>
+            <span x-show="uploading" x-cloak class="inline-flex items-center gap-2 text-xs font-medium text-muted"><span class="size-3.5 animate-spin rounded-full border-2 border-zinc-300 border-t-ink"></span><span x-text="'Uploading ' + uploading + (uploading === 1 ? ' image' : ' images') + '…'"></span></span>
+            <button name="publish" value="0" class="btn btn-light h-10" :disabled="uploading > 0" :class="uploading > 0 && 'opacity-50'">Save draft</button>
+            <button name="publish" value="1" class="btn btn-dark h-10" :disabled="uploading > 0" :class="uploading > 0 && 'opacity-50'">{{ $project->isPublished() ? 'Save & update' : 'Publish' }}</button>
         </div>
     </div>
 
+    <div x-show="notice" x-cloak class="flex items-center justify-between gap-3 rounded-2xl bg-amber-50 px-5 py-3 text-sm text-amber-800"><span x-text="notice"></span><button type="button" @click="notice = ''" class="text-amber-700 hover:text-amber-900" aria-label="Dismiss"><x-icon name="x" class="size-4"/></button></div>
     @if($errors->any())
         <div class="rounded-2xl bg-rose-50 px-5 py-3 text-sm text-rose-700">{{ $errors->first() }}</div>
     @endif
@@ -120,14 +138,14 @@
                                 <p class="text-[11px] leading-snug text-muted">Describes the image for people using screen readers and when it fails to load.</p>
                             </div>
                             <div x-show="current.type === 'gallery'" class="space-y-2">
-                                <p class="text-[11px] font-semibold uppercase tracking-wider text-faint">Alt text <span class="font-normal normal-case tracking-normal" x-text="'· ' + (current.gallery.length + current.pending.length - missingAlt(current)) + ' of ' + (current.gallery.length + current.pending.length) + ' done'"></span></p>
-                                <template x-for="(g, gi) in [...current.gallery, ...current.pending]" :key="g.url">
+                                <p class="text-[11px] font-semibold uppercase tracking-wider text-faint">Alt text <span class="font-normal normal-case tracking-normal" x-text="'· ' + (current.gallery.length - missingAlt(current)) + ' of ' + current.gallery.length + ' done'"></span></p>
+                                <template x-for="(g, gi) in current.gallery" :key="g.id">
                                     <div class="flex gap-3">
                                         <span class="size-12 shrink-0 overflow-hidden rounded-lg bg-zinc-100"><img :src="g.url" alt="" class="size-full object-cover"></span>
                                         <textarea :data-alt-field="gi === 0 ? '' : null" x-model="g.alt" rows="2" maxlength="200" class="input h-auto flex-1 py-1.5 text-[13px]" :aria-label="`Alt text for image ${gi + 1}`" :placeholder="`Describe image ${gi + 1}`"></textarea>
                                     </div>
                                 </template>
-                                <p x-show="!current.gallery.length && !current.pending.length" class="text-xs text-muted">Add images to the gallery first.</p>
+                                <p x-show="!current.gallery.length" class="text-xs text-muted">Add images to the gallery first.</p>
                                 <p class="text-[11px] leading-snug text-muted">Describes each image for people using screen readers.</p>
                             </div>
                             @foreach($controls as $group => $items)
@@ -184,16 +202,18 @@
             </div>
 
             {{-- Cover --}}
-            <div x-data="{ cover: @js($project->coverUrl()) }" @click="deselect()">
+            <div @click="deselect()">
+                <input type="hidden" name="cover_upload" :value="cover.path || ''">
                 <label class="group relative block cursor-pointer">
-                    <template x-if="cover"><img :src="cover" alt="" class="block h-auto max-h-[520px] w-full object-cover"></template>
-                    <div x-show="!cover" class="mx-6 grid aspect-[21/9] place-items-center rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50 text-center text-muted transition group-hover:border-ink sm:mx-10">
-                        <span><x-icon name="upload" class="mx-auto size-7"/><span class="mt-2 block text-sm font-medium text-ink">Add a cover image</span><span class="text-xs">Shown first on your project and in feeds · up to 20 MB</span></span>
+                    <template x-if="cover.preview"><img :src="cover.preview" alt="" class="block h-auto max-h-[520px] w-full object-cover"></template>
+                    <div x-show="!cover.preview" class="mx-6 grid aspect-[21/9] place-items-center rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50 text-center text-muted transition group-hover:border-ink sm:mx-10">
+                        <span><x-icon name="upload" class="mx-auto size-7"/><span class="mt-2 block text-sm font-medium text-ink">Add a cover image</span><span class="text-xs">Shown first on your project and in feeds · compressed automatically</span></span>
                     </div>
-                    <span x-show="cover" class="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium opacity-0 shadow backdrop-blur transition group-hover:opacity-100"><x-icon name="image" class="size-4"/> Replace cover</span>
-                    <input type="file" name="cover" accept="image/*" class="sr-only" @change="cover = URL.createObjectURL($event.target.files[0])">
+                    <span x-show="cover.preview && !cover.up" class="absolute right-4 top-4 z-[7] inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium opacity-0 shadow backdrop-blur transition group-hover:opacity-100"><x-icon name="image" class="size-4"/> Replace cover</span>
+                    {!! $progress('cover', 'coverDone()') !!}
+                    <input type="file" accept="image/*" class="sr-only" @change="pickCover($event)">
                 </label>
-                <div x-show="cover" class="flex items-center gap-2 px-6 pt-3 sm:px-10">
+                <div x-show="cover.preview" class="flex items-center gap-2 px-6 pt-3 sm:px-10">
                     <label for="cover_alt" class="shrink-0 rounded-md bg-zinc-100 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">Alt</label>
                     <input id="cover_alt" name="cover_alt" value="{{ old('cover_alt', $project->cover_alt) }}" maxlength="200" class="block w-full border-0 bg-transparent py-1 text-sm text-ink-soft placeholder:text-zinc-400 focus:outline-none focus:ring-0" placeholder="Describe the cover image for screen readers">
                 </div>
@@ -231,10 +251,7 @@
                                 <input type="hidden" :name="`blocks[${block.key}][existing]`" :value="block.existing || ''">
                                 <input type="hidden" :name="`blocks[${block.key}][alt]`" :value="block.alt || ''">
                             </span></template>
-                            <template x-for="(p, pi) in block.pending" :key="'pa' + p.url">
-                                <input type="hidden" :name="`blocks[${block.key}][image_alts][${pi}]`" :value="p.alt || ''">
-                            </template>
-                            <template x-for="(g, gi) in block.gallery" :key="g.path">
+                            <template x-for="(g, gi) in block.gallery.filter((x) => x.path)" :key="'h' + g.id">
                                 <span><input type="hidden" :name="`blocks[${block.key}][gallery][${gi}][path]`" :value="g.path"><input type="hidden" :name="`blocks[${block.key}][gallery][${gi}][alt]`" :value="g.alt || ''"></span>
                             </template>
 
@@ -256,7 +273,8 @@
                                             <label class="relative block cursor-pointer">
                                                 <template x-if="block.preview"><img :src="block.preview" alt="" class="block h-auto w-full" :class="block.settings.width !== 'full' && 'rounded-2xl'"></template>
                                                 <div x-show="!block.preview" class="grid aspect-[16/9] place-items-center border-2 border-dashed border-zinc-300 bg-zinc-50 text-center text-muted hover:border-ink" :class="block.settings.width === 'full' ? 'mx-6 rounded-2xl sm:mx-10' : 'rounded-2xl'"><span><x-icon name="upload" class="mx-auto size-6"/><span class="mt-1 block text-sm font-medium text-ink">Upload an image</span></span></div>
-                                                <input type="file" accept="image/*" class="sr-only" :name="`blocks[${block.key}][image]`" @change="pickImage(block, $event)">
+                                                {!! $progress('block', 'imageDone(block)') !!}
+                                                <input type="file" accept="image/*" class="sr-only" @change="pickImage(block, $event)">
                                             </label>
                                             <input :name="`blocks[${block.key}][caption]`" x-model="block.caption" maxlength="200" class="mt-2 block w-full border-0 bg-transparent py-1 text-sm text-muted placeholder:text-zinc-300 focus:outline-none focus:ring-0" :class="block.settings.width === 'full' && 'px-6 sm:px-10'" placeholder="Add a caption (optional)">
                                         </figure>
@@ -264,15 +282,16 @@
                                     <template x-if="block.type === 'gallery'">
                                         <figure :class="block.settings.width === 'full' && 'px-2'">
                                             <div class="grid" :class="[{ '2': 'grid-cols-2', '3': 'grid-cols-3', '4': 'grid-cols-4' }[block.settings.cols], { none: 'gap-0', s: 'gap-2', m: 'gap-4' }[block.settings.gap]]">
-                                                <template x-for="(g, gi) in block.gallery" :key="'g' + g.path">
-                                                    <div class="group/i relative aspect-[4/3] overflow-hidden bg-zinc-100" :class="block.settings.gap !== 'none' && 'rounded-xl'"><img :src="g.url" alt="" class="size-full object-cover"><button type="button" @click.stop="block.gallery.splice(gi, 1)" class="absolute right-2 top-2 grid size-7 place-items-center rounded-full bg-black/60 text-white opacity-0 transition group-hover/i:opacity-100" aria-label="Remove image"><x-icon name="x" class="size-4"/></button></div>
+                                                <template x-for="(g, gi) in block.gallery" :key="'g' + g.id">
+                                                    <div class="group/i relative aspect-[4/3] overflow-hidden bg-zinc-100" :class="block.settings.gap !== 'none' && 'rounded-xl'">
+                                                        <img :src="g.url" alt="" class="size-full object-cover">
+                                                        {!! $progress('g', 'galleryDone(g)') !!}
+                                                        <button type="button" @click.stop="block.gallery.splice(gi, 1)" class="absolute right-2 top-2 z-[7] grid size-7 place-items-center rounded-full bg-black/60 text-white opacity-0 transition group-hover/i:opacity-100" aria-label="Remove image"><x-icon name="x" class="size-4"/></button>
+                                                    </div>
                                                 </template>
-                                                <template x-for="(p, pi) in block.pending" :key="p.url">
-                                                    <div class="group/i relative aspect-[4/3] overflow-hidden bg-zinc-100" :class="block.settings.gap !== 'none' && 'rounded-xl'"><img :src="p.url" alt="" class="size-full object-cover"><button type="button" @click.stop="removePending(block, pi)" class="absolute right-2 top-2 grid size-7 place-items-center rounded-full bg-black/60 text-white opacity-0 transition group-hover/i:opacity-100" aria-label="Remove image"><x-icon name="x" class="size-4"/></button></div>
-                                                </template>
-                                                <label x-show="block.gallery.length + block.pending.length < 12" class="grid aspect-[4/3] cursor-pointer place-items-center rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50 text-center text-muted hover:border-ink">
-                                                    <span><x-icon name="plus" class="mx-auto size-6"/><span class="mt-1 block text-xs font-medium text-ink">Add images</span><span class="text-[11px]" x-text="(block.gallery.length + block.pending.length) + ' / 12'"></span></span>
-                                                    <input type="file" accept="image/*" multiple class="sr-only" :id="`gal-${block.key}`" :name="`blocks[${block.key}][images][]`" @change="addGallery(block, $event)">
+                                                <label x-show="block.gallery.length < 12" class="grid aspect-[4/3] cursor-pointer place-items-center rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50 text-center text-muted hover:border-ink">
+                                                    <span><x-icon name="plus" class="mx-auto size-6"/><span class="mt-1 block text-xs font-medium text-ink">Add images</span><span class="text-[11px]" x-text="block.gallery.length + ' / 12'"></span></span>
+                                                    <input type="file" accept="image/*" multiple class="sr-only" @change="addGallery(block, $event)">
                                                 </label>
                                             </div>
                                             <input :name="`blocks[${block.key}][caption]`" x-model="block.caption" maxlength="200" class="mt-2 block w-full border-0 bg-transparent px-4 py-1 text-sm text-muted placeholder:text-zinc-300 focus:outline-none focus:ring-0" placeholder="Add a caption (optional)">
@@ -283,7 +302,8 @@
                                             <label class="relative block cursor-pointer" :class="block.settings.side === 'right' && 'sm:order-2'">
                                                 <template x-if="block.preview"><img :src="block.preview" alt="" class="block h-auto w-full rounded-2xl"></template>
                                                 <div x-show="!block.preview" class="grid aspect-[4/3] place-items-center rounded-2xl border-2 border-dashed border-zinc-300 bg-white/60 text-center text-muted hover:border-ink"><span><x-icon name="upload" class="mx-auto size-6"/><span class="mt-1 block text-sm font-medium text-ink">Upload an image</span></span></div>
-                                                <input type="file" accept="image/*" class="sr-only" :name="`blocks[${block.key}][image]`" @change="pickImage(block, $event)">
+                                                {!! $progress('block', 'imageDone(block)') !!}
+                                                <input type="file" accept="image/*" class="sr-only" @change="pickImage(block, $event)">
                                             </label>
                                             <textarea :name="`blocks[${block.key}][body]`" x-model="block.body" rows="5" x-init="$nextTick(() => grow($el))" @input="grow($el)" maxlength="5000"
                                                       class="block w-full resize-none border-0 bg-transparent p-0 text-[17px] leading-relaxed placeholder:opacity-40 focus:outline-none focus:ring-0" :class="block.settings.bg === 'dark' ? 'text-white/80' : 'text-ink-soft'" placeholder="Title on the first line&#10;Then describe what the image shows…"></textarea>

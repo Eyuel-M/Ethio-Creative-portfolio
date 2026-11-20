@@ -3,18 +3,26 @@
  * per-block style settings and undo for deletes. All values are submitted through
  * ordinary form inputs (blocks[key][...]); settings travel as one JSON string per block.
  */
-export function portfolioBuilder({ blocks, defaults, labels }) {
+import { compressImage, uploadImage, queue, formatBytes } from './image-upload';
+
+export function portfolioBuilder({ blocks, defaults, labels, uploadUrl, cover, coverPath = null }) {
     let n = 0;
     const clone = (o) => JSON.parse(JSON.stringify(o));
     const fresh = (type) => ({
         key: ++n, type, body: '', caption: '', alt: '', embed_url: '',
-        existing: null, preview: null, gallery: [], pending: [],
+        existing: null, preview: null, up: null, gallery: [],
         settings: clone(defaults[type] || {}),
     });
+    const run = queue(3);
 
     return {
-        blocks: blocks.map((b) => ({ ...fresh(b.type), ...b, key: ++n, pending: [], settings: { ...clone(defaults[b.type] || {}), ...(b.settings || {}) } })),
-        defaults, labels,
+        blocks: blocks.map((b) => ({
+            ...fresh(b.type), ...b, key: ++n, up: null,
+            gallery: (b.gallery || []).map((g) => ({ ...g, id: ++n, up: null })),
+            settings: { ...clone(defaults[b.type] || {}), ...(b.settings || {}) },
+        })),
+        cover: { preview: cover, path: coverPath, up: null },
+        defaults, labels, formatBytes,
         selected: null,
         tab: 'add',
         picker: null,       // index where the inline "+" picker is open
@@ -46,9 +54,9 @@ export function portfolioBuilder({ blocks, defaults, labels }) {
         },
         duplicate(i) {
             const src = this.blocks[i];
-            const copy = { ...clone({ ...src, pending: [] }), key: ++n, pending: [] };
-            if (copy.preview && copy.preview.startsWith('blob:') && !copy.existing) copy.preview = null; // unsaved uploads can't be copied
-            copy.gallery = (src.gallery || []).filter((g) => g.path);
+            const copy = { ...clone({ ...src, up: null, gallery: [] }), key: ++n, up: null };
+            if (!copy.existing) copy.preview = null; // an image still uploading can't be copied
+            copy.gallery = (src.gallery || []).filter((g) => g.path && !g.up).map((g) => ({ path: g.path, url: g.url, alt: g.alt, id: ++n, up: null }));
             this.blocks.splice(i + 1, 0, copy);
             this.select(copy);
         },
@@ -91,26 +99,77 @@ export function portfolioBuilder({ blocks, defaults, labels }) {
         },
         endDrag() { this.drag = null; this.dropAt = null; },
 
-        // ── media ──
+        // ── media: every image is compressed, then uploaded on its own as soon as it's picked ──
+        get uploading() {
+            let count = this.cover.up?.status === 'uploading' ? 1 : 0;
+            this.blocks.forEach((b) => {
+                if (b.up?.status === 'uploading') count++;
+                b.gallery.forEach((g) => g.up?.status === 'uploading' && count++);
+            });
+            return count;
+        },
+        get failed() {
+            let count = this.cover.up?.status === 'error' ? 1 : 0;
+            this.blocks.forEach((b) => {
+                if (b.up?.status === 'error') count++;
+                b.gallery.forEach((g) => g.up?.status === 'error' && count++);
+            });
+            return count;
+        },
+        /** Uploads `file` for `target` (an object with preview/path-ish fields); `done` stores the result. */
+        send(target, file, done) {
+            target.up = { status: 'uploading', stage: 'Preparing…', progress: 0, file, error: null, note: '' };
+            const up = target.up;
+            run(async () => {
+                const small = await compressImage(file);
+                up.stage = 'Uploading';
+                const res = await uploadImage(uploadUrl, small, (p) => {
+                    up.progress = p;
+                    up.stage = p < 100 ? 'Uploading' : 'Optimizing…';
+                });
+                done(res);
+                const saved = file.size - res.bytes;
+                up.note = saved > file.size * 0.05 ? `${formatBytes(file.size)} → ${formatBytes(res.bytes)}` : formatBytes(res.bytes);
+                up.status = 'done';
+                setTimeout(() => { if (target.up === up) target.up = null; }, 2500);
+            }).catch((e) => { up.status = 'error'; up.error = e.message; });
+        },
+        retry(target, done) { if (target.up?.file) this.send(target, target.up.file, done); },
+
         pickImage(b, e) {
             const f = e.target.files[0];
-            if (f) b.preview = URL.createObjectURL(f);
+            e.target.value = '';
+            if (!f) return;
+            b.preview = URL.createObjectURL(f);
+            b.existing = null;
+            this.send(b, f, (r) => (b.existing = r.path));
         },
+        imageDone(b) { return (r) => (b.existing = r.path); },
         addGallery(b, e) {
-            const input = e.target;
-            const room = 12 - b.gallery.length - b.pending.length;
-            const files = [...input.files].slice(0, Math.max(0, room));
-            b.pending = [...b.pending, ...files.map((f) => ({ file: f, url: URL.createObjectURL(f), alt: '' }))];
-            this.syncFiles(b);
+            const room = 12 - b.gallery.length;
+            [...e.target.files].slice(0, Math.max(0, room)).forEach((f) => {
+                const item = { id: ++n, path: null, url: URL.createObjectURL(f), alt: '', up: null };
+                b.gallery.push(item);
+                const live = b.gallery[b.gallery.length - 1]; // the reactive copy
+                this.send(live, f, (r) => (live.path = r.path));
+            });
+            e.target.value = '';
         },
-        removePending(b, idx) { b.pending.splice(idx, 1); this.syncFiles(b); },
-        syncFiles(b) {
-            const input = document.getElementById(`gal-${b.key}`);
-            if (!input) return;
-            const dt = new DataTransfer();
-            b.pending.forEach((p) => dt.items.add(p.file));
-            input.files = dt.files;
+        galleryDone(g) { return (r) => (g.path = r.path); },
+        pickCover(e) {
+            const f = e.target.files[0];
+            e.target.value = '';
+            if (!f) return;
+            this.cover.preview = URL.createObjectURL(f);
+            this.cover.path = null;
+            this.send(this.cover, f, (r) => (this.cover.path = r.path));
         },
+        coverDone() { return (r) => (this.cover.path = r.path); },
+        beforeSubmit(e) {
+            if (this.uploading) { e.preventDefault(); this.notice = `Wait for ${this.uploading} image${this.uploading === 1 ? '' : 's'} to finish uploading.`; return; }
+            if (this.failed) { e.preventDefault(); this.notice = `${this.failed} image${this.failed === 1 ? '' : 's'} failed to upload. Retry or remove ${this.failed === 1 ? 'it' : 'them'} first.`; }
+        },
+        notice: '',
 
         embedSrc(url) {
             let m = (url || '').match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
@@ -137,7 +196,7 @@ export function portfolioBuilder({ blocks, defaults, labels }) {
         /** Images in a block that still have no alt text. */
         missingAlt(b) {
             if (['image', 'image_text'].includes(b.type)) return b.preview && !(b.alt || '').trim() ? 1 : 0;
-            if (b.type === 'gallery') return [...b.gallery, ...b.pending].filter((g) => !(g.alt || '').trim()).length;
+            if (b.type === 'gallery') return b.gallery.filter((g) => !(g.alt || '').trim()).length;
             return 0;
         },
         editAlt(b) {

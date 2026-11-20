@@ -72,6 +72,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::middleware('role:freelancer')->group(function () {
             Route::get('/my/portfolio', [PortfolioController::class, 'index'])->name('portfolio.index');
             Route::get('/my/portfolio/create', [PortfolioController::class, 'create'])->name('portfolio.create');
+            Route::post('/my/portfolio/uploads', [\App\Http\Controllers\MediaUploadController::class, 'store'])->middleware('throttle:image-uploads')->name('media.uploads.store');
             Route::post('/my/portfolio', [PortfolioController::class, 'store'])->middleware('throttle:uploads')->name('portfolio.store');
             Route::get('/my/portfolio/{project}/edit', [PortfolioController::class, 'edit'])->name('portfolio.edit');
             Route::put('/my/portfolio/{project}', [PortfolioController::class, 'update'])->middleware('throttle:uploads')->name('portfolio.update');

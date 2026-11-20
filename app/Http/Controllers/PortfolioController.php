@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\MediaUpload;
 use App\Models\PortfolioBlock;
 use App\Models\PortfolioProject;
 use App\Support\Media;
@@ -57,7 +58,9 @@ class PortfolioController extends Controller
             $project = new PortfolioProject($data['attributes']);
             $project->freelancer_profile_id = $profile->id;
             $project->status = 'draft';
-            if ($request->hasFile('cover')) {
+            if ($data['cover_upload']) {
+                $project->cover_path = $data['cover_upload'];
+            } elseif ($request->hasFile('cover')) {
                 $project->cover_path = Media::store($request->file('cover'), 'portfolio');
             }
             $project->save();
@@ -88,9 +91,12 @@ class PortfolioController extends Controller
 
         DB::transaction(function () use ($project, $data, $request) {
             $project->fill($data['attributes']);
-            if ($request->hasFile('cover')) {
-                Media::delete($project->cover_path);
-                $project->cover_path = Media::store($request->file('cover'), 'portfolio');
+            if ($data['cover_upload'] || $request->hasFile('cover')) {
+                $old = $project->cover_path;
+                $project->cover_path = $data['cover_upload'] ?: Media::store($request->file('cover'), 'portfolio');
+                if ($old && ! $project->blocks()->where('media_path', $old)->exists()) {
+                    Media::delete($old);
+                }
             }
             $project->save();
             $this->syncBlocks($project, $data['blocks'], $request);
@@ -147,6 +153,8 @@ class PortfolioController extends Controller
     private function validated(Request $request, ?PortfolioProject $project): array
     {
         $existing = $project ? $project->blocks()->get()->flatMap(fn ($b) => array_merge([$b->media_path], array_column($b->media ?? [], 'path')))->filter()->values()->all() : [];
+        $pending = MediaUpload::pendingPaths($request->user()->id);
+        $existing = array_merge($existing, $pending);
         $max = config('marketplace.max_upload_kb.image');
         $v = $request->validate([
             'title' => 'required|string|max:140',
@@ -157,6 +165,7 @@ class PortfolioController extends Controller
             'project_date' => 'nullable|date',
             'cover' => "nullable|image|mimes:jpg,jpeg,png,webp,gif|max:{$max}|dimensions:max_width=8000,max_height=8000",
             'cover_alt' => 'nullable|string|max:200',
+            'cover_upload' => ['nullable', 'string', Rule::in($pending)],
             'blocks' => 'nullable|array|max:40',
             'blocks.*.type' => 'required|in:'.implode(',', PortfolioBlock::TYPES),
             'blocks.*.settings' => 'nullable|string|max:1000',
@@ -186,6 +195,7 @@ class PortfolioController extends Controller
                 'cover_alt' => $v['cover_alt'] ?? null,
             ],
             'blocks' => $v['blocks'] ?? [],
+            'cover_upload' => $v['cover_upload'] ?? null,
         ];
     }
 
@@ -239,6 +249,7 @@ class PortfolioController extends Controller
                 'sort_order' => $i++,
             ]);
         }
+        MediaUpload::claim($request->user()->id, array_merge($kept, [$project->cover_path]));
         foreach ($old as $o) {
             foreach (array_merge([$o->media_path], array_column($o->media ?? [], 'path')) as $p) {
                 if ($p && $p !== $project->cover_path && ! in_array($p, $kept, true)) {

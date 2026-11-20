@@ -95,3 +95,21 @@ location /build/assets/ {
 
 (`php artisan serve` sends no cache headers, so locally the fonts are re-fetched per page; the preload +
 `font-display: block` setup keeps text from flashing in a fallback font either way.)
+
+## Production note: image uploads
+
+Every uploaded image (portfolio, covers, avatars, logos) goes through `App\Support\ImageCompressor`: phone photos are
+turned upright, location/camera metadata is stripped, anything over 2560 px is scaled down and the result is re-encoded
+as WebP (or JPEG/PNG where the server's GD has no WebP). GIFs are kept as-is so animations survive. The case-study
+editor also shrinks photos in the browser first and uploads each image on its own, so one upload never carries more
+than a single image.
+
+On the server:
+
+- PHP needs the **GD** extension with **WebP and JPEG** support, plus **exif** (for photo orientation).
+- `upload_max_filesize = 20M`, `post_max_size = 25M`, and in Nginx `client_max_body_size 25m;`.
+- Run Laravel's scheduler every minute — it deletes images uploaded but never saved into a project (after 24 h):
+
+```cron
+* * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1
+```

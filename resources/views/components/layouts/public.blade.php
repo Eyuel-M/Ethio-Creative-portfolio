@@ -4,12 +4,12 @@
 <head>@include('partials.head', ['title' => $title])</head>
 <body class="min-h-screen bg-[#fbfbfd]" x-data="{ nav: false }">
 {{-- Top bar: same unboxed look everywhere, inset from the top edge (inside the hero card on the home page). --}}
-<header class="{{ $hero ? 'absolute inset-x-0 top-0' : 'relative' }} z-30 px-3 pt-6 sm:px-4 sm:pt-8">
+<header class="{{ $hero ? 'absolute inset-x-0 top-0' : 'relative border-b border-line pb-5' }} z-30 px-3 pt-6 sm:px-4 sm:pt-8">
     <div class="mx-auto flex h-16 max-w-[1320px] items-center justify-between gap-4 px-4 sm:mx-4 sm:px-5 lg:mx-auto">
         <x-logo/>
-        <nav class="hidden items-center gap-1 rounded-full border border-white/70 bg-white/60 p-1 text-sm shadow-[0_1px_2px_rgba(0,0,0,.03)] backdrop-blur md:flex">
+        <nav class="hidden items-center gap-1 rounded-full border border-line bg-white p-1 text-sm shadow-[0_2px_10px_-4px_rgba(12,12,16,.15)] md:flex">
             @foreach([['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
-                <a href="{{ route($route) }}" class="rounded-full px-4 py-2 {{ request()->routeIs($route) ? 'bg-white font-medium text-ink shadow-sm' : 'text-ink-soft hover:text-ink' }}">{{ $label }}</a>
+                <a href="{{ route($route) }}" class="rounded-full px-4 py-2 transition {{ request()->routeIs($route) ? 'bg-ink font-medium text-white' : 'text-ink-soft hover:bg-zinc-100 hover:text-ink' }}" @if(request()->routeIs($route)) aria-current="page" @endif>{{ $label }}</a>
             @endforeach
         </nav>
         <div class="hidden items-center gap-2 md:flex">
@@ -17,7 +17,7 @@
                 <a href="{{ route('dashboard') }}" class="btn btn-dark btn-pill h-10">Dashboard</a>
             @else
                 <a href="{{ route('register', ['role' => 'freelancer']) }}" class="btn btn-dark btn-pill h-10 text-[13px]">Join as Freelancer</a>
-                <a href="{{ route('login') }}" class="btn btn-pill h-10 bg-white/80 text-[13px] text-ink-soft hover:text-ink">Sign in</a>
+                <a href="{{ route('login') }}" class="btn btn-pill h-10 border border-line bg-white text-[13px] text-ink hover:bg-zinc-50">Sign in</a>
             @endauth
         </div>
         <button class="rounded-lg p-2 md:hidden" @click="nav = !nav" aria-label="Menu"><x-icon name="menu"/></button>

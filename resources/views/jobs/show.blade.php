@@ -130,10 +130,7 @@
             @else
                 <p class="flex items-center gap-2 text-sm font-medium text-muted"><span class="size-2 rounded-full bg-zinc-300"></span> Not accepting proposals</p>
             @endif
-            <p class="mt-3 font-display text-3xl font-bold">{{ $job->budgetLabel() }}</p>
-            <p class="text-sm text-muted">{{ $job->budget_type === 'hourly' ? 'Hourly rate' : 'Fixed budget' }} · paid directly by the client</p>
-
-            <div class="mt-5 grid grid-cols-2 gap-2 text-sm">
+            <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
                 <div class="rounded-xl bg-zinc-50 p-3"><p class="text-xs text-muted">Proposals</p><p class="mt-0.5 font-semibold">{{ $job->applications_count }}</p></div>
                 <div class="rounded-xl bg-zinc-50 p-3"><p class="text-xs text-muted">Closes</p><p class="mt-0.5 font-semibold">{{ $closesIn === null ? ($job->application_deadline ? 'Closed' : 'When filled') : ($closesIn === 0 ? 'Today' : 'In '.$closesIn.' '.\Illuminate\Support\Str::plural('day', $closesIn)) }}</p></div>
             </div>
@@ -151,10 +148,10 @@
                 @if($canSave)
                     <form method="POST" action="{{ route('jobs.save', $job) }}">@csrf<button class="btn btn-light size-12 px-0" aria-label="{{ $saved ? 'Unsave' : 'Save' }}" title="{{ $saved ? 'Saved' : 'Save for later' }}"><x-icon name="bookmark" class="size-5 {{ $saved ? 'fill-ink' : '' }}"/></button></form>
                 @endif
+                @if($job->isLive())
+                    <x-share :url="route('jobs.show', $job)" :title="$job->title" :subtitle="$job->client->displayName().' · '.$job->budgetLabel()" :square="true"/>
+                @endif
             </div>
-            @if($job->isLive())
-                <div class="mt-2"><x-share :url="route('jobs.show', $job)" :title="$job->title" :subtitle="$job->client->displayName().' · '.$job->budgetLabel()"/></div>
-            @endif
 
             @if(! $application && ! $isOwner && $job->isAcceptingApplications())
                 <ul class="mt-5 space-y-2 border-t border-line pt-5 text-sm text-ink-soft">

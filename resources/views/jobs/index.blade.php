@@ -45,7 +45,7 @@
                 <div class="my-6 h-px bg-line"></div>
                 <h3 class="font-semibold">Posted within</h3>
                 <div class="mt-3 grid grid-cols-4 overflow-hidden rounded-xl border border-line text-sm">
-                    @foreach(['' => 'Any', '1' => '24h', '7' => '7 days', '30' => '30 days'] as $v => $l)
+                    @foreach(['' => 'Any', '1' => '24h', '7' => '7d', '30' => '30d'] as $v => $l)
                         <label class="cursor-pointer py-2 text-center transition has-[:checked]:bg-ink has-[:checked]:font-semibold has-[:checked]:text-white {{ ! $loop->last ? 'border-r border-line' : '' }}"><input type="radio" data-auto form="jobfilters" name="posted" value="{{ $v }}" class="sr-only" @checked((string) ($f['posted'] ?? '') === (string) $v)>{{ $l }}</label>
                     @endforeach
                 </div>
@@ -107,7 +107,7 @@
             @if($jobs->isEmpty())
                 <x-empty icon="search" title="No projects match those filters" text="Try removing a filter or searching a broader keyword."><a href="{{ route('jobs.index') }}" class="btn btn-dark">Clear filters</a></x-empty>
             @else
-                <div class="grid gap-3 sm:gap-4 {{ $view === 'grid' ? 'xl:grid-cols-2' : '' }}">
+                <div class="grid gap-3 sm:gap-4 {{ $view === 'grid' ? 'xl:grid-cols-2 3xl:grid-cols-3' : '' }}">
                     @foreach($jobs as $job)
                         <x-job-card :job="$job" :saved="in_array($job->id, $savedIds)" :applied="in_array($job->id, $appliedIds)"/>
                     @endforeach

@@ -168,7 +168,7 @@
                 $all = $projects->getCollection();
                 $blurred = $user ? collect() : $all->slice(max(4, $all->count() - 8))->values();
                 $shown = $user ? $all : $all->take($all->count() - $blurred->count());
-                $gridClass = 'grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1700px]:grid-cols-5';
+                $gridClass = 'grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 3xl:grid-cols-5';
             @endphp
             <div id="feed-grid" x-ref="grid" class="{{ $gridClass }}">
                 @foreach($shown as $p)

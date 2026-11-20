@@ -111,7 +111,7 @@
         @if($profiles->isEmpty())
             <x-empty icon="users" title="No creatives match these filters" text="Try removing a filter or widening the rate range."><a href="{{ route('freelancers.index') }}" class="btn btn-dark">Clear filters</a></x-empty>
         @else
-            <div class="grid gap-3 sm:grid-cols-2 sm:gap-4 2xl:grid-cols-3">
+            <div class="grid gap-3 sm:grid-cols-2 sm:gap-4 2xl:grid-cols-3 3xl:grid-cols-4">
                 @foreach($profiles as $p)<x-talent-card :profile="$p" :shortlisted="in_array($p->id, $shortlisted)"/>@endforeach
             </div>
             @if($profiles->hasPages())<div class="card card-pad">{{ $profiles->links() }}</div>@endif

@@ -31,14 +31,14 @@ class ImageUploadTest extends MarketplaceTestCase
 
     public function test_large_photos_are_resized_and_re_encoded(): void
     {
-        $file = $this->photo(4000, 2000);
+        $file = $this->photo(6000, 2000);
         $out = ImageCompressor::compress($file);
 
         $this->assertNotNull($out);
-        $this->assertSame(ImageCompressor::MAX_EDGE, $out['width']);
+        $this->assertSame(ImageCompressor::MAX_WIDTH, $out['width']);
         $this->assertSame(1280, $out['height']);
         $this->assertLessThan($file->getSize(), strlen($out['data']));
-        $this->assertSame(function_exists('imagewebp') ? 'webp' : 'jpg', $out['ext']);
+        $this->assertSame('jpg', $out['ext']);
     }
 
     public function test_gifs_are_left_untouched(): void

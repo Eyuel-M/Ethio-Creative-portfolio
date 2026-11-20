@@ -11,6 +11,10 @@ return [
 
     'media_disk' => env('MEDIA_DISK', 'public'),
 
+    // Untouched copies of every compressed upload, kept privately so images can always be re-processed.
+    'keep_originals' => env('KEEP_IMAGE_ORIGINALS', true),
+    'originals_disk' => env('ORIGINALS_DISK', 'local'),
+
     'max_upload_kb' => [
         'image' => 20 * 1024,
         'project_file' => 50 * 1024,

@@ -1,32 +1,32 @@
 /**
- * Browser-side half of image handling: shrink a photo before sending it (saves data on slow
- * connections), then upload it on its own with progress. The server compresses again and is the
- * real safeguard; this step just means less to send.
+ * Browser-side half of image handling. Images are sent exactly as chosen — the server does the one careful,
+ * quality-preserving pass. The browser only steps in when a file is too big for the server to accept at all,
+ * and then uses very high quality.
  */
 
-export const MAX_EDGE = 2560;
-const QUALITY = 0.85;
+export const MAX_BYTES = 20 * 1024 * 1024;
+export const MAX_DIMENSION = 8000;
 const COMPRESSIBLE = ['image/jpeg', 'image/png', 'image/webp'];
 
-/** Returns a smaller File where possible, otherwise the original. GIFs are left alone (animation). */
+/** Returns the original file unless it would be rejected for size; then a high-quality version that fits. */
 export async function compressImage(file) {
     if (!COMPRESSIBLE.includes(file.type) || typeof createImageBitmap !== 'function') return file;
     try {
         const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
-        const scale = Math.min(1, MAX_EDGE / Math.max(bmp.width, bmp.height));
-        if (scale === 1 && file.size < 400 * 1024) { bmp.close?.(); return file; } // already small
-        const w = Math.round(bmp.width * scale);
-        const h = Math.round(bmp.height * scale);
+        const tooBig = file.size > MAX_BYTES || Math.max(bmp.width, bmp.height) > MAX_DIMENSION;
+        if (!tooBig) { bmp.close?.(); return file; }
+        const scale = Math.min(1, MAX_DIMENSION / Math.max(bmp.width, bmp.height));
         const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
+        canvas.width = Math.round(bmp.width * scale);
+        canvas.height = Math.round(bmp.height * scale);
+        canvas.getContext('2d').drawImage(bmp, 0, 0, canvas.width, canvas.height);
         bmp.close?.();
-        let blob = await new Promise((r) => canvas.toBlob(r, 'image/webp', QUALITY));
-        if (!blob || blob.type !== 'image/webp') blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', QUALITY));
-        if (!blob || (scale === 1 && blob.size >= file.size)) return file;
-        const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
-        return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.' + ext, { type: blob.type });
+        const type = file.type === 'image/jpeg' ? 'image/jpeg' : 'image/webp'; // WebP keeps transparency
+        for (const q of [0.95, 0.92, 0.88]) {
+            const blob = await new Promise((r) => canvas.toBlob(r, type, q));
+            if (blob && blob.size <= MAX_BYTES) return new File([blob], file.name.replace(/\.[^.]+$/, '') + (blob.type === 'image/webp' ? '.webp' : '.jpg'), { type: blob.type });
+        }
+        return file; // let the server explain the limit
     } catch {
         return file;
     }

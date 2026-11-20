@@ -31,6 +31,10 @@ class Media
         if ($out) {
             $key = $folder.'/'.Str::random(40).'.'.$out['ext'];
             Storage::disk(self::disk())->put($key, $out['data']);
+            // Keep the untouched upload privately, so an image can always be re-processed from the original.
+            if (config('marketplace.keep_originals', true)) {
+                Storage::disk(self::originalsDisk())->putFileAs(dirname('originals/'.$key), $file, basename($key));
+            }
 
             return ['path' => $key, 'bytes' => strlen($out['data']), 'original_bytes' => $original];
         }
@@ -38,6 +42,12 @@ class Media
         Storage::disk(self::disk())->putFileAs(dirname($key), $file, basename($key));
 
         return ['path' => $key, 'bytes' => $original, 'original_bytes' => $original];
+    }
+
+    /** Private disk holding untouched originals (never served publicly). */
+    public static function originalsDisk(): string
+    {
+        return config('marketplace.originals_disk', 'local');
     }
 
     public static function url(?string $path): ?string
@@ -56,6 +66,7 @@ class Media
     {
         if ($path && ! Str::startsWith($path, ['http://', 'https://'])) {
             Storage::disk(self::disk())->delete($path);
+            Storage::disk(self::originalsDisk())->delete('originals/'.$path);
         }
     }
 }

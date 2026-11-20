@@ -98,11 +98,20 @@ location /build/assets/ {
 
 ## Production note: image uploads
 
-Every uploaded image (portfolio, covers, avatars, logos) goes through `App\Support\ImageCompressor`: phone photos are
-turned upright, location/camera metadata is stripped, anything over 2560 px is scaled down and the result is re-encoded
-as WebP (or JPEG/PNG where the server's GD has no WebP). GIFs are kept as-is so animations survive. The case-study
-editor also shrinks photos in the browser first and uploads each image on its own, so one upload never carries more
-than a single image.
+Every uploaded image (portfolio, covers, avatars, logos) goes through `App\Support\ImageCompressor`, which is built
+to never visibly change an image (`tests/Feature/ImageQualityTest.php` measures it):
+
+- **PNG** (screenshots, illustrations, UI text) is only re-saved **losslessly** (lossless WebP) — every pixel identical.
+- **JPEG** photos always lose their metadata (GPS location, camera serials) **without re-compressing** — the rotation
+  flag and colour profile are kept. They are re-encoded only as JPEG quality 95 (≥ 42 dB PSNR, visually identical)
+  and only when that saves ≥ 30%, or when wider than 3840 px.
+- Lossy WebP is never used: GD's encoder measurably softens sharp coloured edges at every quality setting.
+- Colour profiles (Display P3 / Adobe RGB) are preserved, so colours don't shift. Tall pages are never shrunk.
+- GIFs are untouched. The **untouched original** of anything that was changed is kept privately in
+  `storage/app/private/originals/` (set `KEEP_IMAGE_ORIGINALS=false` to turn this off).
+
+The case-study editor uploads each image on its own and sends it exactly as chosen (the browser only re-encodes, at
+quality 95, a file too large for the server to accept).
 
 On the server:
 

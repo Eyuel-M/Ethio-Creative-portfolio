@@ -206,7 +206,7 @@
 {{-- Phones: keep the main action in reach --}}
 @if(! $application && ! $isOwner && $job->isAcceptingApplications())
     <div class="fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t border-line bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
-        <div class="min-w-0 flex-1"><p class="truncate font-display text-lg font-bold leading-tight">{{ $job->budgetLabel() }}</p><p class="text-xs text-muted">{{ $job->applications_count }} {{ \Illuminate\Support\Str::plural('proposal', $job->applications_count) }}</p></div>
+        <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">{{ $job->applications_count }} {{ \Illuminate\Support\Str::plural('proposal', $job->applications_count) }}</p><p class="truncate text-xs text-muted">{{ $closesIn === null ? 'Open until filled' : ($closesIn === 0 ? 'Closes today' : 'Closes in '.$closesIn.' '.\Illuminate\Support\Str::plural('day', $closesIn)) }}</p></div>
         <a href="{{ route('applications.create', $job) }}" class="btn btn-dark h-11 px-6">Apply Now</a>
     </div>
     <div class="h-16 lg:hidden"></div>

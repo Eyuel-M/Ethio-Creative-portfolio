@@ -111,6 +111,25 @@
                                 <p class="font-semibold" x-text="labels[current.type]"></p>
                                 <button type="button" class="text-xs font-medium text-muted hover:text-ink" @click="current.settings = JSON.parse(JSON.stringify(defaults[current.type]))"><x-icon name="refresh" class="inline size-3.5"/> Reset</button>
                             </div>
+                            <div x-show="['image', 'image_text'].includes(current.type)" class="space-y-1.5">
+                                <p class="text-[11px] font-semibold uppercase tracking-wider text-faint">Alt text</p>
+                                <div class="flex gap-3">
+                                    <span class="size-14 shrink-0 overflow-hidden rounded-lg bg-zinc-100"><template x-if="current.preview"><img :src="current.preview" alt="" class="size-full object-cover"></template></span>
+                                    <textarea data-alt-field x-model="current.alt" rows="3" maxlength="200" class="input h-auto flex-1 py-2" aria-label="Alt text" placeholder="e.g. Coffee bags in three colours on a wooden shelf"></textarea>
+                                </div>
+                                <p class="text-[11px] leading-snug text-muted">Describes the image for people using screen readers and when it fails to load.</p>
+                            </div>
+                            <div x-show="current.type === 'gallery'" class="space-y-2">
+                                <p class="text-[11px] font-semibold uppercase tracking-wider text-faint">Alt text <span class="font-normal normal-case tracking-normal" x-text="'· ' + (current.gallery.length + current.pending.length - missingAlt(current)) + ' of ' + (current.gallery.length + current.pending.length) + ' done'"></span></p>
+                                <template x-for="(g, gi) in [...current.gallery, ...current.pending]" :key="g.url">
+                                    <div class="flex gap-3">
+                                        <span class="size-12 shrink-0 overflow-hidden rounded-lg bg-zinc-100"><img :src="g.url" alt="" class="size-full object-cover"></span>
+                                        <textarea :data-alt-field="gi === 0 ? '' : null" x-model="g.alt" rows="2" maxlength="200" class="input h-auto flex-1 py-1.5 text-[13px]" :aria-label="`Alt text for image ${gi + 1}`" :placeholder="`Describe image ${gi + 1}`"></textarea>
+                                    </div>
+                                </template>
+                                <p x-show="!current.gallery.length && !current.pending.length" class="text-xs text-muted">Add images to the gallery first.</p>
+                                <p class="text-[11px] leading-snug text-muted">Describes each image for people using screen readers.</p>
+                            </div>
                             @foreach($controls as $group => $items)
                                 <div class="space-y-4">
                                     <p class="text-[11px] font-semibold uppercase tracking-wider text-faint">{{ $group }}</p>
@@ -138,11 +157,6 @@
                                     @endforeach
                                 </div>
                             @endforeach
-                            <div x-show="['image', 'image_text'].includes(current.type)" class="space-y-1.5">
-                                <p class="text-[11px] font-semibold uppercase tracking-wider text-faint">Accessibility</p>
-                                <label class="text-xs font-medium text-ink-soft" for="alt-field">Alt text</label>
-                                <textarea id="alt-field" x-model="current.alt" rows="2" class="input h-auto py-2" placeholder="Describe the image for people using screen readers"></textarea>
-                            </div>
                         </div>
                     </template>
                 </div>
@@ -153,7 +167,6 @@
                     <div><label class="label" for="project_date">Date</label><input id="project_date" type="date" name="project_date" value="{{ old('project_date', $project->project_date?->format('Y-m-d')) }}" class="input"></div>
                     <div><label class="label" for="tags">Tags</label><input id="tags" name="tags" value="{{ old('tags', implode(', ', $project->tags ?? [])) }}" class="input" placeholder="Branding, Packaging"><p class="hint">Comma separated</p></div>
                     <div><label class="label" for="client_attribution">Client <span class="font-normal text-muted">(optional)</span></label><input id="client_attribution" name="client_attribution" value="{{ old('client_attribution', $project->client_attribution) }}" class="input" placeholder="Only with permission"></div>
-                    <div><label class="label" for="cover_alt">Cover alt text</label><input id="cover_alt" name="cover_alt" value="{{ old('cover_alt', $project->cover_alt) }}" class="input" placeholder="Describe the cover image"></div>
                 </div>
             </div>
         </aside>
@@ -180,6 +193,10 @@
                     <span x-show="cover" class="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium opacity-0 shadow backdrop-blur transition group-hover:opacity-100"><x-icon name="image" class="size-4"/> Replace cover</span>
                     <input type="file" name="cover" accept="image/*" class="sr-only" @change="cover = URL.createObjectURL($event.target.files[0])">
                 </label>
+                <div x-show="cover" class="flex items-center gap-2 px-6 pt-3 sm:px-10">
+                    <label for="cover_alt" class="shrink-0 rounded-md bg-zinc-100 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">Alt</label>
+                    <input id="cover_alt" name="cover_alt" value="{{ old('cover_alt', $project->cover_alt) }}" maxlength="200" class="block w-full border-0 bg-transparent py-1 text-sm text-ink-soft placeholder:text-zinc-400 focus:outline-none focus:ring-0" placeholder="Describe the cover image for screen readers">
+                </div>
                 <div class="px-6 sm:px-10"><x-field-error name="cover"/></div>
             </div>
 
@@ -193,6 +210,10 @@
                             <div class="pointer-events-none absolute inset-0 z-10 transition" :class="selected === block.key ? 'ring-2 ring-inset ring-brand' : 'group-hover/b:ring-1 group-hover/b:ring-inset group-hover/b:ring-brand/40'"></div>
                             {{-- label --}}
                             <span class="absolute left-3 top-3 z-20 rounded-md bg-brand px-2 py-0.5 text-[11px] font-semibold text-white" x-show="selected === block.key" x-text="labels[block.type]"></span>
+                            {{-- missing alt text reminder --}}
+                            <button type="button" x-show="missingAlt(block)" x-cloak @click.stop="editAlt(block)" class="absolute bottom-3 left-3 z-20 inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-800 shadow-sm hover:bg-amber-200">
+                                <x-icon name="pen" class="size-3"/> <span x-text="block.type === 'gallery' ? missingAlt(block) + ' missing alt text' : 'Add alt text'"></span>
+                            </button>
                             {{-- toolbar --}}
                             <div class="absolute right-3 top-3 z-20 flex items-center gap-0.5 rounded-lg border border-line bg-white p-0.5 shadow-md transition" :class="selected === block.key ? 'opacity-100' : 'pointer-events-none opacity-0 group-hover/b:pointer-events-auto group-hover/b:opacity-100'">
                                 <span draggable="true" @dragstart.stop="startDrag($event, { from: i })" class="grid size-7 cursor-grab place-items-center rounded-md text-muted hover:bg-zinc-100 active:cursor-grabbing" title="Drag to reorder"><x-icon name="grip" class="size-4"/></span>
@@ -210,6 +231,9 @@
                                 <input type="hidden" :name="`blocks[${block.key}][existing]`" :value="block.existing || ''">
                                 <input type="hidden" :name="`blocks[${block.key}][alt]`" :value="block.alt || ''">
                             </span></template>
+                            <template x-for="(p, pi) in block.pending" :key="'pa' + p.url">
+                                <input type="hidden" :name="`blocks[${block.key}][image_alts][${pi}]`" :value="p.alt || ''">
+                            </template>
                             <template x-for="(g, gi) in block.gallery" :key="g.path">
                                 <span><input type="hidden" :name="`blocks[${block.key}][gallery][${gi}][path]`" :value="g.path"><input type="hidden" :name="`blocks[${block.key}][gallery][${gi}][alt]`" :value="g.alt || ''"></span>
                             </template>

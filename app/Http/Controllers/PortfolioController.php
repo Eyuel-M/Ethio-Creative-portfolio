@@ -164,6 +164,8 @@ class PortfolioController extends Controller
             'blocks.*.gallery.*.path' => ['required', 'string', Rule::in($existing)],
             'blocks.*.gallery.*.alt' => 'nullable|string|max:200',
             'blocks.*.images' => 'nullable|array|max:12',
+            'blocks.*.image_alts' => 'nullable|array|max:12',
+            'blocks.*.image_alts.*' => 'nullable|string|max:200',
             'blocks.*.images.*' => "image|mimes:jpg,jpeg,png,webp,gif|max:{$max}|dimensions:max_width=8000,max_height=8000",
             'blocks.*.body' => 'nullable|string|max:5000',
             'blocks.*.caption' => 'nullable|string|max:200',
@@ -205,9 +207,9 @@ class PortfolioController extends Controller
                 foreach ($b['gallery'] ?? [] as $g) {
                     $gallery[] = ['path' => $g['path'], 'alt' => $g['alt'] ?? null];
                 }
-                foreach ($request->file("blocks.{$key}.images") ?? [] as $file) {
+                foreach ($request->file("blocks.{$key}.images") ?? [] as $idx => $file) {
                     if (count($gallery) < 12) {
-                        $gallery[] = ['path' => Media::store($file, 'portfolio'), 'alt' => null];
+                        $gallery[] = ['path' => Media::store($file, 'portfolio'), 'alt' => $b['image_alts'][$idx] ?? null];
                     }
                 }
             }

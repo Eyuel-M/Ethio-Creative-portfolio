@@ -100,7 +100,7 @@ export function portfolioBuilder({ blocks, defaults, labels }) {
             const input = e.target;
             const room = 12 - b.gallery.length - b.pending.length;
             const files = [...input.files].slice(0, Math.max(0, room));
-            b.pending = [...b.pending, ...files.map((f) => ({ file: f, url: URL.createObjectURL(f) }))];
+            b.pending = [...b.pending, ...files.map((f) => ({ file: f, url: URL.createObjectURL(f), alt: '' }))];
             this.syncFiles(b);
         },
         removePending(b, idx) { b.pending.splice(idx, 1); this.syncFiles(b); },
@@ -133,6 +133,16 @@ export function portfolioBuilder({ blocks, defaults, labels }) {
                 { full: '', wide: 'px-6 sm:px-10', narrow: 'mx-auto max-w-2xl px-6' }[s.width] ?? 'px-6 sm:px-10',
                 s.align === 'center' ? 'text-center' : '',
             ].join(' ');
+        },
+        /** Images in a block that still have no alt text. */
+        missingAlt(b) {
+            if (['image', 'image_text'].includes(b.type)) return b.preview && !(b.alt || '').trim() ? 1 : 0;
+            if (b.type === 'gallery') return [...b.gallery, ...b.pending].filter((g) => !(g.alt || '').trim()).length;
+            return 0;
+        },
+        editAlt(b) {
+            this.select(b);
+            this.$nextTick(() => document.querySelector('[data-alt-field]')?.focus());
         },
         set(key, value) { if (this.current) this.current.settings[key] = value; },
         has(key) { return this.current && key in (this.defaults[this.current.type] || {}); },

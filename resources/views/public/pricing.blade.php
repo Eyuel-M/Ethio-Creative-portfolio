@@ -9,7 +9,7 @@
     <div class="pointer-events-none absolute -left-40 top-20 size-96 rounded-full bg-rose-200/30 blur-3xl"></div>
     <div class="pointer-events-none absolute -right-40 top-60 size-96 rounded-full bg-emerald-200/30 blur-3xl"></div>
 
-    <div class="relative mx-auto max-w-[1240px] px-4 pb-24 pt-16 sm:px-6 sm:pt-24">
+    <div class="relative px-4 pb-24 pt-16 sm:px-8 sm:pt-24">
         <div class="text-center">
             <h1 class="font-display text-6xl font-semibold tracking-[-0.04em] sm:text-8xl">Pricing</h1>
             <p class="mx-auto mt-6 max-w-2xl text-lg text-muted">Transparent fees for the platform's own services. We never charge to reveal contact details and never take a cut of what clients pay you.</p>
@@ -20,7 +20,7 @@
         </div>
 
         @foreach(['freelancer' => $freelancer, 'client' => $client] as $aud => $plans)
-            <div x-show="tab === '{{ $aud }}'" @if($aud === 'client') x-cloak @endif class="mx-auto mt-14 grid gap-5 {{ $plans->count() >= 3 ? 'md:grid-cols-3' : 'md:grid-cols-2 max-w-4xl' }}">
+            <div x-show="tab === '{{ $aud }}'" @if($aud === 'client') x-cloak @endif class="mx-auto mt-14 grid gap-5 {{ $plans->count() >= 3 ? 'md:grid-cols-3' : 'md:grid-cols-2' }}">
                 @foreach($plans as $i => $plan)
                     @php $hl = $i === 1; @endphp
                     <div class="flex flex-col rounded-[22px] border p-7 sm:p-8 {{ $hl ? 'border-line bg-white shadow-[0_30px_60px_-30px_rgba(12,12,16,.35)]' : 'border-line bg-[#f7f7f8]' }}">
@@ -41,7 +41,7 @@
             </div>
         @endforeach
 
-        <div class="mx-auto mt-14 grid max-w-4xl gap-4 rounded-2xl border border-line bg-white p-6 text-sm sm:grid-cols-3">
+        <div class="mt-14 grid gap-4 rounded-2xl border border-line bg-white p-6 text-sm sm:grid-cols-3">
             <div class="flex gap-3"><x-icon name="lock" class="size-5 shrink-0 text-ink"/><p><span class="font-semibold">No contact unlocks.</span> <span class="text-muted">Details are shared only after both parties confirm an agreement.</span></p></div>
             <div class="flex gap-3"><x-icon name="bank" class="size-5 shrink-0 text-ink"/><p><span class="font-semibold">No commission.</span> <span class="text-muted">Project payments go directly to the freelancer's CBE or Telebirr.</span></p></div>
             <div class="flex gap-3"><x-icon name="megaphone" class="size-5 shrink-0 text-ink"/><p><span class="font-semibold">Promotion is labelled.</span> <span class="text-muted">Featured placement never guarantees work, applicants or hires.</span></p></div>

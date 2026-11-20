@@ -1,12 +1,12 @@
 <x-layouts.public title="How it works">
 <section class="hero-gradient border-b border-line">
-    <div class="mx-auto max-w-[1100px] px-4 py-20 text-center sm:px-6">
+    <div class="px-4 py-20 text-center sm:px-8">
         <span class="eyebrow">How it works</span>
         <h1 class="mt-5 font-display text-5xl font-bold tracking-tight sm:text-6xl">From portfolio to project,<br>without middlemen.</h1>
         <p class="mx-auto mt-5 max-w-2xl text-lg text-ink-soft">We help you get discovered, screen fairly and document the deal. Money for the work moves directly between client and freelancer.</p>
     </div>
 </section>
-<section class="mx-auto max-w-[1100px] px-4 py-20 sm:px-6">
+<section class="px-4 py-20 sm:px-8">
     <div class="grid gap-12 md:grid-cols-2">
         @foreach(['For freelancers' => [
             ['Build a portfolio', 'Publish structured case studies with images, text and video. The free tier is genuinely useful.'],

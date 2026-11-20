@@ -4,8 +4,8 @@
 <head>@include('partials.head', ['title' => $title])</head>
 <body class="min-h-screen bg-[#fbfbfd]" x-data="{ nav: false }">
 {{-- Top bar: same unboxed look everywhere, inset from the top edge (inside the hero card on the home page). --}}
-<header class="{{ $hero ? 'absolute inset-x-0 top-0' : 'relative' }} z-30 px-3 pt-6 sm:px-4 sm:pt-8">
-    <div class="mx-auto flex h-16 max-w-[1320px] items-center justify-between gap-4 px-4 sm:mx-4 sm:px-5 lg:mx-auto">
+<header class="{{ $hero ? 'absolute inset-x-0 top-0' : 'relative' }} z-30 px-4 pt-6 sm:px-8 sm:pt-8">
+    <div class="flex h-16 items-center justify-between gap-4">
         <x-logo/>
         <nav class="hidden items-center gap-1 rounded-full border border-white/70 bg-white/60 p-1 text-sm shadow-[0_1px_2px_rgba(0,0,0,.03)] backdrop-blur md:flex">
             @foreach([['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
@@ -36,7 +36,7 @@
 <main>{{ $slot }}</main>
 
 <footer class="mt-10 border-t border-line bg-white">
-    <div class="mx-auto grid max-w-[1320px] gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+    <div class="grid gap-10 px-4 py-14 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
             <x-logo/>
             <p class="mt-4 max-w-xs text-sm leading-relaxed text-muted">A portfolio-first home for Ethiopian creative talent. Clients pay directly — we never hold or take a cut of project payments.</p>

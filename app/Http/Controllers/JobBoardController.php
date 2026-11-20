@@ -19,7 +19,11 @@ class JobBoardController extends Controller
             'type' => 'nullable|in:hourly,fixed',
             'budget' => 'nullable|array', 'budget.*' => 'in:lt5k,5k-20k,20k-50k,50k-100k,gt100k',
             'proposals' => 'nullable|array', 'proposals.*' => 'in:lt5,5-10,10-15,15-20,gt20',
-            'sort' => 'nullable|in:newest,oldest,budget_high,budget_low',
+            'remote' => 'nullable|boolean',
+            'posted' => 'nullable|in:1,7,30',
+            'verified' => 'nullable|boolean',
+            'featured' => 'nullable|boolean',
+            'sort' => 'nullable|in:newest,oldest,budget_high,budget_low,deadline',
             'view' => 'nullable|in:grid,list',
         ]);
 
@@ -27,7 +31,11 @@ class JobBoardController extends Controller
             ->when($f['q'] ?? null, fn ($q, $term) => $q->where(fn ($w) => $w->where('title', 'like', "%{$term}%")->orWhere('description', 'like', "%{$term}%")->orWhereHas('skills', fn ($s) => $s->where('name', 'like', "%{$term}%"))))
             ->when($f['location'] ?? null, fn ($q, $loc) => $q->where('location', 'like', "%{$loc}%"))
             ->when($f['category'] ?? null, fn ($q, $c) => $q->whereHas('category', fn ($w) => $w->where('slug', $c)))
-            ->when($f['type'] ?? null, fn ($q, $t) => $q->where('budget_type', $t));
+            ->when($f['type'] ?? null, fn ($q, $t) => $q->where('budget_type', $t))
+            ->when($f['remote'] ?? false, fn ($q) => $q->where('is_remote', true))
+            ->when($f['posted'] ?? null, fn ($q, $d) => $q->where('published_at', '>=', now()->subDays((int) $d)))
+            ->when($f['verified'] ?? false, fn ($q) => $q->whereHas('client', fn ($c) => $c->where('is_verified', true)))
+            ->when($f['featured'] ?? false, fn ($q) => $q->where('is_featured', true)->where(fn ($w) => $w->whereNull('featured_until')->orWhere('featured_until', '>', now())));
 
         // Facet counts reflect search but not the facet itself.
         $levelCounts = (clone $base)->selectRaw('experience_level, count(*) c')->groupBy('experience_level')->pluck('c', 'experience_level');
@@ -62,15 +70,18 @@ class JobBoardController extends Controller
             'oldest' => $query->oldest('published_at'),
             'budget_high' => $query->orderByDesc('budget_max_minor'),
             'budget_low' => $query->orderBy('budget_max_minor'),
+            'deadline' => $query->orderByRaw('application_deadline is null')->orderBy('application_deadline'),
             default => $query->orderByDesc('is_featured')->latest('published_at'),
         };
 
         $jobs = $query->paginate(10)->withQueryString();
         $categories = Category::orderBy('sort_order')->get();
+        $locations = JobPost::live()->whereNotNull('location')->pluck('location')->map(fn ($l) => trim(explode(',', $l)[0]))->filter()->countBy()->sortKeys();
+        $filterCount = collect(['category', 'level', 'type', 'budget', 'proposals', 'location', 'remote', 'posted', 'verified', 'featured'])->filter(fn ($k) => filled($f[$k] ?? null))->count();
         $savedIds = $request->user()?->savedJobs()->pluck('job_posts.id')->all() ?? [];
         $appliedIds = $request->user()?->freelancerProfile?->applications()->pluck('job_post_id')->all() ?? [];
 
-        return view('jobs.index', compact('jobs', 'categories', 'levelCounts', 'budgetRanges', 'budgetCounts', 'proposalRanges', 'savedIds', 'appliedIds', 'f'));
+        return view('jobs.index', compact('jobs', 'categories', 'locations', 'filterCount', 'levelCounts', 'budgetRanges', 'budgetCounts', 'proposalRanges', 'savedIds', 'appliedIds', 'f'));
     }
 
     public function show(Request $request, JobPost $job)

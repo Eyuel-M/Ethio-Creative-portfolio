@@ -1,7 +1,7 @@
 <x-layouts.app title="Dashboard">
 <div class="card card-pad bg-gradient-to-br from-white via-white to-[#f3f6ff]">
     @include('dashboard._topbar')
-    <div class="mt-6 grid gap-5 xl:grid-cols-[1fr_340px]">
+    <div class="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-[1fr_340px]">
         <div class="min-w-0 space-y-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h1 class="font-display text-[28px] font-semibold tracking-tight">Welcome back, {{ explode(' ', auth()->user()->name)[0] }}! <span aria-hidden="true">👋</span></h1>
@@ -23,13 +23,13 @@
                 </div>
             @endif
 
-            <div class="grid gap-5 lg:grid-cols-[300px_1fr]">
+            <div class="grid grid-cols-1 gap-5 lg:grid-cols-[300px_1fr]">
                 <section class="rounded-3xl border border-line bg-white p-5 shadow-[0_10px_30px_-20px_rgba(47,107,255,.35)]">
                     <div class="flex items-center justify-between"><h2 class="text-[17px] font-medium">Profile strength</h2><a href="{{ route('freelancers.show', $profile) }}" class="text-brand" aria-label="View public profile"><x-icon name="arrow-up-right" class="size-5"/></a></div>
                     <div class="mt-4"><x-ring :value="$stats['completion']" label="Profile complete"/></div>
                     <div class="mt-5 grid grid-cols-2 gap-3">
-                        <div class="rounded-2xl border border-line p-3"><div class="flex items-center gap-2"><span class="grid size-7 place-items-center rounded-lg bg-brand-soft text-brand"><x-icon name="eye" class="size-4"/></span><span class="font-display text-xl font-bold">{{ number_format($stats['profile_views']) }}</span></div><p class="mt-1 text-[11px] text-muted">Profile views</p></div>
-                        <div class="rounded-2xl border border-line p-3"><div class="flex items-center gap-2"><span class="grid size-7 place-items-center rounded-lg bg-brand-soft text-brand"><x-icon name="star" class="size-4"/></span><span class="font-display text-xl font-bold">{{ $stats['shortlist_rate'] }}%</span></div><p class="mt-1 text-[11px] text-muted">Shortlist rate</p></div>
+                        <div class="rounded-2xl border border-line p-3"><div class="flex items-center gap-2"><span class="grid grid-cols-1 size-7 place-items-center rounded-lg bg-brand-soft text-brand"><x-icon name="eye" class="size-4"/></span><span class="font-display text-xl font-bold">{{ number_format($stats['profile_views']) }}</span></div><p class="mt-1 text-[11px] text-muted">Profile views</p></div>
+                        <div class="rounded-2xl border border-line p-3"><div class="flex items-center gap-2"><span class="grid grid-cols-1 size-7 place-items-center rounded-lg bg-brand-soft text-brand"><x-icon name="star" class="size-4"/></span><span class="font-display text-xl font-bold">{{ $stats['shortlist_rate'] }}%</span></div><p class="mt-1 text-[11px] text-muted">Shortlist rate</p></div>
                     </div>
                 </section>
                 <section class="min-w-0 rounded-3xl border border-line bg-white p-5 shadow-[0_10px_30px_-20px_rgba(47,107,255,.35)]">
@@ -45,11 +45,11 @@
                 @if($projects->isEmpty())
                     <x-empty class="mt-3" icon="folder" title="No active projects" text="Projects appear here after you and a client both confirm an agreement."><a href="{{ route('jobs.index') }}" class="btn btn-dark">Find projects</a></x-empty>
                 @else
-                    <div class="mt-3 grid gap-4 md:grid-cols-2">@foreach($projects as $p)<x-project-card :project="$p" :viewer="auth()->user()"/>@endforeach</div>
+                    <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">@foreach($projects as $p)<x-project-card :project="$p" :viewer="auth()->user()"/>@endforeach</div>
                 @endif
             </section>
 
-            <div class="grid gap-5 lg:grid-cols-2">
+            <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
                 <section class="rounded-3xl border border-line bg-white p-5">
                     <div class="flex items-center justify-between"><h2 class="text-[17px] font-medium">Recent proposals</h2><a href="{{ route('applications.mine') }}" class="text-sm text-muted hover:text-ink">All</a></div>
                     <ul class="mt-3 divide-y divide-line">

@@ -1,7 +1,7 @@
 <x-layouts.app title="Dashboard">
 <div class="card card-pad bg-gradient-to-br from-white via-white to-[#f3f6ff]">
     @include('dashboard._topbar')
-    <div class="mt-6 grid gap-5 xl:grid-cols-[1fr_340px]">
+    <div class="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-[1fr_340px]">
         <div class="min-w-0 space-y-5">
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <h1 class="font-display text-[28px] font-semibold tracking-tight">Welcome back, {{ explode(' ', auth()->user()->name)[0] }}! <span aria-hidden="true">👋</span></h1>
@@ -9,7 +9,7 @@
             </div>
             <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 @foreach([['briefcase', 'Live jobs', $stats['active_jobs']], ['file', 'Applications', $stats['applications']], ['sparkles', 'New to review', $stats['new']], ['folder', 'Active projects', $stats['active_projects']]] as [$icon, $label, $val])
-                    <div class="rounded-2xl border border-line bg-white p-4 shadow-[0_10px_30px_-24px_rgba(47,107,255,.5)]"><span class="grid size-9 place-items-center rounded-xl bg-brand-soft text-brand"><x-icon :name="$icon" class="size-5"/></span><p class="mt-3 font-display text-2xl font-bold">{{ $val }}</p><p class="text-xs text-muted">{{ $label }}</p></div>
+                    <div class="rounded-2xl border border-line bg-white p-4 shadow-[0_10px_30px_-24px_rgba(47,107,255,.5)]"><span class="grid grid-cols-1 size-9 place-items-center rounded-xl bg-brand-soft text-brand"><x-icon :name="$icon" class="size-5"/></span><p class="mt-3 font-display text-2xl font-bold">{{ $val }}</p><p class="text-xs text-muted">{{ $label }}</p></div>
                 @endforeach
             </div>
             <section class="min-w-0 rounded-3xl border border-line bg-white p-5 shadow-[0_10px_30px_-20px_rgba(47,107,255,.35)]">
@@ -22,10 +22,10 @@
                 @if($projects->isEmpty())
                     <x-empty class="mt-3" icon="folder" title="No active projects" text="Confirm an agreement with an applicant to start a project workspace."/>
                 @else
-                    <div class="mt-3 grid gap-4 md:grid-cols-2">@foreach($projects as $p)<x-project-card :project="$p" :viewer="auth()->user()"/>@endforeach</div>
+                    <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">@foreach($projects as $p)<x-project-card :project="$p" :viewer="auth()->user()"/>@endforeach</div>
                 @endif
             </section>
-            <div class="grid gap-5 lg:grid-cols-2">
+            <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
                 <section class="rounded-3xl border border-line bg-white p-5">
                     <div class="flex items-center justify-between"><h2 class="text-[17px] font-medium">Your jobs</h2><a href="{{ route('client.jobs.index') }}" class="text-sm text-muted hover:text-ink">Manage</a></div>
                     <ul class="mt-3 divide-y divide-line">

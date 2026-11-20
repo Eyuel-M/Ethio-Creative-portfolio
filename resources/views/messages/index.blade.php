@@ -1,5 +1,5 @@
 <x-layouts.app title="Messages">
-<div class="card grid h-[calc(100vh-6.75rem)] min-h-[560px] overflow-hidden lg:grid-cols-[340px_1fr]">
+<div class="card grid h-[calc(100vh-7rem)] min-h-[560px] overflow-hidden lg:grid-cols-[340px_1fr]">
     <aside class="{{ $active ? 'hidden lg:flex' : 'flex' }} min-h-0 flex-col border-r border-line">
         <div class="border-b border-line p-5"><h1 class="font-display text-2xl font-bold">Messages</h1><p class="text-sm text-muted">Private conversations tied to jobs and projects.</p></div>
         <div class="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">

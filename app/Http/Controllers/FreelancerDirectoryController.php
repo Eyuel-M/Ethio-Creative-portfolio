@@ -17,8 +17,16 @@ class FreelancerDirectoryController extends Controller
             'level' => 'nullable|array', 'level.*' => 'in:entry,intermediate,expert',
             'availability' => 'nullable|in:available,busy',
             'location' => 'nullable|string|max:100',
-            'sort' => 'nullable|in:featured,newest,rating',
+            'rating' => 'nullable|in:4,4.5',
+            'rate_min' => 'nullable|numeric|min:0|max:1000000',
+            'rate_max' => 'nullable|numeric|min:0|max:1000000',
+            'languages' => 'nullable|array', 'languages.*' => 'string|max:40',
+            'projects' => 'nullable|in:1,3,5',
+            'skills' => 'nullable|array', 'skills.*' => 'string|max:80',
+            'experienced' => 'nullable|boolean',
+            'sort' => 'nullable|in:featured,newest,rating,rate_low,rate_high,projects',
         ]);
+        $avgRating = '(select avg(r.rating) from reviews r where r.reviewee_id = freelancer_profiles.user_id)';
 
         $query = FreelancerProfile::public()
             ->when($f['q'] ?? null, fn ($q, $t) => $q->where(fn ($w) => $w->where('title', 'like', "%{$t}%")->orWhere('bio', 'like', "%{$t}%")
@@ -28,13 +36,29 @@ class FreelancerDirectoryController extends Controller
             ->when($f['level'] ?? null, fn ($q, $l) => $q->whereIn('experience_level', $l))
             ->when($f['availability'] ?? null, fn ($q, $a) => $q->where('availability', $a))
             ->when($f['location'] ?? null, fn ($q, $l) => $q->where('location', 'like', "%{$l}%"))
+            // Validated to exactly 4 or 4.5; inlined as a number because SQLite binds parameters as text,
+            // and a computed average compared with text never matches.
+            ->when($f['rating'] ?? null, fn ($q, $r) => $q->whereRaw($avgRating.' >= '.number_format((float) $r, 1, '.', '')))
+            ->when($f['rate_min'] ?? null, fn ($q, $v) => $q->where('hourly_rate_minor', '>=', \App\Support\Money::toMinor($v)))
+            ->when($f['rate_max'] ?? null, fn ($q, $v) => $q->whereNotNull('hourly_rate_minor')->where('hourly_rate_minor', '<=', \App\Support\Money::toMinor($v)))
+            ->when($f['languages'] ?? null, fn ($q, $langs) => $q->where(function ($w) use ($langs) {
+                foreach ($langs as $lang) {
+                    $w->where('languages', 'like', '%"'.$lang.'"%');
+                }
+            }))
+            ->when($f['projects'] ?? null, fn ($q, $n) => $q->has('publishedProjects', '>=', (int) $n))
+            ->when($f['skills'] ?? null, fn ($q, $skills) => $q->whereHas('skills', fn ($w) => $w->whereIn('slug', $skills)))
+            ->when($f['experienced'] ?? false, fn ($q) => $q->whereExists(fn ($e) => $e->selectRaw('1')->from('projects')->whereColumn('projects.freelancer_user_id', 'freelancer_profiles.user_id')->where('projects.status', 'completed')))
             ->with(['user', 'category', 'skills', 'publishedProjects' => fn ($q) => $q->take(8)])
             ->withCount('publishedProjects');
 
         // Featured placement is labelled as sponsored and never presented as earned reputation.
         $query = match ($f['sort'] ?? 'featured') {
             'newest' => $query->latest(),
-            'rating' => $query->orderByDesc(Review::selectRaw('avg(rating)')->whereColumn('reviewee_id', 'freelancer_profiles.user_id')),
+            'rating' => $query->orderByRaw("coalesce({$avgRating}, 0) desc"),
+            'rate_low' => $query->orderByRaw('hourly_rate_minor is null')->orderBy('hourly_rate_minor'),
+            'rate_high' => $query->orderByDesc('hourly_rate_minor'),
+            'projects' => $query->orderByDesc('published_projects_count'),
             default => $query->orderByRaw('CASE WHEN featured_until > ? THEN 0 ELSE 1 END', [now()])->latest('updated_at'),
         };
 
@@ -42,7 +66,17 @@ class FreelancerDirectoryController extends Controller
         $categories = Category::orderBy('sort_order')->get();
         $shortlisted = $request->user()?->shortlist()->pluck('freelancer_profiles.id')->all() ?? [];
 
-        return view('freelancers.index', compact('profiles', 'categories', 'f', 'shortlisted'));
+        // Filter option lists come from real data so every option can return results.
+        $public = FreelancerProfile::public();
+        $locations = (clone $public)->whereNotNull('location')->pluck('location')
+            ->map(fn ($l) => trim(explode(',', $l)[0]))->filter()->countBy()->sortKeys();
+        $languages = (clone $public)->whereNotNull('languages')->pluck('languages')->flatten()->filter()->countBy()->sortDesc()->take(8);
+        $popularSkills = \App\Models\Skill::whereHas('freelancerProfiles', fn ($q) => $q->public())
+            ->withCount(['freelancerProfiles' => fn ($q) => $q->public()])->orderByDesc('freelancer_profiles_count')->take(12)->get();
+        $filterCount = collect(['category', 'level', 'availability', 'location', 'rating', 'rate_min', 'rate_max', 'languages', 'projects', 'skills', 'experienced'])
+            ->filter(fn ($k) => filled($f[$k] ?? null))->count();
+
+        return view('freelancers.index', compact('profiles', 'categories', 'f', 'shortlisted', 'locations', 'languages', 'popularSkills', 'filterCount'));
     }
 
     public function show(Request $request, FreelancerProfile $profile)

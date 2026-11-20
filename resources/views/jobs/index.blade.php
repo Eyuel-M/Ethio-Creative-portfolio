@@ -14,12 +14,6 @@
                     <input name="q" x-model="q" class="h-12 w-full bg-transparent text-[15px] outline-none placeholder:text-faint" placeholder="Job title, skill or keyword">
                     <button type="button" x-show="q" @click="q = ''; $nextTick(() => $root.closest('form').requestSubmit())" class="text-ink" aria-label="Clear search"><x-icon name="x-circle" class="size-5"/></button>
                 </label>
-                <div class="h-px bg-line md:h-auto md:w-px"></div>
-                <label class="flex flex-1 items-center gap-3 px-4">
-                    <x-icon name="pin" class="size-5 text-muted"/>
-                    <span class="sr-only">Location</span>
-                    <input name="location" value="{{ $f['location'] ?? '' }}" class="h-12 w-full bg-transparent text-[15px] outline-none placeholder:text-faint" placeholder="City or region">
-                </label>
             </div>
             <button class="btn btn-dark h-12 px-6">Find Projects</button>
         </div>
@@ -28,9 +22,9 @@
 
     <div class="mt-3 grid gap-3 sm:mt-4 sm:gap-4 lg:grid-cols-[260px_1fr]">
         {{-- Filters --}}
-        <aside class="card card-pad h-fit lg:sticky lg:top-4" x-data="{ open: window.innerWidth >= 1024 }">
+        <aside class="card card-pad h-fit lg:sticky lg:top-20" x-data="{ open: window.innerWidth >= 1024 }">
             <div class="flex items-center justify-between">
-                <button type="button" class="flex items-center gap-2 lg:pointer-events-none" @click="open = !open"><h2 class="text-[22px] font-bold">Filters</h2><x-icon name="chevron-down" class="size-5 lg:hidden"/></button>
+                <button type="button" class="flex items-center gap-2 lg:pointer-events-none" @click="open = !open" :aria-expanded="open"><h2 class="text-[22px] font-bold">Filters</h2>@if($filterCount)<span class="grid size-6 place-items-center rounded-full bg-ink text-xs font-semibold text-white">{{ $filterCount }}</span>@endif<x-icon name="chevron-down" class="size-5 lg:hidden"/></button>
                 <a href="{{ route('jobs.index') }}" class="text-sm font-medium text-leaf-dark hover:underline">Reset</a>
             </div>
             <div x-show="open" x-cloak class="lg:!block">
@@ -41,6 +35,25 @@
                         @foreach($categories as $c)<option value="{{ $c->slug }}" @selected(($f['category'] ?? '') === $c->slug)>{{ $c->name }}</option>@endforeach
                     </select>
                 </div>
+                <h3 class="mt-6 font-semibold">Location</h3>
+                <select name="location" data-auto form="jobfilters" class="input mt-3" aria-label="Location">
+                    <option value="">Anywhere</option>
+                    @foreach($locations as $city => $n)<option value="{{ $city }}" @selected(($f['location'] ?? '') === $city)>{{ $city }} ({{ $n }})</option>@endforeach
+                </select>
+                <label class="mt-3 flex items-center gap-3 text-[15px]"><input type="checkbox" data-auto form="jobfilters" name="remote" value="1" class="checkbox" @checked($f['remote'] ?? false)> Remote OK only</label>
+
+                <div class="my-6 h-px bg-line"></div>
+                <h3 class="font-semibold">Posted within</h3>
+                <div class="mt-3 grid grid-cols-4 overflow-hidden rounded-xl border border-line text-sm">
+                    @foreach(['' => 'Any', '1' => '24h', '7' => '7 days', '30' => '30 days'] as $v => $l)
+                        <label class="cursor-pointer py-2 text-center transition has-[:checked]:bg-ink has-[:checked]:font-semibold has-[:checked]:text-white {{ ! $loop->last ? 'border-r border-line' : '' }}"><input type="radio" data-auto form="jobfilters" name="posted" value="{{ $v }}" class="sr-only" @checked((string) ($f['posted'] ?? '') === (string) $v)>{{ $l }}</label>
+                    @endforeach
+                </div>
+                <div class="mt-4 space-y-2.5">
+                    <label class="flex items-center gap-3 text-[15px]"><input type="checkbox" data-auto form="jobfilters" name="verified" value="1" class="checkbox" @checked($f['verified'] ?? false)> Verified clients only</label>
+                    <label class="flex items-center gap-3 text-[15px]"><input type="checkbox" data-auto form="jobfilters" name="featured" value="1" class="checkbox" @checked($f['featured'] ?? false)> Featured jobs only</label>
+                </div>
+
                 <div class="my-6 h-px bg-line"></div>
                 <h3 class="font-semibold">Experience Level</h3>
                 <div class="mt-3 space-y-2.5">
@@ -80,7 +93,7 @@
                     <h2 class="text-2xl font-bold">Showing Results <span class="text-base font-normal text-faint">({{ number_format($jobs->total()) }})</span></h2>
                     <label class="mt-3 inline-flex items-center gap-1 text-[15px]"><span class="text-faint">Sort by:</span>
                         <select name="sort" data-auto form="jobfilters" class="cursor-pointer appearance-none bg-transparent pr-1 font-semibold outline-none">
-                            @foreach(['newest' => 'Newest', 'oldest' => 'Oldest', 'budget_high' => 'Highest budget', 'budget_low' => 'Lowest budget'] as $v => $l)<option value="{{ $v }}" @selected(($f['sort'] ?? 'newest') === $v)>{{ $l }}</option>@endforeach
+                            @foreach(['newest' => 'Newest', 'oldest' => 'Oldest', 'budget_high' => 'Highest budget', 'budget_low' => 'Lowest budget', 'deadline' => 'Closing soon'] as $v => $l)<option value="{{ $v }}" @selected(($f['sort'] ?? 'newest') === $v)>{{ $l }}</option>@endforeach
                         </select><x-icon name="chevron-down" class="size-4"/>
                     </label>
                 </div>

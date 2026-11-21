@@ -1,0 +1,56 @@
+{
+ "title": "Kalandras Podcast",
+ "client": "Kalandras Podcast",
+ "year": "2024",
+ "scope": [
+  "Podcast Branding",
+  "Naming"
+ ],
+ "summary": "Inspired by the Ethiopian proverb “ካላንድራስ…” (one solves one’s problems & carries oneself), Kalandras podcast is a space for authentic conversations that empower listeners.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Overview"
+  },
+  {
+   "type": "text",
+   "body": "Inspired by the Ethiopian proverb “ካላንድራስ…” (one solves one’s problems & carries oneself), Kalandras podcast is a space for authentic conversations that empower listeners. Hosted by musician, songwriter, and storyteller MikiMAC, it shares the experiences of Ethiopians who have built meaningful lives by staying true to themselves, blending motivation with the arts to help navigate life’s chaos. And this is the story of creating a visual identity that not only represents the core values of the podcast but also resonates with the target audience."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.png"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.png"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "08.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "09.jpg"
+  },
+  {
+   "type": "image",
+   "file": "10.png"
+  }
+ ]
+}

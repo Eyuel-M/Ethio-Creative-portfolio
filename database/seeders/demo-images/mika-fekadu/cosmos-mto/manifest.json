@@ -1,0 +1,83 @@
+{
+ "title": "Cosmos MTO",
+ "client": "Cosmos MTO",
+ "year": "2024",
+ "scope": [
+  "Brand Identity"
+ ],
+ "summary": "In a transformative moment for Ethiopia’s logistics sector, Cosmos MTO emerges as one of only three companies awarded a multi-modal transport license by the Ethiopian Maritime Authority.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Overview"
+  },
+  {
+   "type": "text",
+   "body": "In a transformative moment for Ethiopia’s logistics sector, Cosmos MTO emerges as one of only three companies awarded a multi-modal transport license by the Ethiopian Maritime Authority. This project tells the story of crafting a brand identity that seamlessly fits into various collateral while capturing the essence of the company’s mission and vision. this is a journey of creating a brand identity with a visual representation that aligns with its forward-thinking approach."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "09.jpg",
+    "10.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "11.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "12.jpg",
+    "13.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "14.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "15.jpg",
+    "16.jpg"
+   ],
+   "cols": "2"
+  }
+ ]
+}

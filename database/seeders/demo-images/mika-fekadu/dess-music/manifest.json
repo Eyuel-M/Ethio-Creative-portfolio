@@ -1,0 +1,92 @@
+{
+ "title": "Dess Music",
+ "client": "Dess Music",
+ "year": "2024",
+ "scope": [
+  "Music Branding",
+  "Brand Identity"
+ ],
+ "summary": "Dess Abeje, a prominent Ethiopian rapper, songwriter, producer, and music video director, has a rich and diverse portfolio of work.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Overview"
+  },
+  {
+   "type": "text",
+   "body": "Dess Abeje, a prominent Ethiopian rapper, songwriter, producer, and music video director, has a rich and diverse portfolio of work. His artistic journey has been marked by continuous evolution, with each collaboration refining his unique identity. Dess’ music is characterized by a distinctive blend of hip-hop and storytelling that resonates deeply with audiences. His projects often explore themes that are both relatable and thought-provoking. this project tells the story of how the new identity project was crafted and then the motif implemented on more items to deliver identity through Motion Graphix, Album art & design Teaser materials for the new album."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "09.jpg",
+    "10.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "11.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "12.jpg",
+    "13.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "14.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "15.jpg",
+    "16.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "17.jpg"
+  },
+  {
+   "type": "image",
+   "file": "18.png"
+  }
+ ]
+}

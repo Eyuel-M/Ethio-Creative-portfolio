@@ -1,0 +1,43 @@
+{
+ "title": "Gouder Wines",
+ "client": "Gouder Wines",
+ "year": "2021",
+ "scope": [
+  "Ad Campaign"
+ ],
+ "summary": "As part of an Ad campaign aimed at messaging “embow your day with Gouder Wine”, I was tasked to create concepts that would go on print ads on several touchpoints.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Overview"
+  },
+  {
+   "type": "text",
+   "body": "As part of an Ad campaign aimed at messaging “embow your day with Gouder Wine”, I was tasked to create concepts that would go on print ads on several touchpoints. The project was interesting because of a couple of reasons one being, it’s a dream come true working for a company I grew nearby, and the second being it also represents some of the print design concepts I tend to produce."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.png"
+  },
+  {
+   "type": "image",
+   "file": "06.png"
+  }
+ ]
+}

@@ -1,0 +1,63 @@
+{
+ "title": "Haben Fabrics",
+ "client": "Haben Fabrics",
+ "year": "2024",
+ "scope": [
+  "Brand Identity"
+ ],
+ "summary": "Haben Fabrics, an Ethiopian trading company that specializes in importing premium fabrics tailored for dresses.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Overview"
+  },
+  {
+   "type": "text",
+   "body": "Haben Fabrics, an Ethiopian trading company that specializes in importing premium fabrics tailored for dresses. The client wanted a Visual identity that uniquely identifies their brand story while appealing as both B2B (as a Fabric Vendor ) and B2C (as a Tailor made Dress Store) Brand. The project was a interesting journey toward building a brand identity lead with a logo design with elements that radiate the essence of the brand promise."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "09.jpg",
+    "10.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "11.png"
+  }
+ ]
+}

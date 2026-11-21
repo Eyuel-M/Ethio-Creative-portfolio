@@ -1,0 +1,55 @@
+{
+ "title": "Arts By Aklil",
+ "client": "Arts By Aklil",
+ "year": "2023",
+ "scope": [
+  "Brand Identity"
+ ],
+ "summary": "Arts By Aklil is the embodiment of Aklil’s artistic vision, seamlessly weaving custom-made clothing into a tapestry of intimate personality.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Overview"
+  },
+  {
+   "type": "text",
+   "body": "Arts By Aklil is the embodiment of Aklil’s artistic vision, seamlessly weaving custom-made clothing into a tapestry of intimate personality. Each piece emanates royalty, prestige, and opulence, forming a connecting thread throughout the brand. Aklil’s unwavering passion has birthed a collection that transcends conventional fashion, resonating with the profound aspirations of each individual client. The brand is a mark of prestige and excellence, bestowing a regal experience upon its discerning clientele. With Arts By Aklil, fashion becomes an expression of grandeur, inviting all to embrace their unique journey towards elevated style and self-discovery."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.png"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.png"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.png"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "image",
+   "file": "09.png"
+  }
+ ]
+}

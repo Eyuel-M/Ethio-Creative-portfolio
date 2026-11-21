@@ -1,0 +1,63 @@
+{
+ "title": "Ashara Architecture",
+ "client": "Ashara Architecture",
+ "year": "2021",
+ "scope": [
+  "Brand Identity"
+ ],
+ "summary": "Ashara Architecture and Engineering PLC is a Design & Consultancy Firm engaged in Building Design, Interior Design, Construction Supervision, Consultancy services to help Builders, Companies, and Governmental Offices.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Overview"
+  },
+  {
+   "type": "text",
+   "body": "Ashara Architecture and Engineering PLC is a Design & Consultancy Firm engaged in Building Design, Interior Design, Construction Supervision, Consultancy services to help Builders, Companies, and Governmental Offices. Ashara builds landmarks through Bold and Elegant Projects with Detailed care and Execution.\n\nFor their brand Launch, the client wanted to build a brand identity that appeals to both local and international clients in a way that expresses the brand values of building landmarks."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.png"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.png"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "09.jpg",
+    "10.png"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "11.png"
+  }
+ ]
+}

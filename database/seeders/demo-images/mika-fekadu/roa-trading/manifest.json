@@ -1,0 +1,43 @@
+{
+ "title": "RoA Trading",
+ "client": "RoA Trading",
+ "year": "2021",
+ "scope": [
+  "Brand Identity"
+ ],
+ "summary": "RoA Trading (previously Misale W/Sillasie General Trading) is a private company engaged in import/export, Wholesale & Retail, Real estate Business Services For Small to Large-scale Enterprises and Banks.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Overview"
+  },
+  {
+   "type": "text",
+   "body": "RoA Trading (previously Misale W/Sillasie General Trading) is a private company engaged in import/export, Wholesale & Retail, Real estate Business Services For Small to Large-scale Enterprises and Banks. Upon Constructing a multipurpose building and the client wanted to take this opportunity to rebrand the company to the legacy he realized, The name of his late Mother Roman Assfaw shortened to RoA. I was asked to develop a logo mark that expresses the story while being flexible to accommodate the new subsidiaries of the company, RoA Trading, & RoA Multiplex."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.jpg"
+  },
+  {
+   "type": "image",
+   "file": "06.png"
+  }
+ ]
+}

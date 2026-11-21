@@ -67,9 +67,9 @@ class DemoSeeder extends Seeder
             ['Hana Tesfaye', 'freelancer@demo.test', 'brand-identity', 'Brand Identity Designer', 'Addis Ababa', 'expert', 8, 1200, ['Branding', 'Logo Design', 'Typography', 'Packaging'], ['Illustrator', 'Figma', 'Photoshop']],
             ['Dawit Bekele', 'dawit@demo.test', 'ui-ux-design', 'Product & UI/UX Designer', 'Addis Ababa', 'expert', 6, 1500, ['UI Design', 'UX Research', 'Prototyping', 'Design Systems'], ['Figma', 'Framer']],
             ['Meron Alemu', 'meron@demo.test', 'illustration', 'Illustrator & Muralist', 'Bahir Dar', 'intermediate', 4, 800, ['Illustration', 'Character Design', 'Editorial'], ['Procreate', 'Photoshop']],
-            ['Yonas Girma', 'yonas@demo.test', 'video-animation', 'Motion Designer', 'Addis Ababa', 'expert', 7, 1400, ['Motion Graphics', '2D Animation', 'Video Editing'], ['After Effects', 'Premiere Pro', 'DaVinci Resolve']],
+            ['Yonas Girma', 'yonas@demo.test', 'video-animation', 'Music Branding & Motion Designer', 'Addis Ababa', 'expert', 7, 1400, ['Music Branding', 'Album Artwork', 'Motion Graphics'], ['After Effects', 'Illustrator', 'Photoshop']],
             ['Liya Haile', 'liya@demo.test', 'photography', 'Product & Food Photographer', 'Hawassa', 'intermediate', 5, 900, ['Product Photography', 'Food Photography', 'Retouching'], ['Lightroom', 'Capture One']],
-            ['Samuel Tadesse', 'samuel@demo.test', 'web-design', 'Web Designer & Webflow Developer', 'Adama', 'intermediate', 3, 1000, ['Web Design', 'Landing Page', 'Webflow', 'Responsive Design'], ['Webflow', 'Figma', 'WordPress']],
+            ['Samuel Tadesse', 'samuel@demo.test', 'web-design', 'Brand Identity & Web Designer', 'Adama', 'expert', 6, 1300, ['Brand Identity', 'Web Design', 'Logo Design', 'Corporate Identity'], ['Illustrator', 'Figma', 'WordPress']],
             ['Bethlehem Kassa', 'bethlehem@demo.test', 'graphic-design', 'Graphic & Brand Designer', 'Addis Ababa', 'intermediate', 5, 950, ['Brand Identity', 'Social Media Design', 'Signage', 'Graphic Design'], ['Illustrator', 'Photoshop', 'InDesign']],
             ['Natnael Worku', 'natnael@demo.test', 'copywriting', 'Bilingual Copywriter (Amharic / English)', 'Mekelle', 'intermediate', 4, 700, ['Copywriting', 'Brand Voice', 'Translation'], ['Notion', 'Google Docs']],
             ['Ruth Mengistu', 'ruth@demo.test', 'ui-ux-design', 'Mobile App Designer', 'Addis Ababa', 'intermediate', 3, 1100, ['Mobile Design', 'UI Design', 'Prototyping'], ['Figma']],
@@ -88,13 +88,16 @@ class DemoSeeder extends Seeder
             'copywriting' => ['Bank app microcopy (Amharic)', 'Tourism campaign taglines', 'Product launch emails'],
         ];
 
-        // Real case studies by Eyuel Mulat (eyuelmulat.com) and Luva Haregot (luvaharegot.com), shown on these demo
+        // Real case studies by Eyuel Mulat, Luva Haregot and Mika Fekadu, shown on these demo
         // profiles with permission — see database/seeders/demo-images/CREDITS.md.
         $realProjects = [
-            'freelancer@demo.test' => ['eyuel-mulat/sone-academy', 'luva-haregot/vektra'],
-            'tsion@demo.test' => ['eyuel-mulat/malden-cafe-and-restaurant', 'luva-haregot/ivylounge'],
+            'freelancer@demo.test' => ['eyuel-mulat/sone-academy', 'luva-haregot/vektra', 'mika-fekadu/haben-fabrics', 'mika-fekadu/arts-by-aklil-logo-design'],
+            'tsion@demo.test' => ['eyuel-mulat/malden-cafe-and-restaurant', 'luva-haregot/ivylounge', 'mika-fekadu/plantable-bags'],
             'bethlehem@demo.test' => ['eyuel-mulat/adadi-studio', 'luva-haregot/zias', 'luva-haregot/cordon'],
-            'kaleb@demo.test' => ['luva-haregot/vivbeverages'],
+            'kaleb@demo.test' => ['luva-haregot/vivbeverages', 'mika-fekadu/roa-trading'],
+            'samuel@demo.test' => ['mika-fekadu/cosmos-mto', 'mika-fekadu/yaconbuilding-contractor', 'mika-fekadu/ashara-architecture'],
+            'yonas@demo.test' => ['mika-fekadu/dess-music', 'mika-fekadu/mastewal-eyayu'],
+            'natnael@demo.test' => ['mika-fekadu/kalandras-podcast', 'mika-fekadu/gouder-wines'],
         ];
 
         $freelancers = collect();

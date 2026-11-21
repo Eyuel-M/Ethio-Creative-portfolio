@@ -1,0 +1,72 @@
+{
+ "title": "Mastewal Eyayu",
+ "client": "Mastewal Eyayu",
+ "year": "2021",
+ "scope": [
+  "Music Branding",
+  "Brand Identity"
+ ],
+ "summary": "Mastewal Eyayou is an Ethiopian singer debuted in Ethiopian Idol has gone to release a variety of original songs about different topics.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Overview"
+  },
+  {
+   "type": "text",
+   "body": "Mastewal Eyayou is an Ethiopian singer debuted in Ethiopian Idol has gone to release a variety of original songs about different topics. Now releasing a solo Album, The Artist wanted to Create a Mark that embodies Mastewal’s unique soulful style and creative blend of duality in his songs. This showcase the is a story creative process and the final design."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "09.jpg",
+    "10.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "11.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "12.jpg",
+    "13.png"
+   ],
+   "cols": "2"
+  }
+ ]
+}

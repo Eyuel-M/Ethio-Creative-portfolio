@@ -1,0 +1,59 @@
+{
+ "title": "Plantable Bags",
+ "client": "Plantable Bags",
+ "year": "2024",
+ "scope": [
+  "Brand Identity"
+ ],
+ "summary": "Plantable bags is an environment-friendly paper bag manufacturing company that provides Reusable & Eco-friendly Shopping bags from recycled paper & vegetable seeds.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Overview"
+  },
+  {
+   "type": "text",
+   "body": "Plantable bags is an environment-friendly paper bag manufacturing company that provides Reusable & Eco-friendly Shopping bags from recycled paper & vegetable seeds. The bags can be planted and grow into plants once they have done served their purpose. I was asked to create a brand identity that expresses the brand values and introduce the relatively new product in a way that resonates with the target market The project included their Logo Design, Stationery items, and client engagement materials."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.png"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.png",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "09.jpg",
+    "10.png"
+   ],
+   "cols": "2"
+  }
+ ]
+}

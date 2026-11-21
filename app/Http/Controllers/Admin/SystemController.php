@@ -82,6 +82,18 @@ class SystemController extends Controller
         return view('admin.system.audit', compact('logs', 'actions', 'actors'));
     }
 
+    /** Admins who also have a member account can browse as that member, then return to admin mode. */
+    public function switchMode(Request $request)
+    {
+        $mode = $request->validate(['mode' => 'required|in:admin,member'])['mode'];
+        abort_if($mode === 'member' && ! $request->user()->hasMemberWorkspace(), 422);
+        $request->session()->put('member_mode', $mode === 'member');
+
+        return $mode === 'member'
+            ? redirect()->route('dashboard')->with('status', 'You are using the site as a member. Switch back from your avatar menu.')
+            : redirect()->route('admin.overview');
+    }
+
     // ── Step-up verification ──
 
     public function verify(Request $request)

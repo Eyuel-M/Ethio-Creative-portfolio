@@ -43,6 +43,8 @@
                 @if($isOwner)
                     <a href="{{ route('settings') }}" class="btn btn-light"><x-icon name="pen" class="size-4"/> Edit profile</a>
                     <a href="{{ route('portfolio.create') }}" class="btn btn-dark"><x-icon name="plus" class="size-4"/> Add project</a>
+                @elseif(auth()->user()?->inAdminMode())
+                    @if(auth()->user()->canAdmin('users'))<a href="{{ route('admin.users.show', $profile->user_id) }}" class="btn btn-dark"><x-icon name="shield" class="size-4"/> Open in console</a>@endif
                 @elseif(auth()->user()?->is_client)
                     <form method="POST" action="{{ route('client.shortlist', $profile) }}">@csrf<button class="btn {{ $isShortlisted ? 'btn-dark' : 'btn-light' }}"><x-icon name="bookmark" class="size-4"/>{{ $isShortlisted ? 'Saved' : 'Save' }}</button></form>
                     <div x-data="{ open: false }">

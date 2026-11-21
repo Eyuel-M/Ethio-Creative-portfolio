@@ -1,7 +1,7 @@
 @props(['project', 'rating' => null, 'liked' => false, 'size' => 'grid'])
 @php
     $author = $project->profile;
-    $mine = auth()->id() === $author->user_id;
+    $mine = auth()->id() === $author->user_id || (bool) auth()->user()?->inAdminMode();
     $overlay = in_array($size, ['large', 'tile'], true);
     $fmt = fn ($n) => $n >= 1000 ? round($n / 1000, 1).'K' : $n;
 @endphp

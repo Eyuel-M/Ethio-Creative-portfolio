@@ -123,8 +123,10 @@
     </div>
     <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
         <div class="flex gap-2">
+            @if(! $user->inAdminMode())
             @unless($user->is_freelancer)<button form="enable-f" class="btn btn-light">Enable freelancer workspace</button>@endunless
             @unless($user->is_client)<button form="enable-c" class="btn btn-light">Enable client workspace</button>@endunless
+            @endif
         </div>
         <button class="btn btn-dark">Save account</button>
     </div>

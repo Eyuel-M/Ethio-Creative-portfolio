@@ -136,7 +136,9 @@
             </div>
 
             <div class="mt-5 flex gap-2">
-                @if($application)
+                @if(auth()->user()?->inAdminMode())
+                    @if(auth()->user()->canAdmin('moderation'))<a href="{{ route('admin.jobs', ['q' => $job->id, 'status' => 'all']) }}" class="btn btn-dark h-12 flex-1"><x-icon name="shield" class="size-4"/> Moderate in console</a>@else<span class="btn btn-muted h-12 flex-1">Viewing as admin</span>@endif
+                @elseif($application)
                     <a href="{{ route('applications.show', $application) }}" class="btn btn-dark h-12 flex-1"><x-icon name="check-circle" class="size-4"/> View your application</a>
                 @elseif($isOwner)
                     <a href="{{ route('client.jobs.applicants', $job) }}" class="btn btn-dark h-12 flex-1">Review applicants</a>
@@ -153,7 +155,7 @@
                 @endif
             </div>
 
-            @if(! $application && ! $isOwner && $job->isAcceptingApplications())
+            @if(! $application && ! $isOwner && $job->isAcceptingApplications() && ! auth()->user()?->inAdminMode())
                 <ul class="mt-5 space-y-2 border-t border-line pt-5 text-sm text-ink-soft">
                     <li class="flex items-center gap-2"><x-icon name="pen" class="size-4 text-muted"/> A short cover message</li>
                     <li class="flex items-center gap-2"><x-icon name="dollar" class="size-4 text-muted"/> Your price and delivery time</li>
@@ -204,7 +206,7 @@
 @endif
 
 {{-- Phones: keep the main action in reach --}}
-@if(! $application && ! $isOwner && $job->isAcceptingApplications())
+@if(! $application && ! $isOwner && $job->isAcceptingApplications() && ! auth()->user()?->inAdminMode())
     <div class="fixed inset-x-0 bottom-0 z-30 flex items-center gap-3 border-t border-line bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
         <div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">{{ $job->applications_count }} {{ \Illuminate\Support\Str::plural('proposal', $job->applications_count) }}</p><p class="truncate text-xs text-muted">{{ $closesIn === null ? 'Open until filled' : ($closesIn === 0 ? 'Closes today' : 'Closes in '.$closesIn.' '.\Illuminate\Support\Str::plural('day', $closesIn)) }}</p></div>
         <a href="{{ route('applications.create', $job) }}" class="btn btn-dark h-11 px-6">Apply Now</a>

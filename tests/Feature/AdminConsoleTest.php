@@ -211,4 +211,29 @@ class AdminConsoleTest extends MarketplaceTestCase
         $this->assertSame('refunded', $order->fresh()->status);
         $this->assertSame('free', $f->freelancerProfile->fresh()->plan);
     }
+
+    public function test_admins_get_an_operator_top_bar_not_member_menus(): void
+    {
+        $admin = $this->admin('moderator');
+        $c = $this->client();
+        $job = $this->job($c);
+
+        $home = $this->actingAs($admin)->get(route('home'))->assertOk();
+        $home->assertSee('Open console')->assertSee(route('admin.overview'))
+            ->assertDontSee('Find Work')->assertDontSee('Proposals')->assertDontSee('Share Work')->assertDontSee('Post a Job')->assertDontSee('Saved jobs')->assertDontSee(route('billing.index'));
+        $this->actingAs($admin)->get(route('dashboard'))->assertRedirect(route('admin.overview'));
+        $this->actingAs($admin)->get(route('jobs.show', $job))->assertOk()->assertSee('Moderate in console')->assertDontSee('Apply Now');
+        $this->actingAs($admin)->get(route('settings'))->assertOk()->assertDontSee('Enable freelancer workspace');
+    }
+
+    public function test_admins_with_a_member_account_can_switch_modes(): void
+    {
+        $f = $this->freelancer();
+        $f->forceFill(['admin_role' => 'support'])->save();
+        $this->actingAs($f)->get(route('home'))->assertSee('Use the site as a member')->assertDontSee('Find Work');
+        $this->actingAs($f)->post(route('admin.mode'), ['mode' => 'member'])->assertRedirect(route('dashboard'));
+        $this->actingAs($f)->get(route('home'))->assertSee('Find Work')->assertSee('Back to admin mode');
+        $this->actingAs($f)->post(route('admin.mode'), ['mode' => 'admin'])->assertRedirect(route('admin.overview'));
+        $this->actingAs($f)->get(route('home'))->assertDontSee('Find Work');
+    }
 }

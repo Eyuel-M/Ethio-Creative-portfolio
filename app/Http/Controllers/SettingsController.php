@@ -28,7 +28,11 @@ class SettingsController extends Controller
             // Owner sees masked values only; full values are never re-rendered into HTML.
             'maskedCbe' => FreelancerPaymentDetails::mask($pd?->encrypted_cbe_account_number),
             'maskedTelebirr' => FreelancerPaymentDetails::mask($pd?->encrypted_telebirr_number),
-            'tab' => $request->query('tab', $user->workspace() === 'client' ? 'client' : 'profile'),
+            'tab' => $request->query('tab', match (true) {
+                $user->inAdminMode() || ! $user->hasMemberWorkspace() => 'account',
+                $user->workspace() === 'client' => 'client',
+                default => 'profile',
+            }),
         ]);
     }
 

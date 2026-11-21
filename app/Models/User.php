@@ -95,6 +95,20 @@ class User extends Authenticatable implements MustVerifyEmail
         return in_array('*', $roles, true) || in_array($this->admin_role, $roles, true);
     }
 
+    /**
+     * Admin mode: staff see the site as operators, not as freelancers or clients. Admins who also have a member
+     * account can switch to member mode (kept in the session) and back.
+     */
+    public function inAdminMode(): bool
+    {
+        return $this->isAdmin() && ! (session('member_mode') && $this->hasMemberWorkspace());
+    }
+
+    public function hasMemberWorkspace(): bool
+    {
+        return $this->is_freelancer || $this->is_client;
+    }
+
     public function adminRoleLabel(): ?string
     {
         return $this->admin_role ? (config('admin.roles')[$this->admin_role] ?? $this->admin_role) : null;

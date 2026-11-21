@@ -34,6 +34,7 @@ Route::get('/jobs/{job}', [JobBoardController::class, 'show'])->name('jobs.show'
 
 Route::post('/a/beacon', [\App\Http\Controllers\AnalyticsBeaconController::class, 'beacon'])->middleware('throttle:120,1')->name('analytics.beacon');
 Route::post('/a/event', [\App\Http\Controllers\AnalyticsBeaconController::class, 'event'])->middleware('throttle:120,1')->name('analytics.event');
+Route::post('/admin-mode', [\App\Http\Controllers\Admin\SystemController::class, 'switchMode'])->middleware(['auth', 'admin'])->name('admin.mode');
 Route::post('/impersonation/stop', [\App\Http\Controllers\Admin\UserController::class, 'stopImpersonating'])->middleware('auth')->name('impersonation.stop');
 Route::post('/webhooks/payments/{provider}', [PaymentWebhookController::class, 'handle'])->name('webhooks.payments');
 

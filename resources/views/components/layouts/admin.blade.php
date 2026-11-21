@@ -76,8 +76,11 @@
                     <span class="hidden text-left leading-tight sm:block"><span class="block text-[13px] font-semibold">{{ $me->name }}</span><span class="block text-[11px] text-muted">{{ $me->adminRoleLabel() }}</span></span>
                 </button>
                 <div x-show="open" x-cloak @click.outside="open = false" x-transition.origin.top.right class="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-line bg-white p-1.5 shadow-xl">
-                    <a href="{{ route('home') }}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-zinc-50"><x-icon name="arrow-up-right" class="size-4 text-muted"/> View site</a>
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-zinc-50"><x-icon name="grid" class="size-4 text-muted"/> My dashboard</a>
+                    <a href="{{ route('home') }}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-zinc-50"><x-icon name="arrow-up-right" class="size-4 text-muted"/> Browse the site</a>
+                    <a href="{{ route('settings', ['tab' => 'account']) }}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-zinc-50"><x-icon name="settings" class="size-4 text-muted"/> Account & password</a>
+                    @if($me->hasMemberWorkspace())
+                        <form method="POST" action="{{ route('admin.mode') }}">@csrf<input type="hidden" name="mode" value="member"><button class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-zinc-50"><x-icon name="swap" class="size-4 text-muted"/> Use the site as a member</button></form>
+                    @endif
                     <div class="my-1 h-px bg-line"></div>
                     <form method="POST" action="{{ route('logout') }}">@csrf<button class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-rose-600 hover:bg-rose-50"><x-icon name="logout" class="size-4"/> Sign out</button></form>
                 </div>

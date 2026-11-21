@@ -1,6 +1,7 @@
 @props(['type', 'id', 'label' => 'Report'])
 {{-- Lets a signed-in member flag content; lands in Admin → Inbox → Reports. --}}
 @auth
+@unless(auth()->user()->inAdminMode())
 <div x-data="{ open: false }" class="relative inline-block text-left" @keydown.escape="open = false">
     <button type="button" @click="open = !open" class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink"><x-icon name="flag" class="size-4"/> {{ $label }}</button>
     <form x-show="open" x-cloak @click.outside="open = false" method="POST" action="{{ route('reports.store') }}" x-transition.origin.top.left
@@ -15,4 +16,5 @@
         <div class="flex justify-end gap-2"><button type="button" class="btn btn-sm btn-light" @click="open = false">Cancel</button><button class="btn btn-sm btn-dark">Send report</button></div>
     </form>
 </div>
+@endunless
 @endauth

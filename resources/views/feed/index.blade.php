@@ -5,7 +5,7 @@
     $sorts = ['recommended' => 'Recommended', 'newest' => 'Newest', 'most_liked' => 'Most liked', 'most_viewed' => 'Most viewed'];
     $keep = fn (array $over = []) => array_filter(array_merge(['q' => $f['q'] ?? null, 'category' => $f['category'] ?? null, 'sort' => $sort !== 'recommended' ? $sort : null,
         'available' => ($f['available'] ?? false) ? 1 : null, 'pro' => ($f['pro'] ?? false) ? 1 : null, 'min_likes' => ($f['min_likes'] ?? 0) ?: null], $over), fn ($v) => $v !== null && $v !== '');
-    $promo = ! $user ? null : ($ws === 'client' ? 'client' : (($user->freelancerProfile && $user->freelancerProfile->plan !== 'professional') ? 'pro' : null));
+    $promo = ! $user || $user->inAdminMode() ? null : ($ws === 'client' ? 'client' : (($user->freelancerProfile && $user->freelancerProfile->plan !== 'professional') ? 'pro' : null));
 @endphp
 <x-dynamic-component :component="$user ? 'layouts.discover' : 'layouts.public'" title="Explore">
 

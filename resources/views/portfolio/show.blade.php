@@ -2,7 +2,8 @@
     $author = $project->profile;
     $likeCount = $project->likes()->count();
     $likedByMe = in_array($project->id, $likedIds ?? [], true);
-    $canLike = auth()->check() && ! $isOwner && $project->isPublished();
+    $staff = (bool) auth()->user()?->inAdminMode();
+    $canLike = auth()->check() && ! $isOwner && ! $staff && $project->isPublished();
 @endphp
 <x-dynamic-component :component="auth()->check() ? 'layouts.discover' : 'layouts.public'" :title="$project->title">
 @push('meta')
@@ -62,6 +63,9 @@
                     </button>
                 @elseif(! auth()->check() && $project->isPublished())
                     <a href="{{ route('login') }}" class="btn btn-dark btn-pill h-11 flex-1 px-5 sm:flex-none"><x-icon name="heart" class="size-5"/> Appreciate</a>
+                @endif
+                @if($staff && auth()->user()->canAdmin('moderation'))
+                    <a href="{{ route('admin.portfolio', ['q' => $project->id, 'status' => $project->status === 'removed' ? 'removed' : ($project->reviewed_at ? 'approved' : 'review')]) }}" class="btn btn-dark btn-pill h-11 px-5"><x-icon name="shield" class="size-4"/> Moderate in console</a>
                 @endif
                 @if($project->isPublished())
                     <x-share :url="route('portfolio.show', $project)" :title="$project->title" :image="$project->coverUrl()" :subtitle="'by '.$author->user->displayName()" :pill="true"/>

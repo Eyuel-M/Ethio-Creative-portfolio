@@ -33,7 +33,7 @@ class AuthController extends Controller
             \App\Models\AuditLog::record('admin.login', $request->user());
         }
 
-        return redirect()->intended(route('home'));
+        return redirect()->intended($request->user()->inAdminMode() ? route('admin.overview') : route('home'));
     }
 
     public function showRegister(Request $request)

@@ -14,6 +14,9 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        if ($user->inAdminMode()) {
+            return redirect()->route('admin.overview');
+        }
 
         return match ($user->workspace()) {
             'client' => $this->client($request),

@@ -15,7 +15,7 @@
         </nav>
         <div class="hidden items-center gap-2 lg:flex">
             @auth
-                <a href="{{ route('dashboard') }}" class="btn btn-dark btn-pill h-10">Dashboard</a>
+                @if(auth()->user()->inAdminMode())<a href="{{ route('admin.overview') }}" class="btn btn-dark btn-pill h-10"><x-icon name="shield" class="size-4"/> Admin console</a>@else<a href="{{ route('dashboard') }}" class="btn btn-dark btn-pill h-10">Dashboard</a>@endif
             @else
                 <a href="{{ route('login') }}" class="btn btn-pill h-10 px-3 text-[13px] text-ink-soft hover:text-ink">Sign in</a>
                 <a href="{{ route('register', ['role' => 'freelancer']) }}" class="btn btn-pill h-10 border border-line bg-white text-[13px] text-ink hover:bg-zinc-50">Join as Freelancer</a>
@@ -29,7 +29,7 @@
             <a href="{{ route($route) }}" class="block rounded-xl px-3 py-2.5 text-sm hover:bg-zinc-50">{{ $label }}</a>
         @endforeach
         <div class="mt-2 grid grid-cols-2 gap-2">
-            @auth <a href="{{ route('dashboard') }}" class="btn btn-dark col-span-2">Dashboard</a>
+            @auth <a href="{{ auth()->user()->inAdminMode() ? route('admin.overview') : route('dashboard') }}" class="btn btn-dark col-span-2">{{ auth()->user()->inAdminMode() ? 'Admin console' : 'Dashboard' }}</a>
             @else
                 <a href="{{ route('register', ['role' => 'client']) }}" class="btn btn-dark col-span-2"><x-icon name="plus" class="size-4"/> Post a Job</a>
                 <a href="{{ route('register', ['role' => 'freelancer']) }}" class="btn btn-light">Join as Freelancer</a>

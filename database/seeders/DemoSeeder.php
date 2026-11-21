@@ -70,7 +70,7 @@ class DemoSeeder extends Seeder
             ['Yonas Girma', 'yonas@demo.test', 'video-animation', 'Motion Designer', 'Addis Ababa', 'expert', 7, 1400, ['Motion Graphics', '2D Animation', 'Video Editing'], ['After Effects', 'Premiere Pro', 'DaVinci Resolve']],
             ['Liya Haile', 'liya@demo.test', 'photography', 'Product & Food Photographer', 'Hawassa', 'intermediate', 5, 900, ['Product Photography', 'Food Photography', 'Retouching'], ['Lightroom', 'Capture One']],
             ['Samuel Tadesse', 'samuel@demo.test', 'web-design', 'Web Designer & Webflow Developer', 'Adama', 'intermediate', 3, 1000, ['Web Design', 'Landing Page', 'Webflow', 'Responsive Design'], ['Webflow', 'Figma', 'WordPress']],
-            ['Bethlehem Kassa', 'bethlehem@demo.test', 'graphic-design', 'Graphic Designer', 'Addis Ababa', 'entry', 1, 450, ['Social Media Design', 'Poster Design', 'Graphic Design'], ['Canva', 'Illustrator']],
+            ['Bethlehem Kassa', 'bethlehem@demo.test', 'graphic-design', 'Graphic & Brand Designer', 'Addis Ababa', 'intermediate', 5, 950, ['Brand Identity', 'Social Media Design', 'Signage', 'Graphic Design'], ['Illustrator', 'Photoshop', 'InDesign']],
             ['Natnael Worku', 'natnael@demo.test', 'copywriting', 'Bilingual Copywriter (Amharic / English)', 'Mekelle', 'intermediate', 4, 700, ['Copywriting', 'Brand Voice', 'Translation'], ['Notion', 'Google Docs']],
             ['Ruth Mengistu', 'ruth@demo.test', 'ui-ux-design', 'Mobile App Designer', 'Addis Ababa', 'intermediate', 3, 1100, ['Mobile Design', 'UI Design', 'Prototyping'], ['Figma']],
             ['Abel Getachew', 'abel@demo.test', 'video-animation', 'Videographer & Editor', 'Dire Dawa', 'entry', 2, 600, ['Video Editing', 'Color Grading', 'Videography'], ['Premiere Pro', 'DaVinci Resolve']],
@@ -88,11 +88,13 @@ class DemoSeeder extends Seeder
             'copywriting' => ['Bank app microcopy (Amharic)', 'Tourism campaign taglines', 'Product launch emails'],
         ];
 
-        // Real brand-identity work by Eyuel Mulat (eyuelmulat.com), shown on these demo profiles with permission.
+        // Real case studies by Eyuel Mulat (eyuelmulat.com) and Luva Haregot (luvaharegot.com), shown on these demo
+        // profiles with permission — see database/seeders/demo-images/CREDITS.md.
         $realProjects = [
-            'freelancer@demo.test' => ['sone-academy'],
-            'tsion@demo.test' => ['malden-cafe-and-restaurant'],
-            'bethlehem@demo.test' => ['adadi-studio'],
+            'freelancer@demo.test' => ['eyuel-mulat/sone-academy', 'luva-haregot/vektra'],
+            'tsion@demo.test' => ['eyuel-mulat/malden-cafe-and-restaurant', 'luva-haregot/ivylounge'],
+            'bethlehem@demo.test' => ['eyuel-mulat/adadi-studio', 'luva-haregot/zias', 'luva-haregot/cordon'],
+            'kaleb@demo.test' => ['luva-haregot/vivbeverages'],
         ];
 
         $freelancers = collect();
@@ -363,12 +365,12 @@ class DemoSeeder extends Seeder
     /** A real case study from database/seeders/demo-images/<author>/<slug>/manifest.json. */
     private function realPortfolio(FreelancerProfile $profile, Category $cat, string $slug, int $k): void
     {
-        $dir = database_path("seeders/demo-images/eyuel-mulat/{$slug}");
+        $dir = database_path("seeders/demo-images/{$slug}");
         $m = json_decode(file_get_contents("{$dir}/manifest.json"), true);
         $disk = Storage::disk(\App\Support\Media::disk());
         $n = 0;
         $put = function (string $file) use ($dir, $disk, $slug) {
-            $key = "seed/real/{$slug}/{$file}";
+            $key = "seed/real/{$slug}/{$file}"; // $slug is "<author>/<project>"
             if (! $disk->exists($key)) {
                 $disk->put($key, file_get_contents("{$dir}/{$file}"));
             }

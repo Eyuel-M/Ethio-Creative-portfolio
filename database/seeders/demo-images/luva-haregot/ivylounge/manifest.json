@@ -1,0 +1,52 @@
+{
+ "title": "IVY Lounge",
+ "client": "Marriott Executive suite",
+ "year": "2023",
+ "agency": null,
+ "scope": [
+  "Brand Identity"
+ ],
+ "summary": "Brand identity for IVY Lounge.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "image",
+   "file": "09.jpg"
+  },
+  {
+   "type": "image",
+   "file": "11.jpg"
+  }
+ ]
+}

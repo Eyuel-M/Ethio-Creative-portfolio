@@ -1,0 +1,88 @@
+{
+ "title": "Cordon Architecture",
+ "client": "cordon architecture",
+ "year": "2024",
+ "agency": "workshop",
+ "scope": [
+  "Brand Identity"
+ ],
+ "summary": "Cordon Architecture was founded on the belief that thoughtful design should stand the test of time while meeting the needs of modern living.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Creating Timeless Architecture for Modern Living"
+  },
+  {
+   "type": "text",
+   "body": "Cordon Architecture was founded on the belief that thoughtful design should stand the test of time while meeting the needs of modern living. What began as a passion for architecture has grown into a practice dedicated to creating spaces that balance aesthetics, function, and context.\nFor Cordon Architecture, the goal is not simply to design buildings, but to shape environments where people can live and work better. The brand identity reflects this philosophy refined, clear, and confident expressing professionalism and trust while maintaining a warm, human character.\nThe result is a brand that represents trust, quality, and a commitment to architecture that feels contemporary today and timeless tomorrow."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "09.jpg",
+    "10.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "11.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "12.jpg",
+    "13.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "14.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "15.jpg",
+    "16.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "17.jpg"
+  }
+ ]
+}

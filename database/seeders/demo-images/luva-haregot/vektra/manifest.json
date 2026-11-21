@@ -1,0 +1,76 @@
+{
+ "title": "Vektra Logistics",
+ "client": "vektra logistics",
+ "year": "2026",
+ "agency": "workshop",
+ "scope": [
+  "Brand Identity"
+ ],
+ "summary": "Vektra is a brand identity built for a logistics company aiming to compete on reliability rather than scale.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Move anything. Anywhere"
+  },
+  {
+   "type": "text",
+   "body": "Vektra is a brand identity built for a logistics company aiming to compete on reliability rather than scale. The project covers the full identity system naming, logomark, typography, colour, and a campaign-ready visual language, designed to feel confident, modern, and distinct from the blue-and-white conventions of the freight industry."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "09.jpg",
+    "10.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "11.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "12.jpg",
+    "13.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "14.jpg"
+  }
+ ]
+}

@@ -1,0 +1,52 @@
+{
+ "title": "VIV Beverages",
+ "client": "viv beverages",
+ "year": "2024",
+ "agency": null,
+ "scope": [
+  "3D Visualization"
+ ],
+ "summary": "3D product visualisation for VIV Beverages.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "09.jpg",
+    "10.jpg"
+   ],
+   "cols": "2"
+  }
+ ]
+}

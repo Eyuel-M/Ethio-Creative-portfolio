@@ -1,0 +1,60 @@
+{
+ "title": "ZIAS Architecture",
+ "client": "Zias architecture",
+ "year": "2022",
+ "agency": "berry advertising",
+ "scope": [
+  "Rebranding",
+  "Brand Identity"
+ ],
+ "summary": "We are tasked in collaboration with Berry Advertising to create a unique brand identity for Zias Architecture/Engineering.",
+ "overview_heading": null,
+ "overview": null,
+ "deliverables": [],
+ "cover": "01.jpg",
+ "blocks": [
+  {
+   "type": "heading",
+   "body": "Shaping Thoughtful Architecture with the Strength of Engineering."
+  },
+  {
+   "type": "text",
+   "body": "We are tasked in collaboration with Berry Advertising to create a unique brand identity for Zias Architecture/Engineering.\nOur goal was to craft a brand identity that embodies elegance, professionalism, stability, and instills a sense of trust. We have successfully delivered an exceptional brand identity for Zias. In addition to the logo, we meticulously designed a comprehensive set of brand collateral to ensure consistent and impactful brand representation across diverse media. This collateral includes business cards, letterheads, and other essential stationery items, all meticulously crafted to uphold the brand’s elegance and professionalism."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "05.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "09.jpg"
+   ],
+   "cols": "2"
+  }
+ ]
+}

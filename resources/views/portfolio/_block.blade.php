@@ -8,6 +8,14 @@
     $center = $block->opt('align') === 'center' ? 'text-center' : '';
     $soft = $dark ? 'text-white/75' : 'text-ink-soft';
     $capCls = 'mx-auto max-w-[1600px] px-4 py-3 text-sm sm:px-6 lg:px-10 '.($dark ? 'text-white/60' : 'text-muted');
+    // Full-width media share one rhythm: an 8px gutter at the sides, 8px between stacked images (4px above + 4px
+    // below each block) and 8px between gallery images — so every image is framed by the same gap. A gallery set to
+    // "no gap" stays seamless, edge to edge.
+    $seamless = $block->type === 'gallery' && $block->opt('gap') === 'none';
+    $media = in_array($block->type, ['image', 'gallery', 'embed'], true) && $width === 'full' && ! $seamless;
+    if ($media && ($block->opt('pad') ?? 'none') === 'none') {
+        $pad = 'py-1';
+    }
 @endphp
 <section class="{{ $bg }} {{ $pad }}">
 @switch($block->type)
@@ -27,8 +35,8 @@
 
     @case('image')
         @if($block->mediaUrl())
-            <figure class="{{ $width === 'full' ? '' : $inner }}">
-                <img src="{{ $block->mediaUrl() }}" alt="{{ $block->alt ?? '' }}" class="block h-auto w-full {{ $width === 'full' ? '' : 'rounded-2xl' }}" loading="lazy">
+            <figure class="{{ $width === 'full' ? 'px-2' : $inner }}">
+                <img src="{{ $block->mediaUrl() }}" alt="{{ $block->alt ?? '' }}" class="block h-auto w-full {{ $width === 'full' ? 'rounded-xl' : 'rounded-2xl' }}" loading="lazy">
                 @if($block->caption)<figcaption class="{{ $width === 'full' ? $capCls : 'pt-3 text-sm '.($dark ? 'text-white/60' : 'text-muted') }}">{{ $block->caption }}</figcaption>@endif
             </figure>
         @endif
@@ -39,7 +47,7 @@
             $cols = ['2' => 'sm:grid-cols-2', '3' => 'sm:grid-cols-2 lg:grid-cols-3', '4' => 'grid-cols-2 lg:grid-cols-4'][$block->opt('cols')] ?? 'sm:grid-cols-2';
             $gap = ['none' => 'gap-0', 's' => 'gap-2', 'm' => 'gap-5'][$block->opt('gap')] ?? 'gap-2';
         @endphp
-        <figure class="{{ $width === 'full' ? ($block->opt('gap') === 'none' ? '' : 'px-2') : $inner }}">
+        <figure class="{{ $width === 'full' ? ($seamless ? '' : 'px-2') : $inner }}">
             <div class="grid {{ $cols }} {{ $gap }}">
                 @foreach($block->galleryItems() as $g)
                     <img src="{{ $g['url'] }}" alt="{{ $g['alt'] }}" class="block aspect-[4/3] w-full object-cover {{ $block->opt('gap') === 'none' ? '' : 'rounded-xl' }}" loading="lazy">
@@ -67,8 +75,8 @@
 
     @case('embed')
         @if($block->embedSrc())
-            <figure class="{{ $width === 'full' ? '' : $inner }}">
-                <div class="aspect-video w-full overflow-hidden bg-black {{ $width === 'full' ? '' : 'rounded-2xl' }}"><iframe src="{{ $block->embedSrc() }}" class="size-full" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="{{ $block->caption ?? 'Video' }}" sandbox="allow-scripts allow-same-origin allow-presentation"></iframe></div>
+            <figure class="{{ $width === 'full' ? 'px-2' : $inner }}">
+                <div class="aspect-video w-full overflow-hidden bg-black {{ $width === 'full' ? 'rounded-xl' : 'rounded-2xl' }}"><iframe src="{{ $block->embedSrc() }}" class="size-full" allow="fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="{{ $block->caption ?? 'Video' }}" sandbox="allow-scripts allow-same-origin allow-presentation"></iframe></div>
                 @if($block->caption)<figcaption class="{{ $width === 'full' ? $capCls : 'pt-3 text-sm '.($dark ? 'text-white/60' : 'text-muted') }}">{{ $block->caption }}</figcaption>@endif
             </figure>
         @endif

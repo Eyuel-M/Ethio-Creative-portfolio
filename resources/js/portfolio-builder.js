@@ -179,17 +179,21 @@ export function portfolioBuilder({ blocks, defaults, labels, uploadUrl, cover, c
         },
 
         // ── canvas styling (mirrors portfolio/_block.blade.php) ──
+        /** Full-width media get the shared 8px gutter (sides and between stacked images), like the public page. */
+        gutter(b) {
+            return ['image', 'gallery', 'embed'].includes(b.type) && b.settings.width === 'full' && !(b.type === 'gallery' && b.settings.gap === 'none');
+        },
         wrap(b) {
             const s = b.settings;
             return [
                 { none: '', light: 'bg-zinc-50', dark: 'bg-ink text-white', accent: 'bg-violet-50' }[s.bg] || '',
-                { none: 'py-0', s: 'py-5', m: 'py-9', l: 'py-14' }[s.pad] ?? 'py-9',
+                s.pad === 'none' && this.gutter(b) ? 'py-1' : ({ none: 'py-0', s: 'py-5', m: 'py-9', l: 'py-14' }[s.pad] ?? 'py-9'),
             ].join(' ');
         },
         inner(b) {
             const s = b.settings;
             return [
-                { full: '', wide: 'px-6 sm:px-10', narrow: 'mx-auto max-w-2xl px-6' }[s.width] ?? 'px-6 sm:px-10',
+                this.gutter(b) ? 'px-2' : ({ full: '', wide: 'px-6 sm:px-10', narrow: 'mx-auto max-w-2xl px-6' }[s.width] ?? 'px-6 sm:px-10'),
                 s.align === 'center' ? 'text-center' : '',
             ].join(' ');
         },

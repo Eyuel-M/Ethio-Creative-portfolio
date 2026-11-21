@@ -205,7 +205,7 @@
             <div @click="deselect()">
                 <input type="hidden" name="cover_upload" :value="cover.path || ''">
                 <label class="group relative block cursor-pointer">
-                    <template x-if="cover.preview"><img :src="cover.preview" alt="" class="block h-auto max-h-[520px] w-full object-cover"></template>
+                    <template x-if="cover.preview"><div class="px-2"><img :src="cover.preview" alt="" class="block h-auto max-h-[520px] w-full rounded-xl object-cover"></div></template>
                     <div x-show="!cover.preview" class="mx-6 grid aspect-[21/9] place-items-center rounded-2xl border-2 border-dashed border-zinc-300 bg-zinc-50 text-center text-muted transition group-hover:border-ink sm:mx-10">
                         <span><x-icon name="upload" class="mx-auto size-7"/><span class="mt-2 block text-sm font-medium text-ink">Add a cover image</span><span class="text-xs">Shown first on your project and in feeds · compressed automatically</span></span>
                     </div>
@@ -271,7 +271,7 @@
                                     <template x-if="block.type === 'image'">
                                         <figure>
                                             <label class="relative block cursor-pointer">
-                                                <template x-if="block.preview"><img :src="block.preview" alt="" class="block h-auto w-full" :class="block.settings.width !== 'full' && 'rounded-2xl'"></template>
+                                                <template x-if="block.preview"><img :src="block.preview" alt="" class="block h-auto w-full" :class="block.settings.width !== 'full' ? 'rounded-2xl' : 'rounded-xl'"></template>
                                                 <div x-show="!block.preview" class="grid aspect-[16/9] place-items-center border-2 border-dashed border-zinc-300 bg-zinc-50 text-center text-muted hover:border-ink" :class="block.settings.width === 'full' ? 'mx-6 rounded-2xl sm:mx-10' : 'rounded-2xl'"><span><x-icon name="upload" class="mx-auto size-6"/><span class="mt-1 block text-sm font-medium text-ink">Upload an image</span></span></div>
                                                 {!! $progress('block', 'imageDone(block)') !!}
                                                 <input type="file" accept="image/*" class="sr-only" @change="pickImage(block, $event)">
@@ -280,7 +280,7 @@
                                         </figure>
                                     </template>
                                     <template x-if="block.type === 'gallery'">
-                                        <figure :class="block.settings.width === 'full' && 'px-2'">
+                                        <figure>
                                             <div class="grid" :class="[{ '2': 'grid-cols-2', '3': 'grid-cols-3', '4': 'grid-cols-4' }[block.settings.cols], { none: 'gap-0', s: 'gap-2', m: 'gap-4' }[block.settings.gap]]">
                                                 <template x-for="(g, gi) in block.gallery" :key="'g' + g.id">
                                                     <div class="group/i relative aspect-[4/3] overflow-hidden bg-zinc-100" :class="block.settings.gap !== 'none' && 'rounded-xl'">
@@ -318,7 +318,7 @@
                                     </template>
                                     <template x-if="block.type === 'embed'">
                                         <figure :class="block.settings.width === 'full' || 'space-y-0'">
-                                            <div class="aspect-video w-full overflow-hidden bg-zinc-900" :class="block.settings.width !== 'full' && 'rounded-2xl'">
+                                            <div class="aspect-video w-full overflow-hidden bg-zinc-900" :class="block.settings.width !== 'full' ? 'rounded-2xl' : 'rounded-xl'">
                                                 <template x-if="embedSrc(block.embed_url)"><iframe :src="embedSrc(block.embed_url)" class="pointer-events-none size-full" title="Video preview"></iframe></template>
                                                 <div x-show="!embedSrc(block.embed_url)" class="grid size-full place-items-center text-center text-white/60"><span><x-icon name="video" class="mx-auto size-8"/><span class="mt-2 block text-sm">Paste a YouTube or Vimeo link below</span></span></div>
                                             </div>

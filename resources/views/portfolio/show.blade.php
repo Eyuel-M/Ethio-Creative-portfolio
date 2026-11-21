@@ -73,10 +73,10 @@
         </div>
     </header>
 
-    {{-- The work: edge to edge --}}
+    {{-- The work: full width with an even 8px gutter around and between images --}}
     <div class="bg-white">
         @if($project->coverUrl())
-            <img src="{{ $project->coverUrl() }}" alt="{{ $project->cover_alt ?? $project->title }}" class="block h-auto w-full">
+            <div class="px-2 pb-1"><img src="{{ $project->coverUrl() }}" alt="{{ $project->cover_alt ?? $project->title }}" class="block h-auto w-full rounded-xl"></div>
         @endif
         @foreach($project->blocks as $block)
             @include('portfolio._block', ['block' => $block])

@@ -15,7 +15,7 @@
         <span class="grid size-8 place-items-center rounded-lg bg-white text-ink"><x-icon name="shield" class="size-4"/></span>
         <div class="leading-tight"><p class="font-display text-[15px] font-bold text-white">{{ config('marketplace.brand') }}</p><p class="text-[11px] uppercase tracking-[0.16em] text-zinc-500">Admin console</p></div>
     </div>
-    <nav class="flex-1 space-y-5 overflow-y-auto px-3 py-4 text-[13.5px]">
+    <nav class="scroll-dark flex-1 space-y-5 overflow-y-auto overscroll-contain px-3 py-4 text-[13.5px]">
         @foreach($menu as $group => $items)
             <div>
                 @if($group)<p class="mb-1.5 px-3 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-zinc-500">{{ $group }}</p>@endif

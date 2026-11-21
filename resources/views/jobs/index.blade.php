@@ -22,7 +22,7 @@
 
     <div class="mt-3 grid gap-3 sm:mt-4 sm:gap-4 lg:grid-cols-[260px_1fr]">
         {{-- Filters --}}
-        <aside class="card card-pad h-fit lg:sticky lg:top-20" x-data="{ open: window.innerWidth >= 1024 }">
+        <aside class="card card-pad h-fit lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:overscroll-contain" x-data="{ open: window.innerWidth >= 1024 }">
             <div class="flex items-center justify-between">
                 <button type="button" class="flex items-center gap-2 lg:pointer-events-none" @click="open = !open" :aria-expanded="open"><h2 class="text-[22px] font-bold">Filters</h2>@if($filterCount)<span class="grid size-6 place-items-center rounded-full bg-ink text-xs font-semibold text-white">{{ $filterCount }}</span>@endif<x-icon name="chevron-down" class="size-5 lg:hidden"/></button>
                 <a href="{{ route('jobs.index') }}" class="text-sm font-medium text-leaf-dark hover:underline">Reset</a>

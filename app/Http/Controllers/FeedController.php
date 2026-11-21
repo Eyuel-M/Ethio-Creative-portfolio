@@ -39,7 +39,8 @@ class FeedController extends Controller
         $filterCount = collect([$f['available'] ?? false, $f['pro'] ?? false, ($f['min_likes'] ?? 0) > 0])->filter()->count();
         $unfiltered = empty($f['q']) && empty($f['category']) && $sort === 'recommended' && $filterCount === 0;
         $candidates = $unfiltered
-            ? $base()->where('published_at', '>=', now()->subDays(120))
+            ? $base()->where(fn ($q) => $q->where('published_at', '>=', now()->subDays(120))->orWhereNotNull('featured_at'))
+                ->orderByRaw('CASE WHEN featured_at IS NULL THEN 1 ELSE 0 END')->orderByDesc('featured_at') // admin-featured work leads
                 ->orderByRaw('views + 20 * (select count(*) from portfolio_likes pl where pl.portfolio_project_id = portfolio_projects.id) desc')
                 ->take(5)->get()
             : collect();
@@ -73,7 +74,7 @@ class FeedController extends Controller
             : $query->paginate(self::PREVIEW, ['*'], 'page', 1);
         $all = $bento->concat($projects->getCollection());
 
-        $ratings = Review::whereIn('reviewee_id', $all->pluck('profile.user_id')->unique())
+        $ratings = Review::whereNull('hidden_at')->whereIn('reviewee_id', $all->pluck('profile.user_id')->unique())
             ->selectRaw('reviewee_id, round(avg(rating), 1) as avg_rating')->groupBy('reviewee_id')->pluck('avg_rating', 'reviewee_id');
         $likedIds = $user ? $user->belongsToMany(PortfolioProject::class, 'portfolio_likes')->whereIn('portfolio_projects.id', $all->pluck('id'))->pluck('portfolio_projects.id')->all() : [];
 
@@ -81,6 +82,10 @@ class FeedController extends Controller
         $categoryCovers = PortfolioProject::discoverable()->whereNotNull('cover_path')->whereNotNull('category_id')
             ->orderByDesc('views')->limit(500)->get(['category_id', 'cover_path'])
             ->unique('category_id')->mapWithKeys(fn ($p) => [$p->category_id => $p->coverUrl()]);
+
+        if (filled($f['q'] ?? null) && ! $request->has('page')) {
+            \App\Support\Analytics::track('search', null, ['area' => 'work', 'q' => mb_strtolower(trim($f['q'])), 'results' => $projects->total()]);
+        }
 
         return view('feed.index', [
             'feedRoute' => $user ? 'home' : 'explore',
@@ -113,6 +118,7 @@ class FeedController extends Controller
 
         $result = $project->likes()->toggle([$request->user()->id]);
         $liked = ! empty($result['attached']);
+        \App\Support\Analytics::track($liked ? 'like' : 'unlike', $project);
         $count = $project->likes()->count();
 
         return $request->expectsJson() ? response()->json(['liked' => $liked, 'count' => $count]) : back();

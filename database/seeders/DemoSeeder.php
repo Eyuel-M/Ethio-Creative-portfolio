@@ -48,6 +48,40 @@ class DemoSeeder extends Seeder
         }
         Storage::disk('public')->deleteDirectory('seed');
         \Illuminate\Support\Facades\DB::transaction(fn () => $this->load());
+        $this->adminQueues();
+        \App\Support\DemoAnalytics::seed();
+    }
+
+    /** A few items in the admin work queues, plus realistic sign-in times. */
+    private function adminQueues(): void
+    {
+        $users = User::where('email', 'like', '%'.\App\Support\DemoData::DOMAIN)->get();
+        foreach ($users as $u) {
+            $seen = now()->subHours(mt_rand(1, 24 * 20));
+            $u->forceFill(['last_seen_at' => $seen, 'last_login_at' => $seen->copy()->subMinutes(mt_rand(5, 300))])->saveQuietly();
+        }
+        $by = fn ($email) => $users->firstWhere('email', $email);
+        $project = PortfolioProject::where('status', 'published')->whereHas('profile.user', fn ($q) => $q->where('email', 'meron@demo.test'))->first();
+        $job = JobPost::live()->latest()->first();
+        foreach ([
+            [$by('dawit@demo.test'), 'portfolio', $project?->id, 'copyright', 'I think the second image is from another designer\'s Behance.'],
+            [$by('freelancer@demo.test'), 'job', $job?->id, 'scam', 'The client asked me to pay a "registration fee" in chat before starting.'],
+            [$by('client@demo.test'), 'profile', $by('abel@demo.test')?->freelancerProfile?->id, 'impersonation', 'This profile uses photos from a wedding studio in Bole.'],
+        ] as [$reporter, $type, $id, $reason, $details]) {
+            if ($reporter && $id) {
+                \App\Models\Report::create(['reporter_id' => $reporter->id, 'reportable_type' => $type, 'reportable_id' => (string) $id, 'reason' => $reason, 'details' => $details, 'created_at' => now()->subHours(mt_rand(3, 60))]);
+            }
+        }
+        foreach (['saron@demo.test' => ['Gojo Tech PLC', 'TIN 0045821193', 'https://gojo.example.com'], 'elias@demo.test' => ['Lalibela Tours & Travel', 'Licence AA/14/7731', null]] as $email => [$name, $reg, $site]) {
+            if ($u = $by($email)) {
+                if (! $u->clientProfile?->is_verified) {
+                    \App\Models\VerificationRequest::create(['user_id' => $u->id, 'business_name' => $name, 'registration_number' => $reg, 'website' => $site, 'message' => 'We post 2–3 design jobs a month.']);
+                }
+            }
+        }
+        if ($u = $by('natnael@demo.test')) {
+            \App\Models\DataRequest::create(['user_id' => $u->id, 'requester_email' => $u->email, 'type' => 'export', 'note' => 'I want a copy of my portfolio texts.']);
+        }
     }
 
     private function load(): void

@@ -21,7 +21,7 @@
               },
               async native() { try { await navigator.share({ title: @js($title), url: @js($url) }); } catch (e) {} } }"
      @keydown.escape.window="open = false" {{ $attributes->merge(['class' => 'inline-flex']) }}>
-    <button type="button" @click="open = true" class="{{ $square ? 'btn btn-light size-12 px-0' : ($iconOnly ? 'btn btn-sm btn-light w-9 px-0' : ($pill ? 'btn btn-light btn-pill h-11 px-5' : 'btn btn-light')) }}" aria-haspopup="dialog" :aria-expanded="open" @if($iconOnly || $square) aria-label="{{ $label }}" title="{{ $label }}" @endif>
+    <button type="button" @click="open = true" data-track="share_open" class="{{ $square ? 'btn btn-light size-12 px-0' : ($iconOnly ? 'btn btn-sm btn-light w-9 px-0' : ($pill ? 'btn btn-light btn-pill h-11 px-5' : 'btn btn-light')) }}" aria-haspopup="dialog" :aria-expanded="open" @if($iconOnly || $square) aria-label="{{ $label }}" title="{{ $label }}" @endif>
         <x-icon name="share" class="{{ $square ? 'size-5' : 'size-4' }}"/>@unless($iconOnly || $square) {{ $label }}@endunless
     </button>
 
@@ -46,7 +46,7 @@
 
                 <div class="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-6">
                     @foreach($platforms as [$name, $href, $color, $svg])
-                        <a href="{{ $href }}" target="_blank" rel="noopener noreferrer" class="group flex flex-col items-center gap-1.5 rounded-2xl p-2 text-xs font-medium text-ink-soft hover:bg-zinc-50 hover:text-ink">
+                        <a href="{{ $href }}" target="_blank" rel="noopener noreferrer" data-track="share_click" data-track-label="{{ $name }}" class="group flex flex-col items-center gap-1.5 rounded-2xl p-2 text-xs font-medium text-ink-soft hover:bg-zinc-50 hover:text-ink">
                             <span class="grid size-12 place-items-center rounded-full text-white transition group-hover:scale-105" style="background: {{ $color }}"><svg viewBox="0 0 24 24" class="size-6" aria-hidden="true">{!! $svg !!}</svg></span>
                             {{ $name }}
                         </a>

@@ -74,6 +74,7 @@ class WebhookProcessor
         });
 
         if ($result === 'granted') {
+            \App\Support\Analytics::track('order_paid', $order, ['product' => $order->product->code, 'amount' => $order->amount_minor], $order->user_id);
             $order->user->notify(new MarketplaceNotification(
                 'Payment confirmed',
                 "Your purchase of {$order->product->name} is active.",
@@ -107,6 +108,7 @@ class WebhookProcessor
                 if ($job) {
                     if ($job->status !== 'published') {
                         $job->transitionTo('published', $order->user_id, 'Job-posting fee verified');
+                        \App\Support\Analytics::track('job_published', $job, ['category' => $job->category_id], $order->user_id);
                     }
                     $job->forceFill([
                         'published_at' => $job->published_at ?? $start,

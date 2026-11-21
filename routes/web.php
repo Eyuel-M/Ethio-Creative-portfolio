@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin as A;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -32,6 +32,9 @@ Route::get('/portfolio/{project}', [PortfolioController::class, 'show'])->name('
 Route::get('/jobs', [JobBoardController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{job}', [JobBoardController::class, 'show'])->name('jobs.show');
 
+Route::post('/a/beacon', [\App\Http\Controllers\AnalyticsBeaconController::class, 'beacon'])->middleware('throttle:120,1')->name('analytics.beacon');
+Route::post('/a/event', [\App\Http\Controllers\AnalyticsBeaconController::class, 'event'])->middleware('throttle:120,1')->name('analytics.event');
+Route::post('/impersonation/stop', [\App\Http\Controllers\Admin\UserController::class, 'stopImpersonating'])->middleware('auth')->name('impersonation.stop');
 Route::post('/webhooks/payments/{provider}', [PaymentWebhookController::class, 'handle'])->name('webhooks.payments');
 
 // ---------- Guest ----------
@@ -67,6 +70,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::put('/settings/freelancer', [SettingsController::class, 'updateFreelancer'])->middleware('role:freelancer')->name('settings.freelancer');
         Route::put('/settings/payment', [SettingsController::class, 'updatePayment'])->middleware('role:freelancer')->name('settings.payment');
         Route::put('/settings/client', [SettingsController::class, 'updateClient'])->middleware('role:client')->name('settings.client');
+        Route::post('/settings/verification', [SettingsController::class, 'requestVerification'])->middleware(['role:client', 'throttle:uploads'])->name('settings.verification');
+        Route::post('/settings/data-requests', [SettingsController::class, 'requestData'])->middleware('throttle:uploads')->name('settings.data-request');
+        Route::get('/settings/data-export/{dataRequest}', [SettingsController::class, 'downloadExport'])->name('settings.data-export');
 
         // Freelancer workspace
         Route::middleware('role:freelancer')->group(function () {
@@ -138,16 +144,110 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::post('/portfolio/{project}/like', [\App\Http\Controllers\FeedController::class, 'toggleLike'])->middleware('throttle:messages')->name('portfolio.like');
 
         // Admin console
-        Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
-            Route::get('/', [AdminController::class, 'overview'])->name('overview');
-            Route::get('/users', [AdminController::class, 'users'])->name('users');
-            Route::post('/users/{user}/status', [AdminController::class, 'userStatus'])->name('users.status');
-            Route::get('/jobs', [AdminController::class, 'jobs'])->name('jobs');
-            Route::post('/jobs/{job}/moderate', [AdminController::class, 'moderateJob'])->name('jobs.moderate');
-            Route::get('/orders', [AdminController::class, 'orders'])->name('orders');
-            Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
-            Route::post('/reports/{report}', [AdminController::class, 'resolveReport'])->name('reports.resolve');
-            Route::get('/audit', [AdminController::class, 'audit'])->name('audit');
+        Route::middleware(['admin', 'admin.stepup'])->prefix('admin')->name('admin.')->group(function () {
+            Route::get('/verify', [A\SystemController::class, 'verify'])->name('verify');
+            Route::post('/verify', [A\SystemController::class, 'confirmVerify'])->middleware('throttle:auth')->name('verify.confirm');
+
+            Route::get('/', A\DashboardController::class)->name('overview');
+            Route::middleware('admin.can:search')->group(function () {
+                Route::get('/search', [A\SearchController::class, 'index'])->name('search');
+                Route::get('/search/suggest', [A\SearchController::class, 'suggest'])->name('search.suggest');
+            });
+
+            // People
+            Route::middleware('admin.can:users')->group(function () {
+                Route::get('/users', [A\UserController::class, 'index'])->name('users');
+                Route::get('/users/{user}', [A\UserController::class, 'show'])->name('users.show');
+                Route::post('/users/{user}/notes', [A\UserController::class, 'note'])->name('users.note');
+                Route::post('/users/{user}/status', [A\UserController::class, 'status'])->name('users.status');
+                Route::post('/users/{user}/verify', [A\UserController::class, 'verifyClient'])->name('users.verify');
+                Route::post('/users/{user}/plan', [A\UserController::class, 'plan'])->name('users.plan');
+                Route::post('/users/{user}/feature', [A\UserController::class, 'feature'])->name('users.feature');
+                Route::post('/users/{user}/impersonate', [A\UserController::class, 'impersonate'])->middleware('admin.can:impersonate')->name('users.impersonate');
+            });
+            Route::middleware('admin.can:team')->group(function () {
+                Route::get('/team', [A\TeamController::class, 'index'])->name('team');
+                Route::post('/team', [A\TeamController::class, 'store'])->name('team.store');
+                Route::post('/team/{user}', [A\TeamController::class, 'update'])->name('team.update');
+            });
+
+            // Inbox
+            Route::middleware('admin.can:reports')->group(function () {
+                Route::get('/reports', [A\ReportController::class, 'index'])->name('reports');
+                Route::post('/reports/{report}/assign', [A\ReportController::class, 'assign'])->name('reports.assign');
+                Route::post('/reports/{report}/resolve', [A\ReportController::class, 'resolve'])->name('reports.resolve');
+            });
+            Route::middleware('admin.can:moderation')->group(function () {
+                Route::get('/jobs', [A\ModerationController::class, 'jobs'])->name('jobs');
+                Route::post('/jobs/{job}/moderate', [A\ModerationController::class, 'moderateJob'])->name('jobs.moderate');
+                Route::get('/portfolio', [A\ModerationController::class, 'portfolio'])->name('portfolio');
+                Route::post('/portfolio/approve-all', [A\ModerationController::class, 'approveAll'])->name('portfolio.approve-all');
+                Route::post('/portfolio/{project}/moderate', [A\ModerationController::class, 'moderatePortfolio'])->name('portfolio.moderate');
+            });
+            Route::middleware('admin.can:verification')->group(function () {
+                Route::get('/verification', [A\VerificationController::class, 'index'])->name('verification');
+                Route::post('/verification/{verification}', [A\VerificationController::class, 'decide'])->name('verification.decide');
+            });
+            Route::middleware('admin.can:data_requests')->group(function () {
+                Route::get('/data-requests', [A\DataRequestController::class, 'index'])->name('data-requests');
+                Route::post('/data-requests/{dataRequest}', [A\DataRequestController::class, 'process'])->name('data-requests.process');
+            });
+
+            // Marketplace
+            Route::get('/applications', [A\MarketplaceController::class, 'applications'])->middleware('admin.can:marketplace')->name('applications');
+            Route::middleware('admin.can:agreements')->group(function () {
+                Route::get('/agreements', [A\MarketplaceController::class, 'agreements'])->name('agreements');
+                Route::get('/agreements/{project}', [A\MarketplaceController::class, 'showAgreement'])->name('agreements.show');
+            });
+            Route::get('/payment-detail-log', [A\MarketplaceController::class, 'disclosures'])->middleware('admin.can:disclosures')->name('disclosures');
+            Route::middleware('admin.can:reviews')->group(function () {
+                Route::get('/reviews', [A\MarketplaceController::class, 'reviews'])->name('reviews');
+                Route::post('/reviews/{review}/toggle', [A\MarketplaceController::class, 'toggleReview'])->name('reviews.toggle');
+            });
+
+            // Money
+            Route::middleware('admin.can:finance')->group(function () {
+                Route::get('/orders', [A\FinanceController::class, 'orders'])->name('orders');
+                Route::get('/orders/issues', [A\FinanceController::class, 'issues'])->name('orders.issues');
+                Route::get('/orders/export', [A\FinanceController::class, 'export'])->name('orders.export');
+                Route::post('/orders/{order}/refund', [A\FinanceController::class, 'refund'])->name('orders.refund');
+                Route::get('/subscriptions', [A\FinanceController::class, 'subscriptions'])->name('subscriptions');
+                Route::get('/plans', [A\FinanceController::class, 'products'])->name('products');
+                Route::put('/plans/{product}', [A\FinanceController::class, 'updateProduct'])->name('products.update');
+            });
+
+            // Insights
+            Route::middleware('admin.can:insights')->prefix('insights')->name('insights.')->group(function () {
+                Route::get('/traffic', [A\InsightsController::class, 'traffic'])->name('traffic');
+                Route::get('/content', [A\InsightsController::class, 'content'])->name('content');
+                Route::get('/funnels', [A\InsightsController::class, 'funnels'])->name('funnels');
+                Route::get('/marketplace', [A\InsightsController::class, 'marketplace'])->name('marketplace');
+            });
+            Route::middleware('admin.can:exports')->group(function () {
+                Route::get('/insights/export', [A\InsightsController::class, 'export'])->name('insights.export');
+                Route::get('/insights/export/{dataset}', [A\InsightsController::class, 'download'])->name('insights.download');
+            });
+
+            // Content
+            Route::middleware('admin.can:content')->group(function () {
+                Route::get('/categories', [A\ContentController::class, 'categories'])->name('categories');
+                Route::post('/categories', [A\ContentController::class, 'storeCategory'])->name('categories.store');
+                Route::put('/categories/{category}', [A\ContentController::class, 'updateCategory'])->name('categories.update');
+                Route::delete('/categories/{category}', [A\ContentController::class, 'destroyCategory'])->name('categories.destroy');
+                Route::post('/skills', [A\ContentController::class, 'storeSkill'])->name('skills.store');
+                Route::delete('/skills/{skill}', [A\ContentController::class, 'destroySkill'])->name('skills.destroy');
+                Route::get('/featured', [A\ContentController::class, 'featured'])->name('featured');
+                Route::get('/announcement', [A\ContentController::class, 'announcement'])->name('announcement');
+                Route::put('/announcement', [A\ContentController::class, 'updateAnnouncement'])->name('announcement.update');
+            });
+
+            // System
+            Route::middleware('admin.can:settings')->group(function () {
+                Route::get('/settings', [A\SystemController::class, 'settings'])->name('settings');
+                Route::put('/settings', [A\SystemController::class, 'updateSettings'])->name('settings.update');
+            });
+            Route::get('/health', [A\SystemController::class, 'health'])->middleware('admin.can:health')->name('health');
+            Route::get('/audit', [A\SystemController::class, 'audit'])->middleware('admin.can:audit')->name('audit');
         });
     });
 });

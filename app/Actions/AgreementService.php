@@ -95,6 +95,7 @@ class AgreementService
             }
 
             $version->update(['status' => 'confirmed']);
+            \App\Support\Analytics::track('agreement_confirmed', $application, ['amount' => $version->amount_minor]);
             $application->transitionTo('accepted', $user->id, 'Both parties confirmed agreement v'.$version->version);
 
             $project = Project::forceCreate([

@@ -24,6 +24,7 @@ class PageController extends Controller
         // Bento showcase: strongest recent work (views + likes), covers only.
         $showcase = PortfolioProject::discoverable()->whereNotNull('cover_path')
             ->with(['profile.user', 'category'])->withCount('likes')
+            ->orderByRaw('CASE WHEN featured_at IS NULL THEN 1 ELSE 0 END')->orderByDesc('featured_at') // admin-featured work leads
             ->orderByRaw('views + 20 * (select count(*) from portfolio_likes pl where pl.portfolio_project_id = portfolio_projects.id) desc')
             ->take(7)->get();
         $jobs = JobPost::live()->with(['client.user', 'category'])->orderByDesc('is_featured')->latest('published_at')->take(4)->get();

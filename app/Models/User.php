@@ -24,6 +24,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'is_freelancer' => 'boolean',
             'is_client' => 'boolean',
+            'last_login_at' => 'datetime',
+            'last_seen_at' => 'datetime',
         ];
     }
 
@@ -77,6 +79,30 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasAdminRole(string ...$roles): bool
     {
         return $this->admin_role === 'super_admin' || in_array($this->admin_role, $roles, true);
+    }
+
+    /** Whether this admin may use a console section (see config/admin.php). */
+    public function canAdmin(string $section): bool
+    {
+        if (! $this->isAdmin()) {
+            return false;
+        }
+        if ($this->admin_role === 'super_admin') {
+            return true;
+        }
+        $roles = config("admin.sections.{$section}", []);
+
+        return in_array('*', $roles, true) || in_array($this->admin_role, $roles, true);
+    }
+
+    public function adminRoleLabel(): ?string
+    {
+        return $this->admin_role ? (config('admin.roles')[$this->admin_role] ?? $this->admin_role) : null;
+    }
+
+    public function adminNotes()
+    {
+        return $this->hasMany(AdminNote::class)->latest();
     }
 
     public function isActive(): bool

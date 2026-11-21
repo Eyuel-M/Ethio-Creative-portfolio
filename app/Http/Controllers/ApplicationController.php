@@ -32,6 +32,7 @@ class ApplicationController extends Controller
         $this->guardCanApply($request, $job);
         $job->load(['questions', 'client.user', 'skills']);
         $portfolio = $profile->publishedProjects()->get();
+        \App\Support\Analytics::track('apply_start', $job);
 
         return view('applications.create', compact('job', 'portfolio', 'profile'));
     }
@@ -113,6 +114,8 @@ class ApplicationController extends Controller
             'file'
         ));
 
+        \App\Support\Analytics::track('application_submitted', $application, ['job' => $job->id, 'category' => $job->category_id]);
+
         return redirect()->route('applications.show', $application)->with('status', 'Application submitted. You can track its status here.');
     }
 
@@ -142,6 +145,9 @@ class ApplicationController extends Controller
         $data = $request->validate(['status' => 'required|in:'.implode(',', $allowed), 'reason' => 'nullable|string|max:300']);
 
         $application->transitionTo($data['status'], $user->id, $data['reason'] ?? null);
+        if ($data['status'] === 'shortlisted') {
+            \App\Support\Analytics::track('shortlisted', $application);
+        }
 
         $recipient = $isClient ? $application->freelancer->user : $application->jobPost->client->user;
         $recipient->notify(new MarketplaceNotification(
@@ -185,6 +191,8 @@ class ApplicationController extends Controller
                 'title' => $m['title'], 'due_date' => $m['due_date'] ?? null, 'amount_minor' => Money::toMinor($m['amount'] ?? null),
             ])->values()->all() ?: null,
         ]);
+
+        \App\Support\Analytics::track('agreement_proposed', $application);
 
         return back()->with('status', 'Agreement version created. Both parties must confirm this exact version.');
     }

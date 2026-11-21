@@ -76,6 +76,12 @@ class FreelancerDirectoryController extends Controller
         $filterCount = collect(['category', 'level', 'availability', 'location', 'rating', 'rate_min', 'rate_max', 'languages', 'projects', 'skills', 'experienced'])
             ->filter(fn ($k) => filled($f[$k] ?? null))->count();
 
+        if (filled($f['q'] ?? null) && ! $request->has('page')) {
+            \App\Support\Analytics::track('search', null, ['area' => 'talent', 'q' => mb_strtolower(trim($f['q'])), 'results' => $profiles->total()]);
+        } elseif ($filterCount && ! $request->has('page')) {
+            \App\Support\Analytics::track('filter_used', null, ['area' => 'talent', 'filters' => $filterCount]);
+        }
+
         return view('freelancers.index', compact('profiles', 'categories', 'f', 'shortlisted', 'locations', 'languages', 'popularSkills', 'filterCount'));
     }
 
@@ -87,11 +93,12 @@ class FreelancerDirectoryController extends Controller
 
         if (! $isOwner) {
             $profile->increment('profile_views');
+            \App\Support\Analytics::track('profile_view', $profile, ['category' => $profile->category_id]);
         }
 
         $profile->load(['user', 'category', 'skills']);
         $projects = $profile->publishedProjects()->with('category')->get();
-        $reviews = Review::where('reviewee_id', $profile->user_id)->with(['reviewer', 'project'])->latest()->take(10)->get();
+        $reviews = Review::where('reviewee_id', $profile->user_id)->whereNull('hidden_at')->with(['reviewer', 'project'])->latest()->take(10)->get();
         $rating = $profile->rating();
         $completed = \App\Models\Project::where('freelancer_user_id', $profile->user_id)->where('status', 'completed')->count();
         $clientJobs = $viewer?->clientProfile ? $viewer->clientProfile->jobPosts()->whereIn('status', ['published'])->get() : collect();
@@ -103,7 +110,10 @@ class FreelancerDirectoryController extends Controller
     public function toggleShortlist(Request $request, FreelancerProfile $profile)
     {
         abort_unless($profile->is_public, 404);
-        $request->user()->shortlist()->toggle([$profile->id]);
+        $res = $request->user()->shortlist()->toggle([$profile->id]);
+        if (! empty($res['attached'])) {
+            \App\Support\Analytics::track('saved_talent', $profile);
+        }
 
         return back()->with('status', 'Shortlist updated.');
     }

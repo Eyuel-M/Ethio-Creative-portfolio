@@ -5,4 +5,5 @@
 <meta name="description" content="Portfolio-first marketplace for Ethiopian creative freelancers and the clients who hire them.">
 <meta property="og:site_name" content="{{ config('marketplace.brand') }}">
 @stack('meta')
+@if(! empty($analyticsPageview))<meta name="ec-pv" content="{{ $analyticsPageview }}">@endif
 @vite(['resources/css/app.css', 'resources/js/app.js'])

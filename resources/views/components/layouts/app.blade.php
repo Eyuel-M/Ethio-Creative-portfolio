@@ -4,6 +4,7 @@
 <html lang="en">
 <head>@include('partials.head', ['title' => $title])</head>
 <body class="min-h-screen bg-canvas">
+@include('partials.site-banners')
 <x-app-nav :counts="$navCounts ?? []"/>
 @if(! $user->hasVerifiedEmail())
     <div class="bg-amber-50 px-6 py-2.5 text-center text-sm text-amber-800">Please verify your email address. <a class="font-semibold underline" href="{{ route('verification.notice') }}">Verify now</a></div>

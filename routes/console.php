@@ -64,3 +64,13 @@ Artisan::command('media:prune-uploads', function () {
 })->purpose('Delete images that were uploaded but never saved into a project');
 
 \Illuminate\Support\Facades\Schedule::command('media:prune-uploads')->daily();
+
+// Heartbeat for Admin → System health ("is the scheduler running?").
+\Illuminate\Support\Facades\Schedule::call(fn () => \Illuminate\Support\Facades\Cache::put('scheduler:last_run', now()->toIso8601String(), now()->addDay()))->everyMinute()->name('scheduler-heartbeat');
+// Expired personal-data exports are deleted after 7 days.
+\Illuminate\Support\Facades\Schedule::call(function () {
+    foreach (\App\Models\DataRequest::whereNotNull('export_path')->where('export_expires_at', '<', now())->get() as $r) {
+        \Illuminate\Support\Facades\Storage::disk('local')->delete($r->export_path);
+        $r->forceFill(['export_path' => null])->save();
+    }
+})->daily()->name('expire-data-exports');

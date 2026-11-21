@@ -7,6 +7,7 @@
 <html lang="en">
 <head>@include('partials.head', ['title' => $title])</head>
 <body class="min-h-screen bg-white pb-10">
+@include('partials.site-banners')
 
 <x-app-nav :counts="$navCounts ?? []"/>
 

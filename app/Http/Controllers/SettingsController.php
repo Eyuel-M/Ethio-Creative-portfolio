@@ -48,10 +48,10 @@ class SettingsController extends Controller
             'jobs' => (clone $jobs)->whereNotIn('status', ['draft', 'pending_payment'])->count(),
             'live' => (clone $jobs)->live()->count(),
             'hires' => \App\Models\Project::where('client_user_id', $user->id)->count(),
-            'rating' => round((float) \App\Models\Review::where('reviewee_id', $user->id)->avg('rating'), 1),
-            'reviews' => \App\Models\Review::where('reviewee_id', $user->id)->count(),
+            'rating' => round((float) \App\Models\Review::whereNull('hidden_at')->where('reviewee_id', $user->id)->avg('rating'), 1),
+            'reviews' => \App\Models\Review::whereNull('hidden_at')->where('reviewee_id', $user->id)->count(),
         ];
-        $reviews = \App\Models\Review::where('reviewee_id', $user->id)->with('reviewer')->latest()->take(5)->get();
+        $reviews = \App\Models\Review::whereNull('hidden_at')->where('reviewee_id', $user->id)->with('reviewer')->latest()->take(5)->get();
 
         return view('profile.client', compact('user', 'client', 'stats', 'reviews'));
     }
@@ -239,5 +239,39 @@ class SettingsController extends Controller
         $client->save();
 
         return redirect()->route('settings', ['tab' => 'client'])->with('status', 'Client profile saved.');
+    }
+
+    // ── Verification & personal data requests (feed the admin queues) ──
+
+    public function requestVerification(Request $request)
+    {
+        $user = $request->user();
+        abort_unless($user->clientProfile && ! $user->clientProfile->is_verified, 422);
+        abort_if(\App\Models\VerificationRequest::where('user_id', $user->id)->where('status', 'pending')->exists(), 422, 'You already have a request under review.');
+        $data = $request->validate(['business_name' => 'required|string|max:120', 'registration_number' => 'required|string|max:80', 'website' => 'nullable|url|max:200', 'message' => 'nullable|string|max:500']);
+        \App\Models\VerificationRequest::create($data + ['user_id' => $user->id, 'kind' => 'client']);
+        \App\Support\AdminMenu::forget();
+        \App\Support\Analytics::track('verification_requested');
+
+        return redirect()->route('settings', ['tab' => 'client'])->with('status', 'Thanks — we’ll review your business and notify you.');
+    }
+
+    public function requestData(Request $request)
+    {
+        $data = $request->validate(['type' => 'required|in:export,deletion', 'note' => 'nullable|string|max:500']);
+        $user = $request->user();
+        if (! \App\Models\DataRequest::where('user_id', $user->id)->where('type', $data['type'])->where('status', 'pending')->exists()) {
+            \App\Models\DataRequest::create(['user_id' => $user->id, 'requester_email' => $user->email, 'type' => $data['type'], 'note' => $data['note'] ?? null]);
+            \App\Support\AdminMenu::forget();
+        }
+
+        return redirect()->route('settings', ['tab' => 'account'])->with('status', $data['type'] === 'export' ? 'Request received — we’ll notify you when your file is ready.' : 'Deletion request received. Our team will confirm with you before anything is removed.');
+    }
+
+    public function downloadExport(Request $request, \App\Models\DataRequest $dataRequest)
+    {
+        abort_unless($dataRequest->user_id === $request->user()->id && $dataRequest->exportAvailable(), 404);
+
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($dataRequest->export_path, 'my-data-'.now()->format('Y-m-d').'.json');
     }
 }

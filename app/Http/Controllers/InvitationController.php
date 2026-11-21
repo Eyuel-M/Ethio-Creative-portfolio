@@ -37,6 +37,8 @@ class InvitationController extends Controller
 
         $profile->user->notify(new MarketplaceNotification('You were invited to a job', "{$request->user()->name} invited you to discuss “{$job->title}”.", route('invitations.index'), 'mail'));
 
+        \App\Support\Analytics::track('invite_sent', $profile);
+
         return back()->with('status', 'Invitation sent.');
     }
 

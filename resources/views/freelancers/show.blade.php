@@ -119,6 +119,7 @@
                 <p class="mt-2 text-sm text-muted">Reviews appear after completed projects.</p>
             @endforelse
         </div>
+        @if(! $isOwner)<div class="px-1"><x-report-button type="profile" :id="$profile->id" label="Report this profile"/></div>@endif
     </aside>
 </div>
 @if($isOwner)

@@ -26,6 +26,7 @@ class BillingController extends Controller
     {
         abort_unless($product->audience === 'freelancer' && $request->user()->is_freelancer, 403);
         $order = $orders->create($request->user(), $product);
+        \App\Support\Analytics::track('checkout_started', $order, ['product' => $product->code]);
 
         return redirect()->away($orders->checkoutUrl($order));
     }

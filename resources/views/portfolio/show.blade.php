@@ -106,6 +106,7 @@
                 @foreach($project->tags as $t)<span class="chip">{{ $t }}</span>@endforeach
             </div>
         @endif
+        @if(! $isOwner && $project->isPublished())<div class="mt-8"><x-report-button type="portfolio" :id="$project->id" label="Report this project"/></div>@endif
     </footer>
 </article>
 

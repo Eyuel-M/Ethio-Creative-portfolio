@@ -88,6 +88,26 @@
     </div>
     <div class="mt-6 text-right"><button class="btn btn-dark">Save client profile</button></div>
 </form>
+@php $vr = \App\Models\VerificationRequest::where('user_id', $user->id)->latest()->first(); @endphp
+<section class="card card-pad" id="verification">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+        <div><h2 class="panel-title flex items-center gap-2">Business verification @if($cp->is_verified)<x-icon name="verified" class="size-5 text-brand"/>@endif</h2>
+        <p class="mt-1 text-sm text-muted">Verified clients get a badge on their jobs, which helps freelancers trust your posts.</p></div>
+        @if($cp->is_verified)<span class="pill bg-emerald-50 text-emerald-700 ring-emerald-600/15">Verified</span>@elseif($vr?->status === 'pending')<span class="pill bg-amber-50 text-amber-700 ring-amber-600/20">Under review</span>@endif
+    </div>
+    @if(! $cp->is_verified && $vr?->status !== 'pending')
+        @if($vr?->status === 'rejected')<p class="mt-4 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700">Your last request wasn't approved: {{ $vr->decision_note }}</p>@endif
+        <form method="POST" action="{{ route('settings.verification') }}" class="mt-5 grid gap-4 md:grid-cols-2">@csrf
+            <div><label class="label" for="vb">Registered business name</label><input id="vb" name="business_name" value="{{ old('business_name', $cp->company_name) }}" class="input" required maxlength="120"></div>
+            <div><label class="label" for="vr">Business licence or TIN</label><input id="vr" name="registration_number" value="{{ old('registration_number') }}" class="input" required maxlength="80"></div>
+            <div><label class="label" for="vw">Website or social page <span class="font-normal text-muted">(optional)</span></label><input id="vw" type="url" name="website" value="{{ old('website', $cp->website) }}" class="input" placeholder="https://"></div>
+            <div><label class="label" for="vm">Anything we should know? <span class="font-normal text-muted">(optional)</span></label><input id="vm" name="message" value="{{ old('message') }}" class="input" maxlength="500"></div>
+            <div class="md:col-span-2 text-right"><button class="btn btn-dark">Request verification</button></div>
+        </form>
+    @elseif($vr?->status === 'pending')
+        <p class="mt-4 text-sm text-ink-soft">We received your request {{ $vr->created_at->diffForHumans() }}. You'll get a notification when it's reviewed.</p>
+    @endif
+</section>
 @endif
 
 @if($tab === 'account')
@@ -111,5 +131,32 @@
 </form>
 <form id="enable-f" method="POST" action="{{ route('workspace.enable') }}">@csrf<input type="hidden" name="role" value="freelancer"></form>
 <form id="enable-c" method="POST" action="{{ route('workspace.enable') }}">@csrf<input type="hidden" name="role" value="client"></form>
+
+@php $dataRequests = \App\Models\DataRequest::where('user_id', $user->id)->latest()->take(5)->get(); $pendingTypes = $dataRequests->where('status', 'pending')->pluck('type')->all(); @endphp
+<section class="card card-pad" id="your-data">
+    <h2 class="panel-title">Your data</h2>
+    <p class="mt-1 text-sm text-muted">Download a copy of everything we hold about you, or ask us to delete your account. Our team handles requests within 30 days.</p>
+    <div class="mt-5 grid gap-3 md:grid-cols-2">
+        <form method="POST" action="{{ route('settings.data-request') }}" class="rounded-2xl border border-line p-4">@csrf<input type="hidden" name="type" value="export">
+            <p class="font-medium">Download my data</p><p class="mt-1 text-sm text-muted">Profile, portfolio, jobs, applications, messages, orders and activity — as one file.</p>
+            <button class="btn btn-light btn-sm mt-3" @disabled(in_array('export', $pendingTypes))>{{ in_array('export', $pendingTypes) ? 'Requested' : 'Request a copy' }}</button>
+        </form>
+        <form method="POST" action="{{ route('settings.data-request') }}" class="rounded-2xl border border-rose-200 p-4" onsubmit="return confirm('Ask us to permanently delete your account and personal data?')">@csrf<input type="hidden" name="type" value="deletion">
+            <p class="font-medium text-rose-700">Delete my account</p><p class="mt-1 text-sm text-muted">Removes your profile, portfolio and personal details. Payment records are kept anonymously for accounting.</p>
+            <input name="note" maxlength="500" class="input mt-3 h-10 text-sm" placeholder="Why are you leaving? (optional)">
+            <button class="btn btn-danger btn-sm mt-3" @disabled(in_array('deletion', $pendingTypes))>{{ in_array('deletion', $pendingTypes) ? 'Requested' : 'Request deletion' }}</button>
+        </form>
+    </div>
+    @if($dataRequests->isNotEmpty())
+        <ul class="mt-5 divide-y divide-line rounded-2xl border border-line text-sm">
+            @foreach($dataRequests as $r)
+                <li class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
+                    <span>{{ $r->type === 'export' ? 'Data copy' : 'Account deletion' }} · {{ $r->created_at->format('M j, Y') }}</span>
+                    <span class="flex items-center gap-2">@if($r->exportAvailable())<a href="{{ route('settings.data-export', $r) }}" class="btn btn-sm btn-dark"><x-icon name="download" class="size-4"/> Download</a>@endif<x-status :status="$r->status"/></span>
+                </li>
+            @endforeach
+        </ul>
+    @endif
+</section>
 @endif
 </x-layouts.app>

@@ -27,6 +27,8 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'These credentials do not match our records.'])->onlyInput('email');
         }
         $request->session()->regenerate();
+        $request->user()->forceFill(['last_login_at' => now()])->saveQuietly();
+        \App\Support\Analytics::track('login');
         if ($request->user()->isAdmin()) {
             \App\Models\AuditLog::record('admin.login', $request->user());
         }
@@ -36,11 +38,16 @@ class AuthController extends Controller
 
     public function showRegister(Request $request)
     {
+        if (! \App\Support\Settings::flag('registrations_open')) {
+            return view('auth.closed');
+        }
+
         return view('auth.register', ['role' => $request->query('role', 'freelancer')]);
     }
 
     public function register(Request $request)
     {
+        abort_unless(\App\Support\Settings::flag('registrations_open'), 403, 'Sign-ups are paused right now.');
         $data = $request->validate([
             'name' => 'required|string|max:120',
             'email' => 'required|email|max:190|unique:users,email',
@@ -68,6 +75,8 @@ class AuthController extends Controller
         event(new Registered($user));
         Auth::login($user);
         $request->session()->regenerate();
+        $user->forceFill(['last_login_at' => now()])->saveQuietly();
+        \App\Support\Analytics::track('signup', null, ['role' => $data['role']], $user->id);
 
         return redirect()->route('verification.notice');
     }

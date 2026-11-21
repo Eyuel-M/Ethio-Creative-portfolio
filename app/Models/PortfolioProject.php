@@ -14,7 +14,7 @@ class PortfolioProject extends Model
 
     protected function casts(): array
     {
-        return ['tags' => 'array', 'project_date' => 'date', 'published_at' => 'datetime'];
+        return ['tags' => 'array', 'project_date' => 'date', 'published_at' => 'datetime', 'reviewed_at' => 'datetime', 'featured_at' => 'datetime'];
     }
 
     public function profile()

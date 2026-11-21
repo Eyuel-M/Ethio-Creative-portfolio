@@ -81,6 +81,12 @@ class JobBoardController extends Controller
         $savedIds = $request->user()?->savedJobs()->pluck('job_posts.id')->all() ?? [];
         $appliedIds = $request->user()?->freelancerProfile?->applications()->pluck('job_post_id')->all() ?? [];
 
+        if (filled($f['q'] ?? null) && ! $request->has('page')) {
+            \App\Support\Analytics::track('search', null, ['area' => 'jobs', 'q' => mb_strtolower(trim($f['q'])), 'results' => $jobs->total()]);
+        } elseif ($filterCount && ! $request->has('page')) {
+            \App\Support\Analytics::track('filter_used', null, ['area' => 'jobs', 'filters' => $filterCount]);
+        }
+
         return view('jobs.index', compact('jobs', 'categories', 'locations', 'filterCount', 'levelCounts', 'budgetRanges', 'budgetCounts', 'proposalRanges', 'savedIds', 'appliedIds', 'f'));
     }
 
@@ -89,6 +95,9 @@ class JobBoardController extends Controller
         $user = $request->user();
         abort_unless($job->isLive() || $job->ownedBy($user) || $user?->isAdmin(), 404);
         $job->load(['client.user', 'category', 'skills', 'questions'])->loadCount('applications');
+        if (! $job->ownedBy($user)) {
+            \App\Support\Analytics::track('job_view', $job, ['category' => $job->category_id]);
+        }
         $application = $user?->freelancerProfile ? $job->applications()->where('freelancer_profile_id', $user->freelancerProfile->id)->first() : null;
         $saved = $user ? $user->savedJobs()->whereKey($job->id)->exists() : false;
         $similar = JobPost::live()->where('id', '!=', $job->id)->where('category_id', $job->category_id)->with('client.user')->take(3)->get();
@@ -103,7 +112,10 @@ class JobBoardController extends Controller
     public function toggleSave(Request $request, JobPost $job)
     {
         abort_unless($job->isLive(), 404);
-        $request->user()->savedJobs()->toggle([$job->id]);
+        $res = $request->user()->savedJobs()->toggle([$job->id]);
+        if (! empty($res['attached'])) {
+            \App\Support\Analytics::track('saved_job', $job);
+        }
 
         return back();
     }

@@ -31,6 +31,7 @@ class MessageController extends Controller
         abort_unless($conversation->hasParticipant($request->user()), 403);
         $data = $request->validate(['body' => 'required|string|max:4000']);
         $conversation->messages()->create(['user_id' => $request->user()->id, 'body' => $data['body']]);
+        \App\Support\Analytics::track('message_sent');
         $conversation->update(['last_message_at' => now()]);
 
         $other = $conversation->otherParty($request->user());

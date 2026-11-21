@@ -55,6 +55,7 @@ class ProjectController extends Controller
         $project->transitionTo($data['status'], $user->id, $data['reason'] ?? null);
         if ($data['status'] === 'completed') {
             $project->forceFill(['completed_at' => now()])->save();
+            \App\Support\Analytics::track('project_completed', $project);
         }
         $label = str_replace('_', ' ', $data['status']);
         $project->log('status', "{$user->name} set status to {$label}".(($data['reason'] ?? null) ? " — {$data['reason']}" : ''), $user->id);
@@ -131,6 +132,8 @@ class ProjectController extends Controller
             'body' => $data['body'] ?? null,
         ]);
         $project->log('review', "{$user->name} left a review", $user->id);
+
+        \App\Support\Analytics::track('review_left', $project);
 
         return back()->with('status', 'Thanks — your review was recorded.');
     }

@@ -29,6 +29,7 @@ class PortfolioController extends Controller
         abort_unless(($project->isPublished() && $project->profile->is_public && $project->profile->user->isActive()) || $isOwner || $request->user()?->isAdmin(), 404);
         if (! $isOwner) {
             $project->increment('views');
+            \App\Support\Analytics::track('portfolio_view', $project, ['category' => $project->category_id]);
         }
         $more = $project->profile->publishedProjects()->where('id', '!=', $project->id)->with('category')->withCount('likes')->take(8)->get();
         $likedIds = $request->user() ? \Illuminate\Support\Facades\DB::table('portfolio_likes')->where('user_id', $request->user()->id)->whereIn('portfolio_project_id', $more->pluck('id')->push($project->id))->pluck('portfolio_project_id')->all() : [];
@@ -139,10 +140,17 @@ class PortfolioController extends Controller
 
     private function publish(PortfolioProject $project): void
     {
+        if (! \App\Support\Settings::flag('portfolio_publishing_open')) {
+            throw ValidationException::withMessages(['title' => 'Publishing is paused for a short while. Your draft is saved.']);
+        }
         if (! $project->cover_path && ! $project->blocks()->where(fn ($q) => $q->whereNotNull('media_path')->orWhereNotNull('media'))->exists()) {
             throw ValidationException::withMessages(['cover' => 'Add a cover image or at least one image block before publishing.']);
         }
+        $first = $project->published_at === null;
         $project->forceFill(['status' => 'published', 'published_at' => $project->published_at ?? now()])->save();
+        if ($first) {
+            \App\Support\Analytics::track('portfolio_published', $project, ['category' => $project->category_id]);
+        }
     }
 
     private function authorizeOwner(Request $request, PortfolioProject $project): void

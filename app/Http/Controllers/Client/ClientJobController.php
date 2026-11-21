@@ -31,11 +31,17 @@ class ClientJobController extends Controller
 
     public function create()
     {
+        if (! \App\Support\Settings::flag('job_posting_open')) {
+            return redirect()->route('client.jobs.index')->with('status', 'New job posts are paused for a short while. Please try again later.');
+        }
+        \App\Support\Analytics::track('job_started');
+
         return view('client.jobs.form', $this->formData(new JobPost(['currency' => 'ETB', 'budget_type' => 'fixed', 'experience_level' => 'intermediate', 'hires_needed' => 1, 'is_remote' => true])));
     }
 
     public function store(Request $request)
     {
+        abort_unless(\App\Support\Settings::flag('job_posting_open'), 403, 'New job posts are paused right now.');
         $data = $this->validated($request);
         $job = DB::transaction(function () use ($request, $data) {
             $job = new JobPost($data['attributes']);
@@ -148,7 +154,7 @@ class ClientJobController extends Controller
         $view = $request->query('view', 'cards');
         $counts = $job->applications()->selectRaw('status, count(*) c')->groupBy('status')->pluck('c', 'status');
         $stats = $job->applications()->selectRaw('avg(proposed_amount_minor) price, avg(estimated_days) days, min(proposed_amount_minor) low')->first();
-        $ratings = \App\Models\Review::whereIn('reviewee_id', $applications->pluck('freelancer.user_id'))
+        $ratings = \App\Models\Review::whereNull('hidden_at')->whereIn('reviewee_id', $applications->pluck('freelancer.user_id'))
             ->selectRaw('reviewee_id, avg(rating) avg, count(*) c')->groupBy('reviewee_id')->get()->keyBy('reviewee_id');
 
         return view('client.jobs.applicants', compact('job', 'applications', 'f', 'view', 'counts', 'stats', 'ratings'));

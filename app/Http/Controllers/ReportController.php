@@ -23,6 +23,9 @@ class ReportController extends Controller
             'details' => $data['details'] ?? null,
         ]);
 
+        \App\Support\AdminMenu::forget();
+        \App\Support\Analytics::track('report_filed', null, ['type' => $data['type']]);
+
         return back()->with('status', 'Thanks — our moderators will review this report.');
     }
 }

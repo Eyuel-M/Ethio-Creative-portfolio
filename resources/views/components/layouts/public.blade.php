@@ -3,6 +3,7 @@
 <html lang="en">
 <head>@include('partials.head', ['title' => $title])</head>
 <body class="min-h-screen bg-[#fbfbfd]" x-data="{ nav: false }">
+@include('partials.site-banners')
 {{-- Top bar: same unboxed look everywhere, inset from the top edge (inside the hero card on the home page). --}}
 <header class="{{ $hero ? 'absolute inset-x-0 top-0' : 'relative border-b border-line pb-5' }} z-30 px-3 pt-6 sm:px-4 sm:pt-8">
     <div class="mx-auto flex h-16 max-w-[1320px] items-center justify-between gap-4 px-4 sm:mx-4 sm:px-5 lg:mx-auto">

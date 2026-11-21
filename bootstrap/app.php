@@ -16,8 +16,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\EnsureRole::class,
             'active' => \App\Http\Middleware\EnsureActive::class,
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
+            'admin.can' => \App\Http\Middleware\AdminCan::class,
+            'admin.stepup' => \App\Http\Middleware\AdminStepUp::class,
         ]);
-        $middleware->validateCsrfTokens(except: ['webhooks/*']);
+        $middleware->web(append: [
+            \App\Http\Middleware\ImpersonationGuard::class,
+            \App\Http\Middleware\TrackVisit::class,
+        ]);
+        $middleware->validateCsrfTokens(except: ['webhooks/*', 'a/*']);
         $middleware->redirectUsersTo(fn () => route('home'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {

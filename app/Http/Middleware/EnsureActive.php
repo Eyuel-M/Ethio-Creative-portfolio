@@ -11,7 +11,7 @@ class EnsureActive
     public function handle(Request $request, Closure $next)
     {
         $user = $request->user();
-        if ($user && in_array($user->status, ['suspended', 'banned'], true)) {
+        if ($user && in_array($user->status, ['suspended', 'banned', 'deleted'], true)) {
             Auth::logout();
             $request->session()->invalidate();
 

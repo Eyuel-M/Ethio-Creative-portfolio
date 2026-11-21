@@ -84,12 +84,16 @@ class DemoData
 
             // Deleting the accounts cascades to profiles → portfolios/likes, jobs → applications,
             // invitations, conversations/messages, saved items, confirmations and reports.
+            DB::table('data_requests')->whereIn('user_id', $ids)->delete();
             $users = User::whereIn('id', $ids)->delete();
 
             return ['users' => $users, 'projects' => $projects->count(), 'reviews' => $reviews, 'agreements' => $agreements, 'orders' => $orders];
         });
 
         Storage::disk('public')->deleteDirectory('seed');
+        foreach (['analytics_events', 'analytics_pageviews', 'analytics_sessions'] as $t) {
+            DB::table($t)->where('is_demo', true)->delete();
+        }
 
         return $counts;
     }

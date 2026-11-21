@@ -99,7 +99,7 @@ class FreelancerProfile extends Model
 
     public function rating(): array
     {
-        $q = Review::where('reviewee_id', $this->user_id);
+        $q = Review::where('reviewee_id', $this->user_id)->whereNull('hidden_at');
 
         return ['avg' => round((float) $q->avg('rating'), 1), 'count' => $q->count()];
     }

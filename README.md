@@ -122,3 +122,29 @@ On the server:
 ```cron
 * * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1
 ```
+
+## Admin console
+
+Sign in as an admin (demo: `admin@demo.test` / `password`) and open **Admin console** from the avatar menu, or go to `/admin`.
+
+- **Roles** (`config/admin.php`): super admin, moderator, support, finance, dispute reviewer, analyst. Menus, routes and
+  actions all follow that one map; super admins manage the team under **People → Admin team**.
+- **Every action needs a reason** and lands in the audit log. Suspending or banning signs the member out everywhere.
+- **Two-step sign-in**: admins confirm an emailed code every 12 hours. On by default in production; set
+  `ADMIN_STEP_UP=true` to try it locally (the code is shown on screen outside production).
+- **View as user** (support): read-only — any change is refused — with a banner and an audit entry.
+- Members feed the queues from the site: **Report** links (jobs, profiles, portfolio projects), **business
+  verification** and **Your data** (export / deletion requests) in Settings.
+
+## Analytics (Insights)
+
+First-party and anonymous: a random visitor cookie (`ec_vid`) and 30-minute visits — no IP addresses, no third-party
+scripts. Each visit records where it came from (search engine, social platform, other website, email, UTM campaign or
+direct), device, landing page, pages viewed, time actually spent on each page and how far it was scrolled. Searches,
+appreciations, shares, applications, hires and payments are recorded as interaction events.
+
+- **Admin → Insights**: Traffic & sources, Content & behaviour, Funnels, Marketplace health, and **Data export**
+  (pseudonymous CSVs for your own analysis).
+- Tag links you share with `?utm_source=telegram&utm_medium=social&utm_campaign=launch-week` to see campaigns.
+- Switch tracking off, or make it respect Do Not Track, under **Admin → Settings & switches**.
+- Demo analytics (90 days) load with `php artisan demo:seed` and are removed by `php artisan demo:clear`.

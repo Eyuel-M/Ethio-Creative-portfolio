@@ -1,0 +1,108 @@
+{
+ "title": "Sone Academy",
+ "client": "SONE GENERAL TRADING PLC",
+ "year": "2024",
+ "scope": [
+  "Brand Identity",
+  "Print",
+  "Publication"
+ ],
+ "summary": "SONE Academy combines global educational standards with affordable pricing. By offering high-end learning to local children, the academy bridges systemic gaps to empower and inspire the next generation.",
+ "overview_heading": "Strive for excellence",
+ "overview": "SONE Academy is an forward-thinking institution dedicated to delivering high-end education to local children. Built on the belief that exceptional learning should be accessible, the academy combines a comprehensive academic vision with affordable pricing. By integrating global perspectives and international benchmarks, SONE Academy elevates the classroom experience addressing systemic educational gaps at the root to empower a new generation of young learners.",
+ "deliverables": [
+  {
+   "desc": "A comprehensive visual system designed to capture the academy’s core values. This includes the primary mark, typography selection, and a curated color palette built for long-term scalability and recognition.",
+   "title": "BRAND IDENTITY"
+  },
+  {
+   "desc": "A cohesive suite of corporate assets, including business cards, letterheads, and envelopes. The design applies the visual identity systematically, ensuring a professional and premium touchpoint for every interaction.",
+   "title": "STATIONARY DESIGN"
+  },
+  {
+   "desc": "High-end marketing collateral designed to communicate the brand's mission effectively. Every asset features a clean layout, thoughtful typographic hierarchy, and intentional spacing tailored for physical media.",
+   "title": "PRINT"
+  }
+ ],
+ "cover": "18.jpg",
+ "blocks": [
+  {
+   "type": "image",
+   "file": "01.jpg"
+  },
+  {
+   "type": "heading",
+   "body": "Concept"
+  },
+  {
+   "type": "text",
+   "body": "Rooted in the symbolism of growth and stability, this concept utilizes a refined pictorial emblem. The design features a central trunk that branches outward, perfectly balancing form and negative space.\n\nMetaphorically, this represents an institution built on a solid foundationreaching out to expand horizons and fostering meaningful connections."
+  },
+  {
+   "type": "image",
+   "file": "02.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "03.jpg",
+    "04.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "heading",
+   "body": "My Process"
+  },
+  {
+   "type": "text",
+   "body": "The project began with market research to establish a clear visual direction. Through collaborative moodboarding, we aligned on the core aesthetic before moving into conceptual development.\n\nThe primary challenge was balancing the school’s friendly, forward-facing identity with its corporate parent company. This required a highly scalable visual system one that honors the academy’s distinct personality while remaining unified with the corporate brand."
+  },
+  {
+   "type": "image",
+   "file": "05.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "image",
+   "file": "09.jpg"
+  },
+  {
+   "type": "image",
+   "file": "10.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "11.jpg",
+    "12.jpg",
+    "13.jpg",
+    "14.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "15.jpg"
+  },
+  {
+   "type": "image",
+   "file": "16.jpg"
+  },
+  {
+   "type": "image",
+   "file": "17.jpg"
+  }
+ ]
+}

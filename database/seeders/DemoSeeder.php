@@ -88,6 +88,13 @@ class DemoSeeder extends Seeder
             'copywriting' => ['Bank app microcopy (Amharic)', 'Tourism campaign taglines', 'Product launch emails'],
         ];
 
+        // Real brand-identity work by Eyuel Mulat (eyuelmulat.com), shown on these demo profiles with permission.
+        $realProjects = [
+            'freelancer@demo.test' => ['sone-academy'],
+            'tsion@demo.test' => ['malden-cafe-and-restaurant'],
+            'bethlehem@demo.test' => ['adadi-studio'],
+        ];
+
         $freelancers = collect();
         foreach ($people as $i => [$name, $email, $catSlug, $title, $loc, $level, $yrs, $rate, $skills, $tools]) {
             $u = $this->user($name, $email, $i % 3 === 0 ? 'freelancer' : 'freelancer');
@@ -115,8 +122,14 @@ class DemoSeeder extends Seeder
             $pd->save();
 
             $titles = $projectTitles[$catSlug] ?? ['Selected work'];
-            foreach (array_slice($titles, 0, min(count($titles), $profile->portfolioLimit())) as $k => $pt) {
-                $this->portfolio($profile, $cat, $pt, $k);
+            $limit = min(count($titles), $profile->portfolioLimit());
+            // Real case studies (used with permission) lead some portfolios; the rest use generated placeholder art.
+            $real = $realProjects[$email] ?? [];
+            foreach ($real as $k => $slug) {
+                $this->realPortfolio($profile, $cat, $slug, $k);
+            }
+            foreach (array_slice($titles, 0, max(0, $limit - count($real))) as $k => $pt) {
+                $this->portfolio($profile, $cat, $pt, $k + count($real));
             }
             $freelancers->push($profile);
         }
@@ -344,6 +357,60 @@ class DemoSeeder extends Seeder
         ];
         foreach ($blocks as $i => $block) {
             $p->blocks()->create($block + ['sort_order' => $i, 'settings' => \App\Models\PortfolioBlock::cleanSettings($block['type'], [])]);
+        }
+    }
+
+    /** A real case study from database/seeders/demo-images/<author>/<slug>/manifest.json. */
+    private function realPortfolio(FreelancerProfile $profile, Category $cat, string $slug, int $k): void
+    {
+        $dir = database_path("seeders/demo-images/eyuel-mulat/{$slug}");
+        $m = json_decode(file_get_contents("{$dir}/manifest.json"), true);
+        $disk = Storage::disk(\App\Support\Media::disk());
+        $n = 0;
+        $put = function (string $file) use ($dir, $disk, $slug) {
+            $key = "seed/real/{$slug}/{$file}";
+            if (! $disk->exists($key)) {
+                $disk->put($key, file_get_contents("{$dir}/{$file}"));
+            }
+
+            return $key;
+        };
+        $alt = function () use ($m, &$n) {
+            $n++;
+
+            return "{$m['title']} — ".strtolower($m['scope'][0] ?? 'design')." work, image {$n}";
+        };
+
+        $p = PortfolioProject::forceCreate([
+            'id' => (string) Str::ulid(), 'freelancer_profile_id' => $profile->id, 'category_id' => $cat->id,
+            'title' => $m['title'], 'summary' => $m['summary'],
+            'cover_path' => $put($m['cover']), 'cover_alt' => "{$m['title']} brand identity",
+            'tags' => $m['scope'], 'client_attribution' => $m['client'] ? Str::title(Str::lower($m['client'])) : null,
+            'project_date' => $m['year'] ? Carbon::create((int) $m['year'], 6, 1) : now()->subMonths(6),
+            'status' => 'published', 'published_at' => now()->subDays(mt_rand(2, 30)),
+            'views' => mt_rand(400, 2500), 'sort_order' => $k,
+        ]);
+
+        $blocks = [];
+        if (! empty($m['overview'])) {
+            $blocks[] = ['type' => 'heading', 'body' => $m['overview_heading'] ?: 'Overview'];
+            $blocks[] = ['type' => 'text', 'body' => $m['overview'], 'settings' => ['size' => 'lg']];
+        }
+        foreach ($m['blocks'] as $b) {
+            $blocks[] = match ($b['type']) {
+                'image' => ['type' => 'image', 'media_path' => $put($b['file']), 'alt' => $alt()],
+                'gallery' => ['type' => 'gallery', 'media' => array_map(fn ($f) => ['path' => $put($f), 'alt' => $alt()], $b['files']), 'settings' => ['cols' => '2', 'gap' => 's']],
+                default => ['type' => $b['type'], 'body' => $b['body']],
+            };
+        }
+        if (! empty($m['deliverables'])) {
+            $blocks[] = ['type' => 'heading', 'body' => 'What was delivered', 'settings' => ['pad' => 'm']];
+            $blocks[] = ['type' => 'text', 'body' => collect($m['deliverables'])->map(fn ($d) => Str::title(Str::lower($d['title']))."\n".$d['desc'])->implode("\n\n")];
+        }
+        foreach ($blocks as $i => $block) {
+            $settings = \App\Models\PortfolioBlock::cleanSettings($block['type'], $block['settings'] ?? []);
+            unset($block['settings']);
+            $p->blocks()->create($block + ['sort_order' => $i, 'settings' => $settings]);
         }
     }
 

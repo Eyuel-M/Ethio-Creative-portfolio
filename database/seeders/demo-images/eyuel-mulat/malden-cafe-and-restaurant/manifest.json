@@ -1,0 +1,73 @@
+{
+ "title": "Malden Café and Restaurant",
+ "client": "Teketay Creative Works PLC",
+ "year": "2025",
+ "scope": [
+  "Brand Identity",
+  "Signage Design"
+ ],
+ "summary": "A premium Café and Restaurant bringing a refined taste to the local market, introducing an exceptional range of classic Italian and American delicacies to the iconic city of Addis Ababa, Bole.",
+ "overview_heading": "A new taste to a local market",
+ "overview": "Founded by a former Italian resident, Malden is rooted in cross-cultural integration and a deep passion for the culinary arts. The brand name itself is composed of family initials, reflecting a core value deeply shared by both Italian and Ethiopian cultures. Moving beyond its original suburban roots, Malden embarked on a comprehensive branding and interior modification process to establish a sophisticated, landmark destination designed specifically for the diaspora and international community.",
+ "deliverables": [
+  {
+   "desc": "A cross-cultural visual system crafted to tell the brand's story of origin and destination. Features a custom logo, thoughtful typography, and a premium color palette designed to stand out in the local market while remaining approachably familiar.",
+   "title": "Brand Identity"
+  },
+  {
+   "desc": "High-impact exterior and interior wayfinding elements engineered for the landmark Bole location. Designed to seamlessly guide guests through the space while establishing a bold, sophisticated street presence that captures the international community's attention.",
+   "title": "Signage Design"
+  },
+  {
+   "desc": "Structured layout frameworks for the print menus and collateral materials. Balancing classic Italian refinement with modern functionality, the typography and spacing are optimized to turn the culinary selection into a premium, easily readable visual experience.",
+   "title": "Layout"
+  }
+ ],
+ "cover": "12.jpg",
+ "blocks": [
+  {
+   "type": "image",
+   "file": "01.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "02.jpg",
+    "03.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "04.jpg"
+  },
+  {
+   "type": "image",
+   "file": "05.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "06.jpg",
+    "07.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "08.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "09.jpg",
+    "10.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "11.jpg"
+  }
+ ]
+}

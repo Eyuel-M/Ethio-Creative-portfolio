@@ -1,0 +1,86 @@
+{
+ "title": "Adadi Studio",
+ "client": "Private",
+ "year": "2025",
+ "scope": [
+  "Brand Identity",
+  "Stationary Design",
+  "Social Media"
+ ],
+ "summary": "ADADI Architecture & Construction Studio blends local landscapes with global innovations to craft unique, sustainable spaces. Balancing striking aesthetics with practical functionality, they design eco-conscious environments that beautifully elevate the human experience.",
+ "overview_heading": "We in the details",
+ "overview": "At ADADI Architecture &amp; Construction Studio, exceptional design is born from a meticulous obsession with the finer points. The studio seamlessly bridges the organic artistry of local landscapes with cutting-edge, global engineering techniques to cultivate environments that feel simultaneously innovative and intimately familiar. Driven by a philosophy where form and function exist in perfect equilibrium, ADADI transforms raw architectural concepts into structures with a distinct soul and a lasting footprint.",
+ "deliverables": [
+  {
+   "desc": "A comprehensive visual system engineered to translate the studio’s architectural innovation into a bold, memorable mark. Includes precision guidelines for typography, color strategy, and grid usage to ensure seamless narrative storytelling across all platforms.",
+   "title": "Brand Identity"
+  },
+  {
+   "desc": "A premium suite of unified print assets, including business cards, letterheads, and project folders. Designed with modernist precision and sharp layouts to reflect the studio's commitment to detail during every tactile client touchpoint.",
+   "title": "Stationary"
+  },
+  {
+   "desc": "A versatile framework of customizable templates designed to establish a cohesive and impactful digital presence. Engineered to stream structural narratives effortlessly across platforms, ensuring a high-end, unified aesthetic from day one.",
+   "title": "Social Media"
+  }
+ ],
+ "cover": "15.jpg",
+ "blocks": [
+  {
+   "type": "image",
+   "file": "01.jpg"
+  },
+  {
+   "type": "image",
+   "file": "02.gif"
+  },
+  {
+   "type": "image",
+   "file": "03.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "04.jpg",
+    "05.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "06.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "07.jpg",
+    "08.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "09.jpg"
+  },
+  {
+   "type": "image",
+   "file": "10.jpg"
+  },
+  {
+   "type": "gallery",
+   "files": [
+    "11.jpg",
+    "12.jpg"
+   ],
+   "cols": "2"
+  },
+  {
+   "type": "image",
+   "file": "13.jpg"
+  },
+  {
+   "type": "image",
+   "file": "14.jpg"
+  }
+ ]
+}

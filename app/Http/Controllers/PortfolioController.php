@@ -37,6 +37,48 @@ class PortfolioController extends Controller
         return view('portfolio.show', compact('project', 'more', 'isOwner', 'likedIds'));
     }
 
+    /** Post card studio: a LinkedIn / Instagram image announcing the portfolio, made from the freelancer's own covers. */
+    public function postCard(Request $request)
+    {
+        $profile = $request->user()->freelancerProfile->load(['user', 'category']);
+        $projects = $profile->publishedProjects()->with('category')->get();
+        if ($projects->isEmpty()) {
+            return redirect()->route('portfolio.index')->with('status', 'Publish a project first — the post card is made from your published work.');
+        }
+        // Same-origin paths so the browser can export the canvas.
+        $local = fn (?string $url) => $url ? (parse_url($url, PHP_URL_HOST) === parse_url(config('app.url'), PHP_URL_HOST) || str_starts_with($url, '/') ? (parse_url($url, PHP_URL_PATH) ?: $url) : $url) : null;
+        $focus = $projects->firstWhere('id', $request->query('project'));
+        $first = \Illuminate\Support\Str::before($profile->user->name, ' ');
+        $brand = config('marketplace.brand');
+        $url = route('freelancers.show', $profile);
+        $headlines = array_values(array_filter([
+            $focus ? "New project: {$focus->title}" : null,
+            "I just launched my portfolio on {$brand}",
+            "My work is now on {$brand} — come take a look",
+            $profile->category ? "Available for {$profile->category->name} projects" : 'Open for new projects',
+            $projects->count() > 1 ? "{$projects->count()} projects, one portfolio" : null,
+        ]));
+        $tags = collect(['#EthioCreative', '#Ethiopia', '#AddisAbaba', '#Portfolio'])
+            ->merge($profile->category ? ['#'.\Illuminate\Support\Str::studly($profile->category->name)] : [])
+            ->merge($profile->skills()->take(2)->pluck('name')->map(fn ($n) => '#'.\Illuminate\Support\Str::studly($n)))->unique()->values()->all();
+        \App\Support\Analytics::track('share_card_open');
+
+        return view('portfolio.post-card', ['config' => [
+            'name' => $profile->user->name,
+            'subtitle' => collect([$profile->title, $profile->location])->filter()->implode(' · '),
+            'slug' => $profile->slug,
+            'url' => $url,
+            'displayUrl' => preg_replace('~^https?://(www\.)?~', '', $url),
+            'headlines' => $headlines,
+            'captionBody' => $focus
+                ? "Just published “{$focus->title}” — the full case study, from brief to final result, is on my {$brand} portfolio."
+                : "I've put my best work together in one place on {$brand}. Have a look, and get in touch if you have a project in mind.",
+            'hashtags' => $tags,
+            'preselect' => $focus ? collect([$focus->id])->merge($projects->where('id', '!=', $focus->id)->pluck('id'))->take(4)->values()->all() : [],
+            'projects' => $projects->map(fn ($p) => ['id' => $p->id, 'title' => $p->title, 'cover' => $local($p->coverUrl()), 'category' => $p->category?->name])->values()->all(),
+        ], 'profile' => $profile]);
+    }
+
     public function create(Request $request)
     {
         $profile = $request->user()->freelancerProfile;
@@ -74,7 +116,11 @@ class PortfolioController extends Controller
             $this->publish($project);
         }
 
-        return redirect()->route('portfolio.edit', $project)->with('status', $project->isPublished() ? 'Project published.' : 'Draft saved.');
+        if ($project->isPublished()) {
+            return redirect()->route('portfolio.index')->with(['status' => 'Project published.', 'announce' => $project->id]);
+        }
+
+        return redirect()->route('portfolio.edit', $project)->with('status', 'Draft saved.');
     }
 
     public function edit(Request $request, PortfolioProject $project)
@@ -105,6 +151,8 @@ class PortfolioController extends Controller
 
         if ($request->boolean('publish') && ! $project->isPublished()) {
             $this->publish($project);
+
+            return redirect()->route('portfolio.index')->with(['status' => 'Project published.', 'announce' => $project->id]);
         }
 
         return back()->with('status', 'Project saved.');
@@ -120,7 +168,7 @@ class PortfolioController extends Controller
         }
         $this->publish($project);
 
-        return back()->with('status', 'Project published.');
+        return redirect()->route('portfolio.index')->with(['status' => 'Project published.', 'announce' => $project->id]);
     }
 
     public function destroy(Request $request, PortfolioProject $project)

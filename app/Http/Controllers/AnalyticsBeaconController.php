@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class AnalyticsBeaconController extends Controller
 {
     /** Client-side events the page may send (everything else is recorded on the server). */
-    public const CLIENT_EVENTS = ['share_open', 'share_click', 'outbound_click', 'cta_click', 'carousel_next', 'filter_open', 'copy_link'];
+    public const CLIENT_EVENTS = ['share_open', 'share_click', 'outbound_click', 'cta_click', 'carousel_next', 'filter_open', 'copy_link', 'share_card_download', 'share_card_share'];
 
     public function beacon(Request $request)
     {

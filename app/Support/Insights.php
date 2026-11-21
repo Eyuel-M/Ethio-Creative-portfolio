@@ -219,6 +219,7 @@ class Insights
         'shortlisted' => 'Shortlisted an applicant', 'invite_sent' => 'Invited a freelancer', 'message_sent' => 'Sent a message',
         'agreement_proposed' => 'Proposed an agreement', 'agreement_confirmed' => 'Confirmed an agreement', 'project_completed' => 'Completed a project', 'review_left' => 'Left a review',
         'checkout_started' => 'Started a checkout', 'order_paid' => 'Paid for a service', 'verification_requested' => 'Requested verification',
+        'share_card_download' => 'Downloaded a portfolio post card', 'share_card_share' => 'Shared a portfolio post card', 'share_card_open' => 'Opened the post card studio',
         'saved_job' => 'Saved a job', 'saved_talent' => 'Saved a freelancer', 'report_filed' => 'Reported something', 'carousel_next' => 'Browsed a carousel', 'filter_open' => 'Opened filters',
     ];
 

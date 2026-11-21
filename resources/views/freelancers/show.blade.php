@@ -41,6 +41,7 @@
                     <x-share :url="route('freelancers.show', $profile)" :title="$profile->user->displayName().' — '.($profile->title ?? 'Portfolio')" :image="$projects->first()?->coverUrl()" :subtitle="$projects->count().' published projects'" :label="$isOwner ? 'Share portfolio' : 'Share'"/>
                 @endif
                 @if($isOwner)
+                    @if($projects->isNotEmpty())<a href="{{ route('portfolio.post-card') }}" class="btn btn-light"><x-icon name="image" class="size-4"/> Post card</a>@endif
                     <a href="{{ route('settings') }}" class="btn btn-light"><x-icon name="pen" class="size-4"/> Edit profile</a>
                     <a href="{{ route('portfolio.create') }}" class="btn btn-dark"><x-icon name="plus" class="size-4"/> Add project</a>
                 @elseif(auth()->user()?->inAdminMode())

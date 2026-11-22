@@ -78,10 +78,12 @@ class FeedController extends Controller
             ->selectRaw('reviewee_id, round(avg(rating), 1) as avg_rating')->groupBy('reviewee_id')->pluck('avg_rating', 'reviewee_id');
         $likedIds = $user ? $user->belongsToMany(PortfolioProject::class, 'portfolio_likes')->whereIn('portfolio_projects.id', $all->pluck('id'))->pluck('portfolio_projects.id')->all() : [];
 
-        // One representative cover per category for the image category tiles (Behance-style).
-        $categoryCovers = PortfolioProject::discoverable()->whereNotNull('cover_path')->whereNotNull('category_id')
-            ->orderByDesc('views')->limit(500)->get(['category_id', 'cover_path'])
-            ->unique('category_id')->mapWithKeys(fn ($p) => [$p->category_id => $p->coverUrl()]);
+        // Up to three of the most viewed covers per category, plus how many projects it holds, for the category chips.
+        $catRows = PortfolioProject::discoverable()->whereNotNull('category_id')
+            ->orderByDesc('views')->limit(1000)->get(['id', 'category_id', 'cover_path']);
+        $categoryCovers = $catRows->whereNotNull('cover_path')->groupBy('category_id')
+            ->map(fn ($g) => $g->take(3)->map(fn ($p) => $p->coverUrl())->values());
+        $categoryCounts = $catRows->countBy('category_id');
 
         if (filled($f['q'] ?? null) && ! $request->has('page')) {
             \App\Support\Analytics::track('search', null, ['area' => 'work', 'q' => mb_strtolower(trim($f['q'])), 'results' => $projects->total()]);
@@ -90,6 +92,7 @@ class FeedController extends Controller
         return view('feed.index', [
             'feedRoute' => $user ? 'home' : 'explore',
             'categoryCovers' => $categoryCovers,
+            'categoryCounts' => $categoryCounts,
             'filterCount' => $filterCount,
             'bento' => $bento,
             'projects' => $projects,

@@ -23,7 +23,7 @@
 <header {{ $attributes->merge(['class' => 'sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur']) }} x-data="{ menu: false }" @keydown.escape="menu = false">
     <div class="flex h-16 items-center gap-2 px-4 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4">
         <div class="flex min-w-0 items-center gap-2 justify-self-start">
-        <button type="button" @click="menu = !menu" :aria-expanded="menu" aria-controls="admin-nav-mobile" class="-ml-1 grid size-10 place-items-center rounded-xl hover:bg-zinc-100 lg:hidden" aria-label="Menu">
+        <button type="button" @click="{{ request()->routeIs('admin.*') ? "\$dispatch('open-console')" : 'menu = !menu' }}" :aria-expanded="menu" aria-controls="admin-nav-mobile" class="-ml-1 grid size-10 place-items-center rounded-xl hover:bg-zinc-100 lg:hidden" aria-label="Menu">
             <x-icon name="menu" x-show="!menu"/><x-icon name="x" x-show="menu" x-cloak/>
         </button>
         <x-logo class="shrink-0"/>
@@ -36,7 +36,9 @@
             @endforeach
         </nav>
         <div class="ml-auto flex items-center gap-1.5 justify-self-end sm:gap-2">
+            @unless(request()->routeIs('admin.*'))
             <a href="{{ route('admin.overview') }}" class="btn btn-dark btn-pill hidden h-10 sm:inline-flex"><x-icon name="shield" class="size-4"/> Open console @if($openQueues)<span class="rounded-full bg-white/20 px-1.5 text-[11px] tabular-nums">{{ $openQueues }}</span>@endif</a>
+            @endunless
             <div x-data="{ open: false }" class="relative" @keydown.escape="open = false">
                 <button @click="open = !open" :aria-expanded="open" class="flex items-center rounded-full p-0.5 ring-2 ring-transparent transition hover:ring-ink/15" aria-label="Account menu">
                     <x-avatar :user="$me" size="size-9" class="text-xs"/>

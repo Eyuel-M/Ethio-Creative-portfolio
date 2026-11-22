@@ -60,52 +60,45 @@
 </form>
 @endauth
 
-{{-- Category chips: a fanned stack of real work, the name and a count. The stack spreads on hover. --}}
+{{-- Category chips: a fanned stack of real work, the name and a count. They wrap, so every category is in view without scrolling. --}}
 @php
-    $chip = 'group/chip flex h-14 shrink-0 items-center gap-3 rounded-full border py-1.5 pl-1.5 pr-5 text-[15px] font-semibold transition duration-200';
-    $on = 'border-ink bg-ink text-white shadow-[0_10px_24px_-12px_rgba(12,12,16,.6)]';
-    $off = 'border-line bg-white text-ink hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-[0_10px_24px_-14px_rgba(12,12,16,.35)]';
+    $chip = 'group/chip flex h-9 items-center gap-1.5 rounded-full border py-1 pl-1 pr-2.5 text-[12.5px] font-medium min-[1760px]:text-[13px] min-[1760px]:pr-3 min-[1760px]:font-semibold transition duration-200';
+    $on = 'border-ink bg-ink text-white shadow-[0_8px_18px_-10px_rgba(12,12,16,.6)]';
+    $off = 'border-line bg-white text-ink hover:-translate-y-px hover:border-zinc-300 hover:shadow-[0_8px_18px_-12px_rgba(12,12,16,.35)]';
     $allActive = empty($f['category']) && $sort !== 'most_liked';
 @endphp
-<div class="relative" x-data="{ el: null, start: true, end: false, update() { this.start = this.el.scrollLeft <= 4; this.end = this.el.scrollLeft + this.el.clientWidth >= this.el.scrollWidth - 4 } }" x-init="el = $refs.row; update()">
-    <nav x-ref="row" @scroll.debounce.50ms="update()" class="flex gap-2.5 overflow-x-auto scroll-smooth px-4 py-5 [scrollbar-width:none] sm:px-6 [&::-webkit-scrollbar]:hidden" aria-label="Categories">
-        <a href="{{ route($feedRoute, $keep(['category' => null, 'sort' => null])) }}" class="{{ $chip }} {{ $allActive ? $on : $off }}" @if($allActive) aria-current="page" @endif>
-            <span class="relative grid size-11 place-items-center overflow-hidden rounded-full bg-[conic-gradient(from_200deg,#2a78d6,#8b5cf6,#f59e0b,#10b981,#2a78d6)] text-white transition duration-500 group-hover/chip:rotate-90">
-                <x-icon name="star" class="size-5 drop-shadow"/>
+<nav class="flex flex-wrap items-center gap-1.5 px-4 py-4 sm:px-6 min-[1760px]:gap-2" aria-label="Categories">
+    <a href="{{ route($feedRoute, $keep(['category' => null, 'sort' => null])) }}" class="{{ $chip }} {{ $allActive ? $on : $off }}" @if($allActive) aria-current="page" @endif>
+        <span class="grid size-7 place-items-center rounded-full bg-[conic-gradient(from_200deg,#2a78d6,#8b5cf6,#f59e0b,#10b981,#2a78d6)] text-white transition duration-500 group-hover/chip:rotate-90">
+            <x-icon name="star" class="size-3.5 drop-shadow"/>
+        </span>
+        For You
+    </a>
+    @auth
+    @php $loved = $sort === 'most_liked' && empty($f['category']); @endphp
+    <a href="{{ route($feedRoute, ['sort' => 'most_liked']) }}" class="{{ $chip }} {{ $loved ? $on : $off }}" @if($loved) aria-current="page" @endif>
+        <span class="grid size-7 place-items-center rounded-full {{ $loved ? 'bg-white/15' : 'bg-rose-50' }} text-rose-500 transition group-hover/chip:scale-110"><x-icon name="heart" class="size-3.5"/></span>
+        Most Loved
+    </a>
+    @endauth
+    @foreach($categories as $c)
+        @php $active = ($f['category'] ?? '') === $c->slug; $imgs = $categoryCovers[$c->id] ?? collect(); $n = $categoryCounts[$c->id] ?? 0; $fan = $imgs->count() > 1 ? 'group-hover/chip:translate-x-1.5' : ''; @endphp
+        <a href="{{ route($feedRoute, $keep(['category' => $active ? null : $c->slug])) }}" class="{{ $chip }} {{ $active ? $on : $off }}" @if($active) aria-current="page" @endif>
+            <span class="relative h-7 w-7 shrink-0 sm:w-[var(--w2)] min-[1760px]:w-[var(--w3)]" style="--w2: {{ 28 + min(1, max(0, $imgs->count() - 1)) * 8 }}px; --w3: {{ 28 + max(0, $imgs->count() - 1) * 8 }}px" aria-hidden="true">
+                @forelse($imgs as $i => $img)
+                    <img src="{{ $img }}" alt="" loading="lazy"
+                         class="absolute top-0 size-7 rounded-full object-cover ring-2 transition-transform duration-300 ease-out {{ $active ? 'ring-ink' : 'ring-white' }}
+                                {{ ['left-0 z-30 group-hover/chip:-rotate-6', 'left-[8px] z-20 hidden sm:block group-hover/chip:translate-x-1 group-hover/chip:rotate-3', 'left-[16px] z-10 hidden min-[1760px]:block group-hover/chip:translate-x-2 group-hover/chip:rotate-12'][$i] }}">
+                @empty
+                    <span class="absolute inset-0 grid size-7 place-items-center rounded-full bg-zinc-100 text-muted"><x-icon name="image" class="size-3.5"/></span>
+                @endforelse
             </span>
-            For You
+            <span class="whitespace-nowrap transition-transform duration-300 {{ $fan }}">{{ $c->name }}</span>
+            @if($n)<span class="hidden rounded-full px-1.5 min-[1760px]:inline text-[11px] font-medium tabular-nums transition-transform duration-300 {{ $fan }} {{ $active ? 'bg-white/15 text-white' : 'bg-zinc-100 text-muted' }}">{{ $n }}</span>@endif
+            @if($active)<x-icon name="x" class="-mr-1 size-3.5 opacity-70" aria-label="Clear"/>@endif
         </a>
-        @auth
-        @php $loved = $sort === 'most_liked' && empty($f['category']); @endphp
-        <a href="{{ route($feedRoute, ['sort' => 'most_liked']) }}" class="{{ $chip }} {{ $loved ? $on : $off }}" @if($loved) aria-current="page" @endif>
-            <span class="grid size-11 place-items-center rounded-full {{ $loved ? 'bg-white/15' : 'bg-rose-50' }} text-rose-500 transition group-hover/chip:scale-110"><x-icon name="heart" class="size-5"/></span>
-            Most Loved
-        </a>
-        @endauth
-        <span class="mx-1 my-auto h-7 w-px shrink-0 bg-line" aria-hidden="true"></span>
-        @foreach($categories as $c)
-            @php $active = ($f['category'] ?? '') === $c->slug; $imgs = $categoryCovers[$c->id] ?? collect(); $n = $categoryCounts[$c->id] ?? 0; @endphp
-            <a href="{{ route($feedRoute, $keep(['category' => $active ? null : $c->slug])) }}" class="{{ $chip }} {{ $active ? $on : $off }}" @if($active) aria-current="page" @endif>
-                <span class="relative h-11 shrink-0" style="width: {{ 44 + max(0, $imgs->count() - 1) * 14 }}px" aria-hidden="true">
-                    @forelse($imgs as $i => $img)
-                        <img src="{{ $img }}" alt="" loading="lazy"
-                             class="absolute top-0 size-11 rounded-full object-cover ring-2 transition-transform duration-300 ease-out {{ $active ? 'ring-ink' : 'ring-white' }}
-                                    {{ ['left-0 z-30 group-hover/chip:-rotate-6', 'left-[14px] z-20 group-hover/chip:translate-x-2 group-hover/chip:rotate-3', 'left-[28px] z-10 group-hover/chip:translate-x-4 group-hover/chip:rotate-12'][$i] }}">
-                    @empty
-                        <span class="absolute inset-0 grid size-11 place-items-center rounded-full bg-zinc-100 text-muted"><x-icon name="image" class="size-5"/></span>
-                    @endforelse
-                </span>
-                <span class="whitespace-nowrap transition-transform duration-300 {{ $imgs->count() > 1 ? 'group-hover/chip:translate-x-2' : '' }}">{{ $c->name }}</span>
-                @if($n)<span class="rounded-full px-2 py-0.5 text-xs font-medium tabular-nums transition-transform duration-300 {{ $imgs->count() > 1 ? 'group-hover/chip:translate-x-2' : '' }} {{ $active ? 'bg-white/15 text-white' : 'bg-zinc-100 text-muted' }}">{{ $n }}</span>@endif
-                @if($active)<x-icon name="x" class="-mr-1 size-4 opacity-70" aria-label="Clear"/>@endif
-            </a>
-        @endforeach
-    </nav>
-    <div x-show="!start" x-cloak class="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r {{ $user ? 'from-white' : 'from-[#fbfbfd]' }} to-transparent"></div>
-    <button type="button" x-show="!start" x-cloak @click="el.scrollBy({ left: -el.clientWidth * .7 })" class="absolute left-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full border border-line bg-white shadow-md hover:bg-zinc-50" aria-label="Previous categories"><x-icon name="chevron-left" class="size-5"/></button>
-    <div x-show="!end" class="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l {{ $user ? 'from-white' : 'from-[#fbfbfd]' }} to-transparent"></div>
-    <button type="button" x-show="!end" @click="el.scrollBy({ left: el.clientWidth * .7 })" class="absolute right-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full border border-line bg-white shadow-md hover:bg-zinc-50" aria-label="More categories"><x-icon name="chevron-right" class="size-5"/></button>
-</div>
+    @endforeach
+</nav>
 
 {{-- Promo strip (dismissible) --}}
 @if($promo && ! $filtered)

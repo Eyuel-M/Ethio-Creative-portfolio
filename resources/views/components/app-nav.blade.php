@@ -21,19 +21,21 @@
 @endphp
 {{-- Staff top bar: browse the site as an operator — no member workspaces, posting, applying or billing. --}}
 <header {{ $attributes->merge(['class' => 'sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur']) }} x-data="{ menu: false }" @keydown.escape="menu = false">
-    <div class="flex h-16 items-center gap-2 px-4 sm:px-6">
+    <div class="flex h-16 items-center gap-2 px-4 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4">
+        <div class="flex min-w-0 items-center gap-2 justify-self-start">
         <button type="button" @click="menu = !menu" :aria-expanded="menu" aria-controls="admin-nav-mobile" class="-ml-1 grid size-10 place-items-center rounded-xl hover:bg-zinc-100 lg:hidden" aria-label="Menu">
             <x-icon name="menu" x-show="!menu"/><x-icon name="x" x-show="menu" x-cloak/>
         </button>
         <x-logo class="shrink-0"/>
         <span class="ml-1 hidden rounded-full bg-ink px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-white sm:inline">Admin</span>
-        <nav class="ml-5 hidden h-16 items-stretch gap-1 lg:flex" aria-label="Admin">
+        </div>
+        <nav class="hidden h-16 justify-self-center items-stretch gap-1 lg:flex" aria-label="Admin">
             @foreach($adminLinks as [$label, $route, $patterns])
                 @php $active = request()->routeIs(...$patterns) && ! ($route === 'admin.overview' && request()->routeIs('admin.insights.*')); @endphp
-                <a href="{{ route($route) }}" @if($active) aria-current="page" @endif class="flex items-center border-b-2 px-3 text-[15px] font-medium transition {{ $active ? 'border-ink text-ink' : 'border-transparent text-ink-soft hover:text-ink' }}">{{ $label }}</a>
+                <a href="{{ route($route) }}" @if($active) aria-current="page" @endif class="flex items-center whitespace-nowrap border-b-2 px-2.5 text-[15px] xl:px-3 font-medium transition {{ $active ? 'border-ink text-ink' : 'border-transparent text-ink-soft hover:text-ink' }}">{{ $label }}</a>
             @endforeach
         </nav>
-        <div class="ml-auto flex items-center gap-1.5 sm:gap-2">
+        <div class="ml-auto flex items-center gap-1.5 justify-self-end sm:gap-2">
             <a href="{{ route('admin.overview') }}" class="btn btn-dark btn-pill hidden h-10 sm:inline-flex"><x-icon name="shield" class="size-4"/> Open console @if($openQueues)<span class="rounded-full bg-white/20 px-1.5 text-[11px] tabular-nums">{{ $openQueues }}</span>@endif</a>
             <div x-data="{ open: false }" class="relative" @keydown.escape="open = false">
                 <button @click="open = !open" :aria-expanded="open" class="flex items-center rounded-full p-0.5 ring-2 ring-transparent transition hover:ring-ink/15" aria-label="Account menu">
@@ -87,25 +89,27 @@
     $item = 'flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm hover:bg-zinc-50';
 @endphp
 <header {{ $attributes->merge(['class' => 'sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur']) }} x-data="{ menu: false }" @keydown.escape="menu = false">
-    <div class="flex h-16 items-center gap-2 px-4 sm:px-6">
+    <div class="flex h-16 items-center gap-2 px-4 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4">
+        <div class="flex min-w-0 items-center gap-2 justify-self-start">
         <button type="button" @click="menu = !menu" :aria-expanded="menu" aria-controls="app-nav-mobile" class="-ml-1 grid size-10 place-items-center rounded-xl hover:bg-zinc-100 lg:hidden" aria-label="Menu">
             <x-icon name="menu" x-show="!menu"/><x-icon name="x" x-show="menu" x-cloak/>
         </button>
         <x-logo class="shrink-0"/>
+        </div>
 
-        <nav class="ml-6 hidden h-16 items-stretch gap-1 lg:flex" aria-label="{{ ucfirst($ws) }} workspace">
+        <nav class="hidden h-16 justify-self-center items-stretch gap-1 lg:flex" aria-label="{{ ucfirst($ws) }} workspace">
             @foreach($links as [$label, $route, $patterns])
                 @php $active = $isActive($patterns); @endphp
                 <a href="{{ route($route) }}" @if($active) aria-current="page" @endif
-                   class="flex items-center border-b-2 px-3 text-[15px] font-medium transition {{ $active ? 'border-ink text-ink' : 'border-transparent text-ink-soft hover:text-ink' }}">{{ $label }}</a>
+                   class="flex items-center whitespace-nowrap border-b-2 px-2.5 text-[15px] xl:px-3 font-medium transition {{ $active ? 'border-ink text-ink' : 'border-transparent text-ink-soft hover:text-ink' }}">{{ $label }}</a>
             @endforeach
         </nav>
 
-        <div class="ml-auto flex items-center gap-1.5 sm:gap-2">
+        <div class="ml-auto flex items-center gap-1.5 justify-self-end sm:gap-2">
             @if($ws === 'client')
-                <a href="{{ route('client.jobs.create') }}" class="btn btn-light btn-pill hidden h-10 sm:inline-flex"><x-icon name="plus" class="size-4"/> Post a Job</a>
+                <a href="{{ route('client.jobs.create') }}" class="btn btn-light btn-pill hidden h-10 sm:inline-flex lg:max-xl:w-10 lg:max-xl:px-0"><x-icon name="plus" class="size-4"/><span class="lg:max-xl:sr-only">Post a Job</span></a>
             @elseif($user->freelancerProfile)
-                <a href="{{ route('portfolio.create') }}" class="btn btn-light btn-pill hidden h-10 sm:inline-flex"><x-icon name="plus" class="size-4"/> Share Work</a>
+                <a href="{{ route('portfolio.create') }}" class="btn btn-light btn-pill hidden h-10 sm:inline-flex lg:max-xl:w-10 lg:max-xl:px-0"><x-icon name="plus" class="size-4"/><span class="lg:max-xl:sr-only">Share Work</span></a>
             @endif
             <a href="{{ route('messages.index') }}" title="Messages" class="relative grid size-10 place-items-center rounded-full hover:bg-zinc-100 {{ request()->routeIs('messages.*') ? 'bg-zinc-100' : '' }}" aria-label="Messages{{ $msg ? " ($msg unread)" : '' }}">
                 <x-icon name="mail" class="size-[22px]"/>@if($msg)<span class="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-leaf px-1 text-[10px] font-bold text-white ring-2 ring-white">{{ $msg }}</span>@endif

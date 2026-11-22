@@ -123,7 +123,7 @@
     </div>
 
     {{-- ───────── Sidebar ───────── --}}
-    <aside class="space-y-3 sm:space-y-4 lg:sticky lg:top-20">
+    <aside data-fit="release" class="space-y-3 sm:space-y-4 lg:sticky lg:top-20">
         <div id="apply" class="card card-pad">
             @if($job->isAcceptingApplications())
                 <p class="flex items-center gap-2 text-sm font-medium text-leaf-dark"><span class="size-2 rounded-full bg-leaf"></span> Accepting proposals</p>

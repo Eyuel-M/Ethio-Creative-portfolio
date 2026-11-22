@@ -202,7 +202,7 @@
         </div>
 
         {{-- Summary / submit --}}
-        <aside class="space-y-3 sm:space-y-4 xl:sticky xl:top-20">
+        <aside data-fit="release" class="space-y-3 sm:space-y-4 xl:sticky xl:top-20">
             <section class="card card-pad">
                 <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Proposal summary</p>
                 <ul class="mt-4 space-y-3 text-sm">

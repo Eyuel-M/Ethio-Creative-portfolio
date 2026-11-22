@@ -91,7 +91,7 @@
     <div class="grid grid-cols-1 items-start gap-3 sm:gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
 
         {{-- ───────── Panel ───────── --}}
-        <aside class="card overflow-hidden lg:sticky lg:top-[9.5rem] lg:flex lg:max-h-[calc(100vh-11rem)] lg:flex-col">
+        <aside data-fit="scroll" class="card overflow-hidden lg:sticky lg:top-[9.5rem] lg:flex lg:max-h-[calc(100vh-11rem)] lg:flex-col">
             <div class="flex border-b border-line p-1.5">
                 @foreach(['add' => ['Add', 'plus'], 'style' => ['Style', 'settings'], 'project' => ['Project', 'file']] as $t => [$tl, $ti])
                     <button type="button" @click="tab = '{{ $t }}'" class="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium transition" :class="tab === '{{ $t }}' ? 'bg-ink text-white' : 'text-ink-soft hover:bg-zinc-100'"><x-icon :name="$ti" class="size-4"/> {{ $tl }}</button>

@@ -226,7 +226,7 @@
         </section>
     </div>
 
-    <aside class="space-y-3 sm:space-y-4 xl:sticky xl:top-20">
+    <aside data-fit="release" class="space-y-3 sm:space-y-4 xl:sticky xl:top-20">
         <section class="card card-pad">
             <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Next step</p>
             <p class="mt-2 font-display text-lg font-bold leading-snug">{{ $next[0] }}</p>

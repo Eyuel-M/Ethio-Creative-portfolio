@@ -10,7 +10,7 @@
 
     <div class="grid grid-cols-1 items-start gap-3 sm:gap-4 xl:grid-cols-[minmax(0,1fr)_400px]">
         {{-- Preview --}}
-        <section class="card overflow-hidden xl:sticky xl:top-20">
+        <section data-fit="release" class="card overflow-hidden xl:sticky xl:top-20">
             <div class="flex items-center justify-between border-b border-line px-5 py-3 text-sm">
                 <span class="font-medium" x-text="formats[format].label + ' · ' + formats[format].w + '×' + formats[format].h"></span>
                 <span class="text-xs text-muted">Preview</span>

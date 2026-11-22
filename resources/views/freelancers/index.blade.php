@@ -12,7 +12,7 @@
     $seg = 'cursor-pointer py-2 text-center text-sm transition has-[:checked]:bg-ink has-[:checked]:font-semibold has-[:checked]:text-white';
 @endphp
 <div class="grid gap-3 sm:gap-4 lg:grid-cols-[280px_1fr]" x-data @change="if ($event.target.dataset.auto !== undefined) document.getElementById('talentfilters').requestSubmit()">
-    <aside class="card card-pad h-fit lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:overscroll-contain" x-data="{ open: window.innerWidth >= 1024 }">
+    <aside data-fit="scroll" class="card card-pad h-fit lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:overscroll-contain" x-data="{ open: window.innerWidth >= 1024 }">
         <div class="flex items-center justify-between">
             <button type="button" class="flex items-center gap-2 lg:pointer-events-none" @click="open = !open" :aria-expanded="open">
                 <h2 class="text-[22px] font-bold">Filters</h2>

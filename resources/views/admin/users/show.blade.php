@@ -143,7 +143,7 @@
     </div>
 
     {{-- Actions --}}
-    <aside class="space-y-5 xl:sticky xl:top-20">
+    <aside data-fit="release" class="space-y-5 xl:sticky xl:top-20">
         @if($me->canAdmin('users_manage') && $user->id !== $me->id && $user->status !== 'deleted')
             <x-admin.panel title="Account status">
                 <form method="POST" action="{{ route('admin.users.status', $user) }}" class="space-y-3">@csrf

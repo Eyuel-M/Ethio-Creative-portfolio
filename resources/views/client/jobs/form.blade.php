@@ -80,7 +80,7 @@
         </section>
     </div>
 
-    <aside class="space-y-3 sm:space-y-4 xl:sticky xl:top-4 xl:h-fit">
+    <aside data-fit="release" class="space-y-3 sm:space-y-4 xl:sticky xl:top-4 xl:h-fit">
         <section class="card card-pad space-y-3">
             @if($job->exists)<div class="flex items-center justify-between"><span class="text-sm text-muted">Status</span><x-status :status="$job->status"/></div>@endif
             <button name="intent" value="draft" class="btn btn-light w-full">{{ $job->exists ? 'Save changes' : 'Save draft' }}</button>

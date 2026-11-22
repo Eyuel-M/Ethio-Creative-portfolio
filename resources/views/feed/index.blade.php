@@ -84,13 +84,13 @@
     @foreach($categories as $c)
         @php $active = ($f['category'] ?? '') === $c->slug; $imgs = $categoryCovers[$c->id] ?? collect(); $n = $categoryCounts[$c->id] ?? 0; $fan = $imgs->count() > 1 ? 'group-hover/chip:translate-x-1.5' : ''; @endphp
         <a href="{{ route($feedRoute, $keep(['category' => $active ? null : $c->slug])) }}" class="{{ $chip }} {{ $active ? $on : $off }}" @if($active) aria-current="page" @endif>
-            <span class="relative h-7 w-7 shrink-0 sm:w-[var(--w2)] min-[1760px]:w-[var(--w3)]" style="--w2: {{ 28 + min(1, max(0, $imgs->count() - 1)) * 8 }}px; --w3: {{ 28 + max(0, $imgs->count() - 1) * 8 }}px" aria-hidden="true">
+            <span class="relative flex h-7 shrink-0" aria-hidden="true">
                 @forelse($imgs as $i => $img)
                     <img src="{{ $img }}" alt="" loading="lazy"
-                         class="absolute top-0 size-7 rounded-full object-cover ring-2 transition-transform duration-300 ease-out {{ $active ? 'ring-ink' : 'ring-white' }}
-                                {{ ['left-0 z-30 group-hover/chip:-rotate-6', 'left-[8px] z-20 hidden sm:block group-hover/chip:translate-x-1 group-hover/chip:rotate-3', 'left-[16px] z-10 hidden min-[1760px]:block group-hover/chip:translate-x-2 group-hover/chip:rotate-12'][$i] }}">
+                         class="relative size-7 shrink-0 rounded-full object-cover ring-2 transition-transform duration-300 ease-out {{ $active ? 'ring-ink' : 'ring-white' }}
+                                {{ ['z-30 group-hover/chip:-rotate-6', 'z-20 -ml-5 hidden sm:block group-hover/chip:translate-x-1 group-hover/chip:rotate-3', 'z-10 -ml-5 hidden min-[1760px]:block group-hover/chip:translate-x-2 group-hover/chip:rotate-12'][$i] }}">
                 @empty
-                    <span class="absolute inset-0 grid size-7 place-items-center rounded-full bg-zinc-100 text-muted"><x-icon name="image" class="size-3.5"/></span>
+                    <span class="grid size-7 place-items-center rounded-full bg-zinc-100 text-muted"><x-icon name="image" class="size-3.5"/></span>
                 @endforelse
             </span>
             <span class="whitespace-nowrap transition-transform duration-300 {{ $fan }}">{{ $c->name }}</span>

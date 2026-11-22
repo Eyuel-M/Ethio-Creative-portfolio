@@ -54,6 +54,26 @@ class DiscoveryFeedTest extends MarketplaceTestCase
         $this->actingAs($this->client())->get('/?q=injera')->assertSee('Injera menu shoot')->assertDontSee('Banking app UI');
     }
 
+    public function test_collection_shows_only_what_the_viewer_liked(): void
+    {
+        $f = $this->freelancer();
+        $liked = $this->project($f, 'published', 'Liked label design');
+        $this->project($f, 'published', 'Unliked poster series');
+        $viewer = $this->client();
+        $other = $this->client();
+        $liked->likes()->attach($viewer->id);
+        $this->project($f, 'published', 'Someone elses favourite')->likes()->attach($other->id);
+
+        $this->actingAs($viewer)->get('/?liked=1')->assertOk()
+            ->assertSee('Liked label design')
+            ->assertDontSee('Unliked poster series')
+            ->assertDontSee('Someone elses favourite')
+            ->assertSeeText('1 liked project')->assertDontSeeText('1 liked projects');
+
+        $this->actingAs($other)->get('/?liked=1&q=label')->assertOk()->assertSee('None of your liked projects match');
+        $this->actingAs($this->client())->get('/?liked=1')->assertOk()->assertSee('Your collection is empty');
+    }
+
     public function test_like_toggles_and_rules_hold(): void
     {
         $owner = $this->freelancer();

@@ -1,10 +1,11 @@
 @php
     $user = auth()->user();
     $ws = $user?->workspace();
-    $filtered = ($f['q'] ?? null) || ($f['category'] ?? null) || $sort !== 'recommended' || $filterCount;
+    $liked = (bool) ($f['liked'] ?? false);
+    $filtered = $liked || ($f['q'] ?? null) || ($f['category'] ?? null) || $sort !== 'recommended' || $filterCount;
     $sorts = ['recommended' => 'Recommended', 'newest' => 'Newest', 'most_liked' => 'Most liked', 'most_viewed' => 'Most viewed'];
     $keep = fn (array $over = []) => array_filter(array_merge(['q' => $f['q'] ?? null, 'category' => $f['category'] ?? null, 'sort' => $sort !== 'recommended' ? $sort : null,
-        'available' => ($f['available'] ?? false) ? 1 : null, 'pro' => ($f['pro'] ?? false) ? 1 : null, 'min_likes' => ($f['min_likes'] ?? 0) ?: null], $over), fn ($v) => $v !== null && $v !== '');
+        'available' => ($f['available'] ?? false) ? 1 : null, 'pro' => ($f['pro'] ?? false) ? 1 : null, 'min_likes' => ($f['min_likes'] ?? 0) ?: null, 'liked' => $liked ? 1 : null], $over), fn ($v) => $v !== null && $v !== '');
     $promo = ! $user || $user->inAdminMode() ? null : ($ws === 'client' ? 'client' : (($user->freelancerProfile && $user->freelancerProfile->plan !== 'professional') ? 'pro' : null));
 @endphp
 <x-dynamic-component :component="$user ? 'layouts.discover' : 'layouts.public'" title="Explore">
@@ -39,6 +40,7 @@
             <x-icon name="chevron-down" class="pointer-events-none -ml-1 size-4"/>
         </label>
         @if($f['category'] ?? null)<input type="hidden" name="category" value="{{ $f['category'] }}">@endif
+        @if($liked)<input type="hidden" name="liked" value="1" data-feed-only>@endif
     </div>
 
     {{-- Filter panel --}}
@@ -62,40 +64,46 @@
 
 {{-- Category chips: a fanned stack of real work, the name and a count. They wrap, so every category is in view without scrolling. --}}
 @php
-    $chip = 'group/chip flex h-9 items-center gap-1.5 rounded-full border py-1 pl-1 pr-2.5 text-[12.5px] font-medium min-[1760px]:text-[13px] min-[1760px]:pr-3 min-[1760px]:font-semibold transition duration-200';
+    $chip = 'group/chip flex h-8 items-center gap-1.5 rounded-full border py-1 pl-1 pr-2.5 text-[12.5px] font-medium min-[2000px]:text-[13px] min-[2000px]:pr-3 min-[2000px]:font-semibold transition duration-200';
     $on = 'border-ink bg-ink text-white shadow-[0_8px_18px_-10px_rgba(12,12,16,.6)]';
     $off = 'border-line bg-white text-ink hover:-translate-y-px hover:border-zinc-300 hover:shadow-[0_8px_18px_-12px_rgba(12,12,16,.35)]';
-    $allActive = empty($f['category']) && $sort !== 'most_liked';
+    $allActive = empty($f['category']) && $sort !== 'most_liked' && ! $liked;
 @endphp
-<nav class="flex flex-wrap items-center gap-1.5 px-4 py-4 sm:px-6 min-[1760px]:gap-2" aria-label="Categories">
-    <a href="{{ route($feedRoute, $keep(['category' => null, 'sort' => null])) }}" class="{{ $chip }} {{ $allActive ? $on : $off }}" @if($allActive) aria-current="page" @endif>
-        <span class="grid size-7 place-items-center rounded-full bg-[conic-gradient(from_200deg,#2a78d6,#8b5cf6,#f59e0b,#10b981,#2a78d6)] text-white transition duration-500 group-hover/chip:rotate-90">
+<nav class="flex flex-wrap items-center gap-1 px-4 py-4 sm:px-6 min-[1536px]:gap-1.5 min-[2000px]:gap-2" aria-label="Categories">
+    <a href="{{ route($feedRoute, $keep(['category' => null, 'sort' => null, 'liked' => null])) }}" class="{{ $chip }} {{ $allActive ? $on : $off }}" @if($allActive) aria-current="page" @endif>
+        <span class="grid size-6 place-items-center rounded-full bg-[conic-gradient(from_200deg,#2a78d6,#8b5cf6,#f59e0b,#10b981,#2a78d6)] text-white transition duration-500 group-hover/chip:rotate-90">
             <x-icon name="star" class="size-3.5 drop-shadow"/>
         </span>
         For You
     </a>
     @auth
-    @php $loved = $sort === 'most_liked' && empty($f['category']); @endphp
+    @php $loved = $sort === 'most_liked' && empty($f['category']) && ! $liked; @endphp
     <a href="{{ route($feedRoute, ['sort' => 'most_liked']) }}" class="{{ $chip }} {{ $loved ? $on : $off }}" @if($loved) aria-current="page" @endif>
-        <span class="grid size-7 place-items-center rounded-full {{ $loved ? 'bg-white/15' : 'bg-rose-50' }} text-rose-500 transition group-hover/chip:scale-110"><x-icon name="heart" class="size-3.5"/></span>
+        <span class="grid size-6 place-items-center rounded-full {{ $loved ? 'bg-white/15' : 'bg-rose-50' }} text-rose-500 transition group-hover/chip:scale-110"><x-icon name="heart" class="size-3.5"/></span>
         Most Loved
+    </a>
+    <a href="{{ route($feedRoute, $keep(['liked' => $liked ? null : 1, 'sort' => null])) }}" class="{{ $chip }} {{ $liked ? $on : $off }}" @if($liked) aria-current="page" @endif title="Your collection: everything you've liked">
+        <span class="grid size-6 place-items-center rounded-full {{ $liked ? 'bg-white/15 text-white' : 'bg-blue-50 text-brand' }} transition group-hover/chip:-rotate-12"><x-icon name="bookmark" class="size-3.5"/></span>
+        Collection
+        @if($likedCount)<span class="hidden rounded-full px-1.5 min-[2000px]:inline text-[11px] font-medium tabular-nums {{ $liked ? 'bg-white/15 text-white' : 'bg-zinc-100 text-muted' }}">{{ $likedCount }}</span>@endif
+        @if($liked)<x-icon name="x" class="-mr-1 hidden size-3.5 opacity-70 min-[1536px]:block" aria-label="Clear"/>@endif
     </a>
     @endauth
     @foreach($categories as $c)
         @php $active = ($f['category'] ?? '') === $c->slug; $imgs = $categoryCovers[$c->id] ?? collect(); $n = $categoryCounts[$c->id] ?? 0; $fan = $imgs->count() > 1 ? 'group-hover/chip:translate-x-1.5' : ''; @endphp
         <a href="{{ route($feedRoute, $keep(['category' => $active ? null : $c->slug])) }}" class="{{ $chip }} {{ $active ? $on : $off }}" @if($active) aria-current="page" @endif>
-            <span class="relative flex h-7 shrink-0" aria-hidden="true">
+            <span class="relative flex h-6 shrink-0" aria-hidden="true">
                 @forelse($imgs as $i => $img)
                     <img src="{{ $img }}" alt="" loading="lazy"
-                         class="relative size-7 shrink-0 rounded-full object-cover ring-2 transition-transform duration-300 ease-out {{ $active ? 'ring-ink' : 'ring-white' }}
-                                {{ ['z-30 group-hover/chip:-rotate-6', 'z-20 -ml-5 hidden sm:block group-hover/chip:translate-x-1 group-hover/chip:rotate-3', 'z-10 -ml-5 hidden min-[1760px]:block group-hover/chip:translate-x-2 group-hover/chip:rotate-12'][$i] }}">
+                         class="relative size-6 shrink-0 rounded-full object-cover ring-2 transition-transform duration-300 ease-out {{ $active ? 'ring-ink' : 'ring-white' }}
+                                {{ ['z-30 group-hover/chip:-rotate-6', 'z-20 -ml-4 hidden min-[2000px]:block group-hover/chip:translate-x-1 group-hover/chip:rotate-3', 'z-10 -ml-4 hidden min-[2000px]:block group-hover/chip:translate-x-2 group-hover/chip:rotate-12'][$i] }}">
                 @empty
-                    <span class="grid size-7 place-items-center rounded-full bg-zinc-100 text-muted"><x-icon name="image" class="size-3.5"/></span>
+                    <span class="grid size-6 place-items-center rounded-full bg-zinc-100 text-muted"><x-icon name="image" class="size-3.5"/></span>
                 @endforelse
             </span>
             <span class="whitespace-nowrap transition-transform duration-300 {{ $fan }}">{{ $c->name }}</span>
-            @if($n)<span class="hidden rounded-full px-1.5 min-[1760px]:inline text-[11px] font-medium tabular-nums transition-transform duration-300 {{ $fan }} {{ $active ? 'bg-white/15 text-white' : 'bg-zinc-100 text-muted' }}">{{ $n }}</span>@endif
-            @if($active)<x-icon name="x" class="-mr-1 size-3.5 opacity-70" aria-label="Clear"/>@endif
+            @if($n)<span class="hidden rounded-full px-1.5 min-[2000px]:inline text-[11px] font-medium tabular-nums transition-transform duration-300 {{ $fan }} {{ $active ? 'bg-white/15 text-white' : 'bg-zinc-100 text-muted' }}">{{ $n }}</span>@endif
+            @if($active)<x-icon name="x" class="-mr-1 hidden size-3.5 opacity-70 min-[1536px]:block" aria-label="Clear"/>@endif
         </a>
     @endforeach
 </nav>
@@ -161,13 +169,19 @@
 
     @if($filtered)
         <div class="mb-5 flex items-center justify-between">
-            <p class="text-sm text-muted"><span class="font-semibold text-ink">{{ number_format($projects->total()) }}</span> projects{{ ($f['q'] ?? null) ? ' for “'.$f['q'].'”' : '' }}</p>
+            <p class="text-sm text-muted"><span class="font-semibold text-ink">{{ number_format($projects->total()) }}</span> {{ $liked ? 'liked ' : '' }}{{ \Illuminate\Support\Str::plural('project', $projects->total()) }}{{ ($f['q'] ?? null) ? ' for “'.$f['q'].'”' : '' }}</p>
             <a href="{{ route($feedRoute) }}" class="text-sm font-medium text-leaf-dark hover:underline">Clear all</a>
         </div>
     @endif
 
     @if($projects->isEmpty())
-        <x-empty icon="image" title="No projects found" text="Try another category, fewer filters or a different search."/>
+        @if($liked && ! ($f['q'] ?? null) && ! ($f['category'] ?? null) && ! $filterCount)
+            <x-empty icon="bookmark" title="Your collection is empty" text="Tap the heart on any project you like and it will be kept here, so you can come back to it.">
+                <a href="{{ route($feedRoute) }}" class="btn btn-dark btn-pill h-10 px-5">Explore projects</a>
+            </x-empty>
+        @else
+            <x-empty icon="image" title="No projects found" text="{{ $liked ? 'None of your liked projects match. Try another category or clear the search.' : 'Try another category, fewer filters or a different search.' }}"/>
+        @endif
     @else
         <div x-data="{ next: @js($projects->nextPageUrl()), loading: false,
                       async more() {

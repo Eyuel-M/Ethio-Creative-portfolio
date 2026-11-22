@@ -22,6 +22,7 @@ class FeedController extends Controller
             'available' => 'nullable|boolean',
             'pro' => 'nullable|boolean',
             'min_likes' => 'nullable|integer|in:0,5,10',
+            'liked' => 'nullable|boolean',
         ]);
         $user = $request->user();
         // Visitors get a preview: categories only — no search, filters, sorting or further pages.
@@ -37,7 +38,8 @@ class FeedController extends Controller
         // Bento "featured" block: top recent work by views + likes, only for the unfiltered feed and
         // only when there's enough of it. Those projects are then excluded from the grid on every page.
         $filterCount = collect([$f['available'] ?? false, $f['pro'] ?? false, ($f['min_likes'] ?? 0) > 0])->filter()->count();
-        $unfiltered = empty($f['q']) && empty($f['category']) && $sort === 'recommended' && $filterCount === 0;
+        $liked = (bool) ($f['liked'] ?? false);
+        $unfiltered = ! $liked && empty($f['q']) && empty($f['category']) && $sort === 'recommended' && $filterCount === 0;
         $candidates = $unfiltered
             ? $base()->where(fn ($q) => $q->where('published_at', '>=', now()->subDays(120))->orWhereNotNull('featured_at'))
                 ->orderByRaw('CASE WHEN featured_at IS NULL THEN 1 ELSE 0 END')->orderByDesc('featured_at') // admin-featured work leads
@@ -57,9 +59,14 @@ class FeedController extends Controller
             ->when($f['category'] ?? null, fn ($q, $c) => $q->whereHas('category', fn ($w) => $w->where('slug', $c)))
             ->when($f['available'] ?? false, fn ($q) => $q->whereHas('profile', fn ($p) => $p->where('availability', 'available')))
             ->when($f['pro'] ?? false, fn ($q) => $q->whereHas('profile', fn ($p) => $p->where('plan', 'professional')))
-            ->when(($f['min_likes'] ?? 0) > 0, fn ($q) => $q->has('likes', '>=', (int) $f['min_likes']));
+            ->when(($f['min_likes'] ?? 0) > 0, fn ($q) => $q->has('likes', '>=', (int) $f['min_likes']))
+            // "Your collection": only what this viewer has liked.
+            ->when($liked, fn ($q) => $q->whereHas('likes', fn ($l) => $l->where('users.id', $user->id)));
 
-        $query = match ($sort) {
+        $query = $liked && $sort === 'recommended'
+            // Most recently liked first.
+            ? $query->orderByRaw('(select pl.created_at from portfolio_likes pl where pl.portfolio_project_id = portfolio_projects.id and pl.user_id = ?) desc', [$user->id])
+            : match ($sort) {
             'newest' => $query->latest('published_at'),
             'most_viewed' => $query->orderByDesc('views'),
             'most_liked' => $query->orderByDesc('likes_count')->orderByDesc('views'),
@@ -93,6 +100,7 @@ class FeedController extends Controller
             'feedRoute' => $user ? 'home' : 'explore',
             'categoryCovers' => $categoryCovers,
             'categoryCounts' => $categoryCounts,
+            'likedCount' => $user ? PortfolioProject::discoverable()->whereHas('likes', fn ($l) => $l->where('users.id', $user->id))->count() : 0,
             'filterCount' => $filterCount,
             'bento' => $bento,
             'projects' => $projects,

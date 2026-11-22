@@ -50,7 +50,8 @@ class PortfolioController extends Controller
         $focus = $projects->firstWhere('id', $request->query('project'));
         $first = \Illuminate\Support\Str::before($profile->user->name, ' ');
         $brand = config('marketplace.brand');
-        $url = route('freelancers.show', $profile);
+        // Shared links use the platform's public domain (config marketplace.public_url / PUBLIC_URL).
+        $url = config('marketplace.public_url').route('freelancers.show', $profile, false);
         $headlines = array_values(array_filter([
             $focus ? "New project: {$focus->title}" : null,
             "I just launched my portfolio on {$brand}",
@@ -58,12 +59,13 @@ class PortfolioController extends Controller
             $profile->category ? "Available for {$profile->category->name} projects" : 'Open for new projects',
             $projects->count() > 1 ? "{$projects->count()} projects, one portfolio" : null,
         ]));
-        $tags = collect(['#EthioCreative', '#Ethiopia', '#AddisAbaba', '#Portfolio'])
+        $tags = collect(['#'.\Illuminate\Support\Str::studly(preg_replace('/[^A-Za-z0-9 ]/', ' ', $brand)), '#Ethiopia', '#AddisAbaba', '#Portfolio'])
             ->merge($profile->category ? ['#'.\Illuminate\Support\Str::studly($profile->category->name)] : [])
             ->merge($profile->skills()->take(2)->pluck('name')->map(fn ($n) => '#'.\Illuminate\Support\Str::studly($n)))->unique()->values()->all();
         \App\Support\Analytics::track('share_card_open');
 
         return view('portfolio.post-card', ['config' => [
+            'brand' => $brand,
             'name' => $profile->user->name,
             'subtitle' => collect([$profile->title, $profile->location])->filter()->implode(' · '),
             'slug' => $profile->slug,

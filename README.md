@@ -1,4 +1,4 @@
-# Ethio Creative — portfolio-first creative freelance marketplace
+# DezignersHub — portfolio-first creative freelance marketplace
 
 A Laravel 13 monolith (Blade + Tailwind CSS v4 + Alpine.js, as the spec recommends) built from the
 *Freelance Marketplace Product & Technical Specification (Revision 1.1)*.

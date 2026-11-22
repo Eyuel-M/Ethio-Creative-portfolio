@@ -145,7 +145,7 @@ export function shareCard(cfg) {
             ctx.textBaseline = 'middle';
             ctx.font = `700 ${Math.round(24 * k)}px ${DISPLAY}`;
             ctx.fillStyle = t.ink;
-            ctx.fillText('EthioCreative', x + m + 14 * k, y + m / 2);
+            ctx.fillText(cfg.brand, x + m + 14 * k, y + m / 2);
 
             // Headline, wrapped to fit
             ctx.textBaseline = 'alphabetic';

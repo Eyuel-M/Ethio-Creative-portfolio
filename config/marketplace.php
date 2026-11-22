@@ -2,7 +2,11 @@
 
 // Proposed defaults only — prices, quotas and retention periods require owner approval (spec §20).
 return [
-    'brand' => env('APP_NAME', 'Ethio Creative'),
+    'brand' => env('APP_NAME', 'DezignersHub'),
+
+    // The public address people see on shared links and post cards (e.g. https://dezignershub.com).
+    // Falls back to APP_URL. Set this when the app itself runs on another host.
+    'public_url' => rtrim((string) env('PUBLIC_URL', env('APP_URL', 'http://localhost')), '/'),
 
     'portfolio_limits' => [
         'free' => (int) env('PORTFOLIO_LIMIT_FREE', 3),

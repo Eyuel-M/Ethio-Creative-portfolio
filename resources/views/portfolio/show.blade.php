@@ -4,6 +4,7 @@
     $likedByMe = in_array($project->id, $likedIds ?? [], true);
     $staff = (bool) auth()->user()?->inAdminMode();
     $canLike = auth()->check() && ! $isOwner && ! $staff && $project->isPublished();
+    $savedByMe = (bool) auth()->user()?->hasSavedProject($project->id);
 @endphp
 <x-dynamic-component :component="auth()->check() ? 'layouts.discover' : 'layouts.public'" :title="$project->title">
 @push('meta')
@@ -15,7 +16,11 @@
 @endpush
 
 {{-- Full-screen project view: work spans the whole width; text stays in a readable column. --}}
-<article class="bg-white" x-data="{ liked: @js($likedByMe), count: {{ $likeCount }},
+<article class="bg-white" x-data="{ liked: @js($likedByMe), saved: @js($savedByMe), count: {{ $likeCount }},
+        async save() {
+            const r = await fetch(@js(route('portfolio.save', $project)), { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' } });
+            if (r.ok) { this.saved = (await r.json()).saved; }
+        },
         async toggle() {
             const r = await fetch(@js(route('portfolio.like', $project)), { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' } });
             if (r.ok) { const d = await r.json(); this.liked = d.liked; this.count = d.count; }
@@ -61,8 +66,12 @@
                     <button type="button" @click="toggle()" :aria-pressed="liked" class="btn btn-pill h-11 flex-1 px-5 sm:flex-none" :class="liked ? 'bg-rose-500 text-white hover:bg-rose-600' : 'btn-dark'">
                         <x-icon name="heart" class="size-5" ::class="liked && 'fill-white'"/> <span x-text="liked ? 'Appreciated' : 'Appreciate'">Appreciate</span>
                     </button>
+                    <button type="button" @click="save()" :aria-pressed="saved" class="btn btn-pill h-11 px-5" :class="saved ? 'border border-brand bg-blue-50 text-brand hover:bg-blue-100' : 'btn-light'" title="Saves are private — only you can see them">
+                        <x-icon name="bookmark" class="size-5" ::class="saved && 'fill-brand'"/> <span x-text="saved ? 'Saved' : 'Save'">Save</span>
+                    </button>
                 @elseif(! auth()->check() && $project->isPublished())
                     <a href="{{ route('login') }}" class="btn btn-dark btn-pill h-11 flex-1 px-5 sm:flex-none"><x-icon name="heart" class="size-5"/> Appreciate</a>
+                    <a href="{{ route('login') }}" class="btn btn-light btn-pill h-11 px-5"><x-icon name="bookmark" class="size-5"/> Save</a>
                 @endif
                 @if($staff && auth()->user()->canAdmin('moderation'))
                     <a href="{{ route('admin.portfolio', ['q' => $project->id, 'status' => $project->status === 'removed' ? 'removed' : ($project->reviewed_at ? 'approved' : 'review')]) }}" class="btn btn-dark btn-pill h-11 px-5"><x-icon name="shield" class="size-4"/> Moderate in console</a>
@@ -96,6 +105,9 @@
             @if($canLike)
                 <button type="button" @click="toggle()" :aria-pressed="liked" class="btn btn-pill h-12 px-6" :class="liked ? 'bg-rose-500 text-white hover:bg-rose-600' : 'btn-dark'">
                     <x-icon name="heart" class="size-5" ::class="liked && 'fill-white'"/> <span x-text="liked ? 'Appreciated' : 'Appreciate'">Appreciate</span> · <span x-text="count">{{ $likeCount }}</span>
+                </button>
+                <button type="button" @click="save()" :aria-pressed="saved" class="btn btn-pill h-12 px-6" :class="saved ? 'border border-brand bg-blue-50 text-brand hover:bg-blue-100' : 'btn-light'">
+                    <x-icon name="bookmark" class="size-5" ::class="saved && 'fill-brand'"/> <span x-text="saved ? 'Saved' : 'Save'">Save</span>
                 </button>
             @elseif(! auth()->check() && $project->isPublished())
                 <a href="{{ route('login') }}" class="btn btn-dark btn-pill h-12 px-6"><x-icon name="heart" class="size-5"/> Appreciate · {{ $likeCount }}</a>

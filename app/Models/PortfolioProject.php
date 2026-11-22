@@ -37,6 +37,12 @@ class PortfolioProject extends Model
         return $this->belongsToMany(User::class, 'portfolio_likes');
     }
 
+    /** Members who saved this privately. Never shown publicly — only used for each member's own Collection. */
+    public function savers()
+    {
+        return $this->belongsToMany(User::class, 'portfolio_saves');
+    }
+
     /** Published, owned by a public active profile — i.e. safe to show to anyone. */
     public function scopeDiscoverable($q)
     {

@@ -1,11 +1,11 @@
 @php
     $user = auth()->user();
     $ws = $user?->workspace();
-    $liked = (bool) ($f['liked'] ?? false);
-    $filtered = $liked || ($f['q'] ?? null) || ($f['category'] ?? null) || $sort !== 'recommended' || $filterCount;
+    $col = $f['collection'] ?? null;
+    $filtered = $col || ($f['q'] ?? null) || ($f['category'] ?? null) || $sort !== 'recommended' || $filterCount;
     $sorts = ['recommended' => 'Recommended', 'newest' => 'Newest', 'most_liked' => 'Most liked', 'most_viewed' => 'Most viewed'];
     $keep = fn (array $over = []) => array_filter(array_merge(['q' => $f['q'] ?? null, 'category' => $f['category'] ?? null, 'sort' => $sort !== 'recommended' ? $sort : null,
-        'available' => ($f['available'] ?? false) ? 1 : null, 'pro' => ($f['pro'] ?? false) ? 1 : null, 'min_likes' => ($f['min_likes'] ?? 0) ?: null, 'liked' => $liked ? 1 : null], $over), fn ($v) => $v !== null && $v !== '');
+        'available' => ($f['available'] ?? false) ? 1 : null, 'pro' => ($f['pro'] ?? false) ? 1 : null, 'min_likes' => ($f['min_likes'] ?? 0) ?: null, 'collection' => $col], $over), fn ($v) => $v !== null && $v !== '');
     $promo = ! $user || $user->inAdminMode() ? null : ($ws === 'client' ? 'client' : (($user->freelancerProfile && $user->freelancerProfile->plan !== 'professional') ? 'pro' : null));
 @endphp
 <x-dynamic-component :component="$user ? 'layouts.discover' : 'layouts.public'" title="Explore">
@@ -40,7 +40,7 @@
             <x-icon name="chevron-down" class="pointer-events-none -ml-1 size-4"/>
         </label>
         @if($f['category'] ?? null)<input type="hidden" name="category" value="{{ $f['category'] }}">@endif
-        @if($liked)<input type="hidden" name="liked" value="1" data-feed-only>@endif
+        @if($col)<input type="hidden" name="collection" value="{{ $col }}" data-feed-only>@endif
     </div>
 
     {{-- Filter panel --}}
@@ -67,26 +67,26 @@
     $chip = 'group/chip flex h-8 items-center gap-1.5 rounded-full border py-1 pl-1 pr-2.5 text-[12.5px] font-medium min-[2000px]:text-[13px] min-[2000px]:pr-3 min-[2000px]:font-semibold transition duration-200';
     $on = 'border-ink bg-ink text-white shadow-[0_8px_18px_-10px_rgba(12,12,16,.6)]';
     $off = 'border-line bg-white text-ink hover:-translate-y-px hover:border-zinc-300 hover:shadow-[0_8px_18px_-12px_rgba(12,12,16,.35)]';
-    $allActive = empty($f['category']) && $sort !== 'most_liked' && ! $liked;
+    $allActive = empty($f['category']) && $sort !== 'most_liked' && ! $col;
 @endphp
 <nav class="flex flex-wrap items-center gap-1 px-4 py-4 sm:px-6 min-[1536px]:gap-1.5 min-[2000px]:gap-2" aria-label="Categories">
-    <a href="{{ route($feedRoute, $keep(['category' => null, 'sort' => null, 'liked' => null])) }}" class="{{ $chip }} {{ $allActive ? $on : $off }}" @if($allActive) aria-current="page" @endif>
+    <a href="{{ route($feedRoute, $keep(['category' => null, 'sort' => null, 'collection' => null])) }}" class="{{ $chip }} {{ $allActive ? $on : $off }}" @if($allActive) aria-current="page" @endif>
         <span class="grid size-6 place-items-center rounded-full bg-[conic-gradient(from_200deg,#2a78d6,#8b5cf6,#f59e0b,#10b981,#2a78d6)] text-white transition duration-500 group-hover/chip:rotate-90">
             <x-icon name="star" class="size-3.5 drop-shadow"/>
         </span>
         For You
     </a>
     @auth
-    @php $loved = $sort === 'most_liked' && empty($f['category']) && ! $liked; @endphp
+    @php $loved = $sort === 'most_liked' && empty($f['category']) && ! $col; @endphp
     <a href="{{ route($feedRoute, ['sort' => 'most_liked']) }}" class="{{ $chip }} {{ $loved ? $on : $off }}" @if($loved) aria-current="page" @endif>
         <span class="grid size-6 place-items-center rounded-full {{ $loved ? 'bg-white/15' : 'bg-rose-50' }} text-rose-500 transition group-hover/chip:scale-110"><x-icon name="heart" class="size-3.5"/></span>
         Most Loved
     </a>
-    <a href="{{ route($feedRoute, $keep(['liked' => $liked ? null : 1, 'sort' => null])) }}" class="{{ $chip }} {{ $liked ? $on : $off }}" @if($liked) aria-current="page" @endif title="Your collection: everything you've liked">
-        <span class="grid size-6 place-items-center rounded-full {{ $liked ? 'bg-white/15 text-white' : 'bg-blue-50 text-brand' }} transition group-hover/chip:-rotate-12"><x-icon name="bookmark" class="size-3.5"/></span>
+    <a href="{{ route($feedRoute, $keep(['collection' => $col ? null : 'saved', 'sort' => null])) }}" class="{{ $chip }} {{ $col ? $on : $off }}" @if($col) aria-current="page" @endif title="Your collection: projects you saved or liked">
+        <span class="grid size-6 place-items-center rounded-full {{ $col ? 'bg-white/15 text-white' : 'bg-blue-50 text-brand' }} transition group-hover/chip:-rotate-12"><x-icon name="bookmark" class="size-3.5"/></span>
         Collection
-        @if($likedCount)<span class="hidden rounded-full px-1.5 min-[2000px]:inline text-[11px] font-medium tabular-nums {{ $liked ? 'bg-white/15 text-white' : 'bg-zinc-100 text-muted' }}">{{ $likedCount }}</span>@endif
-        @if($liked)<x-icon name="x" class="-mr-1 hidden size-3.5 opacity-70 min-[1536px]:block" aria-label="Clear"/>@endif
+        @if($collectionCounts['saved'])<span class="hidden rounded-full px-1.5 min-[2000px]:inline text-[11px] font-medium tabular-nums {{ $col ? 'bg-white/15 text-white' : 'bg-zinc-100 text-muted' }}">{{ $collectionCounts['saved'] }}</span>@endif
+        @if($col)<x-icon name="x" class="-mr-1 hidden size-3.5 opacity-70 min-[1536px]:block" aria-label="Clear"/>@endif
     </a>
     @endauth
     @foreach($categories as $c)
@@ -167,20 +167,37 @@
         <div class="mb-6 mt-10 h-px bg-line"></div>
     @endif
 
+    @if($col)
+        {{-- Collection: private saves, or what you liked --}}
+        <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+            <div>
+                <h2 class="font-display text-2xl font-bold tracking-tight">Your collection</h2>
+                <p class="mt-1 text-sm text-muted">{{ $col === 'saved' ? 'Projects you saved. Only you can see these.' : 'Projects you appreciated. Likes are public; your saves stay private.' }}</p>
+            </div>
+            <div class="flex rounded-full border border-line bg-white p-1 text-sm" role="tablist" aria-label="Collection">
+                @foreach(['saved' => ['Saved', 'bookmark'], 'liked' => ['Liked', 'heart']] as $k => [$l, $ic])
+                    <a href="{{ route($feedRoute, $keep(['collection' => $k])) }}" role="tab" aria-selected="{{ $col === $k ? 'true' : 'false' }}" class="flex items-center gap-1.5 rounded-full px-4 py-1.5 font-medium transition {{ $col === $k ? 'bg-ink text-white' : 'text-ink-soft hover:text-ink' }}">
+                        <x-icon :name="$ic" class="size-4"/> {{ $l }} <span class="tabular-nums {{ $col === $k ? 'text-white/70' : 'text-faint' }}">{{ $collectionCounts[$k] }}</span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     @if($filtered)
         <div class="mb-5 flex items-center justify-between">
-            <p class="text-sm text-muted"><span class="font-semibold text-ink">{{ number_format($projects->total()) }}</span> {{ $liked ? 'liked ' : '' }}{{ \Illuminate\Support\Str::plural('project', $projects->total()) }}{{ ($f['q'] ?? null) ? ' for “'.$f['q'].'”' : '' }}</p>
+            <p class="text-sm text-muted"><span class="font-semibold text-ink">{{ number_format($projects->total()) }}</span> {{ $col ? $col.' ' : '' }}{{ \Illuminate\Support\Str::plural('project', $projects->total()) }}{{ ($f['q'] ?? null) ? ' for “'.$f['q'].'”' : '' }}</p>
             <a href="{{ route($feedRoute) }}" class="text-sm font-medium text-leaf-dark hover:underline">Clear all</a>
         </div>
     @endif
 
     @if($projects->isEmpty())
-        @if($liked && ! ($f['q'] ?? null) && ! ($f['category'] ?? null) && ! $filterCount)
-            <x-empty icon="bookmark" title="Your collection is empty" text="Tap the heart on any project you like and it will be kept here, so you can come back to it.">
+        @if($col && ! ($f['q'] ?? null) && ! ($f['category'] ?? null) && ! $filterCount)
+            <x-empty :icon="$col === 'saved' ? 'bookmark' : 'heart'" :title="$col === 'saved' ? 'Nothing saved yet' : 'No liked projects yet'" :text="$col === 'saved' ? 'Tap the bookmark on any project to keep it here. Saves are private — only you can see them.' : 'Tap the heart on projects you appreciate and they will show up here.'">
                 <a href="{{ route($feedRoute) }}" class="btn btn-dark btn-pill h-10 px-5">Explore projects</a>
             </x-empty>
         @else
-            <x-empty icon="image" title="No projects found" text="{{ $liked ? 'None of your liked projects match. Try another category or clear the search.' : 'Try another category, fewer filters or a different search.' }}"/>
+            <x-empty icon="image" title="No projects found" text="{{ $col ? 'None of your '.$col.' projects match. Try another category or clear the search.' : 'Try another category, fewer filters or a different search.' }}"/>
         @endif
     @else
         <div x-data="{ next: @js($projects->nextPageUrl()), loading: false,

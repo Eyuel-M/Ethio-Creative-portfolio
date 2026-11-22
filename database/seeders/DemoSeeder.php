@@ -320,6 +320,12 @@ class DemoSeeder extends Seeder
             $proj->likes()->sync($likers->reject(fn ($id) => $id === $proj->profile->user_id)->shuffle()->take(mt_rand(0, 12))->all());
         }
 
+        // --- Private saves (each demo member's Collection) ---
+        foreach (User::whereIn('id', $likers)->get() as $saver) {
+            $saver->savedProjects()->sync(PortfolioProject::whereHas('profile', fn ($q) => $q->where('user_id', '!=', $saver->id))
+                ->where('status', 'published')->inRandomOrder()->take(mt_rand(3, 9))->pluck('id')->all());
+        }
+
         // --- A couple of paid orders (platform fees only) ---
         $std = Product::where('code', 'job_post_standard')->first();
         foreach ($jobModels->take(6) as $job) {

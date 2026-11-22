@@ -49,6 +49,22 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Entitlement::class);
     }
 
+    /** Portfolio projects this member saved privately (their Collection). */
+    public function savedProjects()
+    {
+        return $this->belongsToMany(PortfolioProject::class, 'portfolio_saves');
+    }
+
+    private ?array $savedProjectIdSet = null;
+
+    /** Ids of the projects this member saved, loaded once per request (for bookmark buttons on cards). */
+    public function hasSavedProject(string $projectId): bool
+    {
+        $this->savedProjectIdSet ??= array_flip(\Illuminate\Support\Facades\DB::table('portfolio_saves')->where('user_id', $this->id)->pluck('portfolio_project_id')->all());
+
+        return isset($this->savedProjectIdSet[$projectId]);
+    }
+
     public function savedJobs()
     {
         return $this->belongsToMany(JobPost::class, 'saved_jobs')->withTimestamps();

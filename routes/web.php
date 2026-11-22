@@ -144,6 +144,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 
         Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
         Route::post('/portfolio/{project}/like', [\App\Http\Controllers\FeedController::class, 'toggleLike'])->middleware('throttle:messages')->name('portfolio.like');
+        Route::post('/portfolio/{project}/save', [\App\Http\Controllers\FeedController::class, 'toggleSave'])->middleware('throttle:messages')->name('portfolio.save');
 
         // Admin console
         Route::middleware(['admin', 'admin.stepup'])->prefix('admin')->name('admin.')->group(function () {

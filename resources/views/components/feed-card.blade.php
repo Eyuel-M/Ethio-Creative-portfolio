@@ -3,10 +3,16 @@
     $author = $project->profile;
     $mine = auth()->id() === $author->user_id || (bool) auth()->user()?->inAdminMode();
     $overlay = in_array($size, ['large', 'tile'], true);
+    $saved = (bool) auth()->user()?->hasSavedProject($project->id);
     $fmt = fn ($n) => $n >= 1000 ? round($n / 1000, 1).'K' : $n;
 @endphp
 <article {{ $attributes->merge(['class' => 'group flex min-w-0 flex-col']) }}
-         x-data="{ liked: @js($liked), count: {{ (int) ($project->likes_count ?? 0) }}, busy: false,
+         x-data="{ liked: @js($liked), saved: @js($saved), count: {{ (int) ($project->likes_count ?? 0) }}, busy: false,
+                   async save() {
+                       const r = await fetch(@js(route('portfolio.save', $project)), { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' } });
+                       if (r.status === 401) { window.location = @js(route('login')); return; }
+                       if (r.ok) { this.saved = (await r.json()).saved; }
+                   },
                    async toggle() {
                        if (this.busy) return; this.busy = true;
                        try {
@@ -31,6 +37,9 @@
                     <button type="button" @click="toggle()" :aria-pressed="liked" class="grid size-9 place-items-center rounded-full bg-white/95 text-ink shadow-sm transition hover:scale-105" :aria-label="liked ? 'Unlike' : 'Like'">
                         <x-icon name="heart" class="size-[18px]" ::class="liked && 'fill-rose-500 text-rose-500'"/>
                     </button>
+                    <button type="button" @click="save()" :aria-pressed="saved" class="grid size-9 place-items-center rounded-full bg-white/95 text-ink shadow-sm transition hover:scale-105" :aria-label="saved ? 'Remove from your collection' : 'Save to your collection'" :title="saved ? 'Saved' : 'Save'">
+                        <x-icon name="bookmark" class="size-[18px]" ::class="saved && 'fill-brand text-brand'"/>
+                    </button>
                 @endunless
                 @if($rating)<span class="flex items-center gap-1 rounded-full bg-black/45 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">{{ number_format($rating, 1) }} <x-icon name="star" class="size-3.5 fill-amber-400 text-amber-400"/></span>@endif
             </div>
@@ -48,13 +57,19 @@
             </a>
         @else
             {{-- Grid card: clean image; title + like appear on hover (like Behance) --}}
+            @unless($mine)<span x-show="saved" x-cloak class="absolute right-2.5 top-2.5 z-[2] grid size-7 place-items-center rounded-full bg-white/95 text-brand shadow-sm transition group-hover:opacity-0" title="In your collection"><x-icon name="bookmark" class="size-3.5 fill-brand"/></span>@endunless
             @if($author->isFeatured())<span class="absolute left-2.5 top-2.5 z-[2] rounded-md bg-white/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-700">Sponsored</span>@endif
             <div class="pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex items-end justify-between gap-3 bg-gradient-to-t from-black/70 to-transparent p-3 pt-12 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
                 <p class="line-clamp-2 font-semibold leading-snug text-white">{{ $project->title }}</p>
                 @unless($mine)
-                    <button type="button" @click="toggle()" :aria-pressed="liked" class="pointer-events-auto grid size-9 shrink-0 place-items-center rounded-full bg-white text-ink shadow transition hover:scale-105" :aria-label="liked ? 'Unlike' : 'Like'">
-                        <x-icon name="heart" class="size-[18px]" ::class="liked && 'fill-rose-500 text-rose-500'"/>
-                    </button>
+                    <div class="pointer-events-auto flex shrink-0 gap-1.5">
+                        <button type="button" @click="save()" :aria-pressed="saved" class="grid size-9 place-items-center rounded-full bg-white text-ink shadow transition hover:scale-105" :aria-label="saved ? 'Remove from your collection' : 'Save to your collection'" :title="saved ? 'Saved' : 'Save'">
+                            <x-icon name="bookmark" class="size-[18px]" ::class="saved && 'fill-brand text-brand'"/>
+                        </button>
+                        <button type="button" @click="toggle()" :aria-pressed="liked" class="grid size-9 place-items-center rounded-full bg-white text-ink shadow transition hover:scale-105" :aria-label="liked ? 'Unlike' : 'Like'">
+                            <x-icon name="heart" class="size-[18px]" ::class="liked && 'fill-rose-500 text-rose-500'"/>
+                        </button>
+                    </div>
                 @endunless
             </div>
         @endif

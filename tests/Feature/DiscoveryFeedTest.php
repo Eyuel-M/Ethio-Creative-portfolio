@@ -71,7 +71,40 @@ class DiscoveryFeedTest extends MarketplaceTestCase
             ->assertSeeText('1 liked project')->assertDontSeeText('1 liked projects');
 
         $this->actingAs($other)->get('/?liked=1&q=label')->assertOk()->assertSee('None of your liked projects match');
-        $this->actingAs($this->client())->get('/?liked=1')->assertOk()->assertSee('Your collection is empty');
+        $this->actingAs($this->client())->get('/?liked=1')->assertOk()->assertSee('No liked projects yet');
+    }
+
+    public function test_saves_are_private_and_make_up_the_saved_collection(): void
+    {
+        $owner = $this->freelancer();
+        $p = $this->project($owner, 'published', 'Bookmarked brand book');
+        $this->project($owner, 'published', 'Not bookmarked');
+        $viewer = $this->client();
+
+        // Toggle on, then the Saved collection shows only that project.
+        $this->actingAs($viewer)->postJson(route('portfolio.save', $p))->assertOk()->assertJson(['saved' => true]);
+        $this->actingAs($viewer)->get('/?collection=saved')->assertOk()
+            ->assertSee('Bookmarked brand book')->assertDontSee('Not bookmarked')
+            ->assertSeeText('1 saved project')->assertSee('Only you can see these');
+
+        // Saving isn't a like: no public count, and the liked view stays empty.
+        $this->assertSame(0, $p->likes()->count());
+        $this->actingAs($viewer)->get('/?collection=liked')->assertSee('No liked projects yet');
+
+        // Nobody else sees it in their collection.
+        $this->actingAs($this->client())->get('/?collection=saved')->assertSee('Nothing saved yet')->assertDontSee('Bookmarked brand book');
+
+        // Toggle off.
+        $this->actingAs($viewer)->postJson(route('portfolio.save', $p))->assertOk()->assertJson(['saved' => false]);
+        $this->actingAs($viewer)->get('/?collection=saved')->assertSee('Nothing saved yet');
+    }
+
+    public function test_save_rules(): void
+    {
+        $owner = $this->freelancer();
+        $this->postJson(route('portfolio.save', $this->project($owner, 'published', 'Public')))->assertUnauthorized();
+        $this->actingAs($owner)->postJson(route('portfolio.save', $this->project($owner)))->assertStatus(422);
+        $this->actingAs($this->client())->postJson(route('portfolio.save', $this->project($owner, 'draft', 'Draft')))->assertNotFound();
     }
 
     public function test_like_toggles_and_rules_hold(): void

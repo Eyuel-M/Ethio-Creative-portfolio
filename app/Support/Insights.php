@@ -212,7 +212,7 @@ class Insights
     public const EVENTS = [
         'signup' => 'Signed up', 'login' => 'Signed in', 'email_verified' => 'Verified email',
         'portfolio_view' => 'Viewed a portfolio project', 'profile_view' => 'Viewed a freelancer profile', 'job_view' => 'Viewed a job',
-        'like' => 'Appreciated a project', 'unlike' => 'Removed an appreciation', 'share_open' => 'Opened the share menu', 'share_click' => 'Shared to a platform', 'copy_link' => 'Copied a link',
+        'like' => 'Appreciated a project', 'unlike' => 'Removed an appreciation', 'save' => 'Saved a project', 'unsave' => 'Removed a saved project', 'share_open' => 'Opened the share menu', 'share_click' => 'Shared to a platform', 'copy_link' => 'Copied a link',
         'search' => 'Searched', 'filter_used' => 'Used filters', 'outbound_click' => 'Clicked an outside link', 'cta_click' => 'Clicked a call to action',
         'portfolio_published' => 'Published a portfolio project', 'portfolio_saved' => 'Saved a portfolio draft',
         'job_started' => 'Started a job post', 'job_published' => 'Published a job', 'apply_start' => 'Opened an application', 'application_submitted' => 'Submitted an application',

@@ -22,7 +22,8 @@ class FeedController extends Controller
             'available' => 'nullable|boolean',
             'pro' => 'nullable|boolean',
             'min_likes' => 'nullable|integer|in:0,5,10',
-            'liked' => 'nullable|boolean',
+            'collection' => 'nullable|in:saved,liked',
+            'liked' => 'nullable|boolean', // older links: ?liked=1
         ]);
         $user = $request->user();
         // Visitors get a preview: categories only — no search, filters, sorting or further pages.
@@ -38,8 +39,12 @@ class FeedController extends Controller
         // Bento "featured" block: top recent work by views + likes, only for the unfiltered feed and
         // only when there's enough of it. Those projects are then excluded from the grid on every page.
         $filterCount = collect([$f['available'] ?? false, $f['pro'] ?? false, ($f['min_likes'] ?? 0) > 0])->filter()->count();
-        $liked = (bool) ($f['liked'] ?? false);
-        $unfiltered = ! $liked && empty($f['q']) && empty($f['category']) && $sort === 'recommended' && $filterCount === 0;
+        // Collection: the viewer's private saves, or the projects they liked.
+        $collection = $user ? ($f['collection'] ?? (($f['liked'] ?? false) ? 'liked' : null)) : null;
+        $f['collection'] = $collection;
+        unset($f['liked']);
+        $pivot = ['saved' => 'portfolio_saves', 'liked' => 'portfolio_likes'][$collection] ?? null;
+        $unfiltered = ! $collection && empty($f['q']) && empty($f['category']) && $sort === 'recommended' && $filterCount === 0;
         $candidates = $unfiltered
             ? $base()->where(fn ($q) => $q->where('published_at', '>=', now()->subDays(120))->orWhereNotNull('featured_at'))
                 ->orderByRaw('CASE WHEN featured_at IS NULL THEN 1 ELSE 0 END')->orderByDesc('featured_at') // admin-featured work leads
@@ -60,12 +65,11 @@ class FeedController extends Controller
             ->when($f['available'] ?? false, fn ($q) => $q->whereHas('profile', fn ($p) => $p->where('availability', 'available')))
             ->when($f['pro'] ?? false, fn ($q) => $q->whereHas('profile', fn ($p) => $p->where('plan', 'professional')))
             ->when(($f['min_likes'] ?? 0) > 0, fn ($q) => $q->has('likes', '>=', (int) $f['min_likes']))
-            // "Your collection": only what this viewer has liked.
-            ->when($liked, fn ($q) => $q->whereHas('likes', fn ($l) => $l->where('users.id', $user->id)));
+            ->when($pivot, fn ($q) => $q->whereIn('id', fn ($s) => $s->select('portfolio_project_id')->from($pivot)->where('user_id', $user->id)));
 
-        $query = $liked && $sort === 'recommended'
-            // Most recently liked first.
-            ? $query->orderByRaw('(select pl.created_at from portfolio_likes pl where pl.portfolio_project_id = portfolio_projects.id and pl.user_id = ?) desc', [$user->id])
+        $query = $pivot && $sort === 'recommended'
+            // Most recently saved/liked first.
+            ? $query->orderByRaw("(select c.created_at from {$pivot} c where c.portfolio_project_id = portfolio_projects.id and c.user_id = ?) desc", [$user->id])
             : match ($sort) {
             'newest' => $query->latest('published_at'),
             'most_viewed' => $query->orderByDesc('views'),
@@ -100,7 +104,10 @@ class FeedController extends Controller
             'feedRoute' => $user ? 'home' : 'explore',
             'categoryCovers' => $categoryCovers,
             'categoryCounts' => $categoryCounts,
-            'likedCount' => $user ? PortfolioProject::discoverable()->whereHas('likes', fn ($l) => $l->where('users.id', $user->id))->count() : 0,
+            'collectionCounts' => $user ? [
+                'saved' => PortfolioProject::discoverable()->whereIn('id', fn ($s) => $s->select('portfolio_project_id')->from('portfolio_saves')->where('user_id', $user->id))->count(),
+                'liked' => PortfolioProject::discoverable()->whereIn('id', fn ($s) => $s->select('portfolio_project_id')->from('portfolio_likes')->where('user_id', $user->id))->count(),
+            ] : ['saved' => 0, 'liked' => 0],
             'filterCount' => $filterCount,
             'bento' => $bento,
             'projects' => $projects,
@@ -133,5 +140,19 @@ class FeedController extends Controller
         $count = $project->likes()->count();
 
         return $request->expectsJson() ? response()->json(['liked' => $liked, 'count' => $count]) : back();
+    }
+
+    /** Private save (bookmark). Unlike a like, it isn't counted or shown to anyone else. */
+    public function toggleSave(Request $request, PortfolioProject $project)
+    {
+        abort_unless(PortfolioProject::discoverable()->whereKey($project->id)->exists(), 404);
+        abort_if($project->profile->user_id === $request->user()->id, 422, 'You cannot save your own project.');
+        abort_if($request->user()->inAdminMode(), 403);
+
+        $result = $project->savers()->toggle([$request->user()->id]);
+        $saved = ! empty($result['attached']);
+        \App\Support\Analytics::track($saved ? 'save' : 'unsave', $project);
+
+        return $request->expectsJson() ? response()->json(['saved' => $saved]) : back();
     }
 }

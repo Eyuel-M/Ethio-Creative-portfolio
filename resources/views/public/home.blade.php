@@ -1,7 +1,7 @@
 <x-layouts.public :hero="true">
     {{-- Hero --}}
     <section class="px-3 pt-3 sm:px-4 sm:pt-4">
-        <div class="hero-gradient relative overflow-hidden rounded-[28px] px-4 pb-10 pt-28 sm:px-6 sm:pt-32">
+        <div class="hero-gradient relative overflow-hidden flex min-h-[calc(100svh-1.5rem)] flex-col justify-center rounded-[28px] px-4 pb-10 pt-28 sm:min-h-[calc(100svh-2rem)] sm:px-6 sm:pt-32">
             <div class="pointer-events-none absolute left-1/2 top-24 size-[780px] -translate-x-1/2 rounded-full border border-white/70"></div>
             <div class="pointer-events-none absolute left-1/2 top-48 size-[540px] -translate-x-1/2 rounded-full border border-white/60"></div>
 

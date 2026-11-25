@@ -24,6 +24,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\TrackVisit::class,
         ]);
         $middleware->validateCsrfTokens(except: ['webhooks/*', 'a/*']);
+        // Behind a tunnel or load balancer (e.g. a Cloudflare Tunnel for a quick demo), trust its
+        // forwarded headers so links use https and the public host. Off unless TRUST_PROXIES is set.
+        if ($proxies = env('TRUST_PROXIES')) {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
         $middleware->redirectUsersTo(fn () => route('home'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {

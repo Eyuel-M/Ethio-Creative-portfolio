@@ -15,7 +15,6 @@
         ['Explore', 'home', ['home', 'portfolio.show'], true],
         ['Talent', 'freelancers.index', ['freelancers.*'], true],
         ['Jobs', 'jobs.index', ['jobs.index', 'jobs.show'], true],
-        ['Insights', 'admin.insights.traffic', ['admin.insights.*'], $me->canAdmin('insights')],
     ], fn ($l) => $l[3]));
     $openQueues = collect(\App\Support\AdminMenu::counts())->except('health')->sum();
 @endphp
@@ -31,7 +30,7 @@
         </div>
         <nav class="hidden h-16 justify-self-center items-stretch gap-1 lg:flex" aria-label="Admin">
             @foreach($adminLinks as [$label, $route, $patterns])
-                @php $active = request()->routeIs(...$patterns) && ! ($route === 'admin.overview' && request()->routeIs('admin.insights.*')); @endphp
+                @php $active = request()->routeIs(...$patterns); @endphp
                 <a href="{{ route($route) }}" @if($active) aria-current="page" @endif class="flex items-center whitespace-nowrap border-b-2 px-2.5 text-[15px] xl:px-3 font-medium transition {{ $active ? 'border-ink text-ink' : 'border-transparent text-ink-soft hover:text-ink' }}">{{ $label }}</a>
             @endforeach
         </nav>

@@ -7,7 +7,6 @@
     $showToc = $post->shows('toc') && $layout !== 'minimal' && count($outline) >= 2;
     $hex = Post::ACCENTS[$post->opt('accent')]['hex'];
     $url = route('insights.show', $post);
-    $byAuthor = $post->author && ! $post->author_label;
 @endphp
 <x-dynamic-component :component="$guest ? 'layouts.public' : 'layouts.discover'" :title="$post->metaTitle()">
 @push('meta')
@@ -25,7 +24,7 @@
     '@context' => 'https://schema.org', '@type' => $post->type === 'study' ? 'Report' : 'Article',
     'headline' => $post->title, 'description' => $post->metaDescription(), 'image' => $post->coverUrl(),
     'datePublished' => $post->published_at?->toIso8601String(), 'dateModified' => $post->updated_at?->toIso8601String(),
-    'author' => ['@type' => $byAuthor ? 'Person' : 'Organization', 'name' => $post->byline()],
+    'author' => ['@type' => 'Organization', 'name' => config('marketplace.brand')],
     'publisher' => ['@type' => 'Organization', 'name' => config('marketplace.brand')],
     'mainEntityOfPage' => $url, 'keywords' => implode(', ', $post->topics ?? []) ?: null,
 ]), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
@@ -168,16 +167,6 @@
             @endif
         </div>
 
-        @if($post->shows('author_box'))
-            <div class="mt-8 flex items-center gap-4 rounded-3xl bg-zinc-50 p-5 sm:p-6">
-                @if($byAuthor)<x-avatar :user="$post->author" size="size-14" class="text-base"/>@else<span class="grid size-14 shrink-0 place-items-center rounded-2xl bg-ink text-white"><x-logo-mark class="size-7"/></span>@endif
-                <div class="min-w-0">
-                    <p class="text-xs font-semibold uppercase tracking-[0.12em] text-faint">Written by</p>
-                    <p class="font-display text-lg font-bold">{{ $post->byline() }}</p>
-                    <p class="text-sm text-muted">{{ $byAuthor ? 'Team '.config('marketplace.brand') : 'From the '.config('marketplace.brand').' team' }} · <a href="{{ route('insights.index') }}" class="font-medium text-ink hover:underline">More Insights</a></p>
-                </div>
-            </div>
-        @endif
     </footer>
 </article>
 

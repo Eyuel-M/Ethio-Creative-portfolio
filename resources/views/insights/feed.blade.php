@@ -15,7 +15,7 @@
         <pubDate>{{ $p->published_at->toRssString() }}</pubDate>
         <category>{{ $p->typeLabel() }}</category>
         @foreach($p->topics ?? [] as $t)<category>{{ $t }}</category>@endforeach
-        <author>noreply@{{ parse_url(config('app.url'), PHP_URL_HOST) ?: 'localhost' }} ({{ $p->byline() }})</author>
+        <author>noreply@{{ parse_url(config('app.url'), PHP_URL_HOST) ?: 'localhost' }} ({{ config('marketplace.brand') }})</author>
         <description>{{ $p->metaDescription() }}</description>
     </item>
     @endforeach

@@ -82,10 +82,6 @@
                 </h2>
                 @if($lead->excerpt)<p class="mt-4 text-lg leading-relaxed text-ink-soft">{{ $lead->excerpt }}</p>@endif
                 <p class="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
-                    <span class="flex items-center gap-2 font-semibold">
-                        @if($lead->author && ! $lead->author_label)<x-avatar :user="$lead->author" size="size-8" class="text-[11px]"/>@else<span class="grid size-8 place-items-center rounded-full bg-ink text-white"><x-logo-mark class="size-4"/></span>@endif
-                        {{ $lead->byline() }}
-                    </span>
                     <span class="text-muted">{{ $lead->published_at->format('M j, Y') }}@if($lead->shows('reading_time')) · {{ $lead->reading_minutes }} min read @endif</span>
                 </p>
                 <span class="relative mt-6 inline-flex items-center gap-2 text-sm font-semibold">Read the {{ strtolower($lead->typeLabel()) }} <span class="grid size-8 place-items-center rounded-full bg-ink text-white transition group-hover:translate-x-1"><x-icon name="arrow-right" class="size-4"/></span></span>

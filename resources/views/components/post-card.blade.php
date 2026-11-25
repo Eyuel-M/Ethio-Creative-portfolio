@@ -23,10 +23,7 @@
         </h3>
         @if($post->excerpt && ! $compact)<p class="mt-2 line-clamp-2 text-[15px] leading-relaxed text-ink-soft">{{ $post->excerpt }}</p>@endif
         @unless($compact)
-            <p class="mt-auto flex items-center gap-2 pt-4 text-sm font-medium">
-                @if($post->author && ! $post->author_label)<x-avatar :user="$post->author" size="size-6" class="text-[9px]"/>@else<span class="grid size-6 place-items-center rounded-full bg-ink text-white"><x-logo-mark class="size-3.5"/></span>@endif
-                <span class="truncate">{{ $post->byline() }}</span>
-            </p>
+            <span class="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-semibold {{ $post->accent('text') }}">Read {{ strtolower($post->typeLabel()) }} <x-icon name="arrow-right" class="size-4 transition group-hover:translate-x-0.5"/></span>
         @endunless
     </div>
 </article>

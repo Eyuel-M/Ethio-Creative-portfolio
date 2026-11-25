@@ -290,7 +290,6 @@
                         </div>
                     </div>
                     <div><label class="label" for="topics">Topics</label><input id="topics" name="topics" value="{{ old('topics', implode(', ', $post->topics ?? [])) }}" maxlength="300" class="input" placeholder="Pricing, Branding, Ethiopia"><p class="hint">Comma separated · up to 8</p></div>
-                    <div><label class="label" for="author_label">Byline</label><input id="author_label" name="author_label" value="{{ old('author_label', $post->author_label) }}" maxlength="120" class="input" placeholder="{{ ($post->author ?? auth()->user())->name }}"><p class="hint">Leave empty to show {{ ($post->author ?? auth()->user())->name }}, or write e.g. “{{ config('marketplace.brand') }} Research”.</p></div>
 
                     <div class="space-y-3 rounded-2xl border border-line p-3">
                         <p class="text-[11px] font-semibold uppercase tracking-wider text-faint">Publishing</p>
@@ -335,7 +334,7 @@
                         </div>
                         <div class="space-y-2">
                             <p class="text-xs font-medium text-ink-soft">Show on the page</p>
-                            @foreach(['toc' => 'Table of contents (from H2/H3 headings)', 'reading_time' => 'Reading time', 'author_box' => 'Author card at the end', 'share' => 'Share buttons', 'related' => 'Related posts'] as $k => $tl)
+                            @foreach(['toc' => 'Table of contents (from H2/H3 headings)', 'reading_time' => 'Reading time', 'share' => 'Share buttons', 'related' => 'Related posts'] as $k => $tl)
                                 <label class="flex items-center gap-2 text-sm"><input type="hidden" name="settings[{{ $k }}]" value="0"><input type="checkbox" name="settings[{{ $k }}]" value="1" class="checkbox" @checked(($s[$k] ?? '1') === '1')> {{ $tl }}</label>
                             @endforeach
                         </div>

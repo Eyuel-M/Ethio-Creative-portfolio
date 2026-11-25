@@ -42,7 +42,10 @@ class AuthController extends Controller
             return view('auth.closed');
         }
 
-        return view('auth.register', ['role' => $request->query('role', 'freelancer')]);
+        // Came through "Join as freelancer" / "Post a job"? Start them in that role. Otherwise they decide later.
+        $role = in_array($request->query('role'), ['freelancer', 'client'], true) ? $request->query('role') : null;
+
+        return view('auth.register', ['role' => $role]);
     }
 
     public function register(Request $request)
@@ -52,7 +55,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:120',
             'email' => 'required|email|max:190|unique:users,email',
             'password' => ['required', 'confirmed', Password::min(8)],
-            'role' => 'required|in:freelancer,client',
+            'role' => 'nullable|in:freelancer,client,member',
             'avatar' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120|dimensions:max_width=6000,max_height=6000',
             'terms' => 'accepted',
         ]);
@@ -66,8 +69,11 @@ class AuthController extends Controller
             if (request()->hasFile('avatar')) {
                 $user->forceFill(['avatar_path' => \App\Support\Media::store(request()->file('avatar'), 'avatars')])->save();
             }
-            self::enableRole($user, $data['role']);
-            $user->forceFill(['active_workspace' => $data['role']])->save();
+            // A plain member until they pick: "member" (or nothing) means just browsing for now.
+            if (in_array($data['role'] ?? null, ['freelancer', 'client'], true)) {
+                self::enableRole($user, $data['role']);
+                $user->forceFill(['active_workspace' => $data['role']])->save();
+            }
 
             return $user;
         });
@@ -76,7 +82,7 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
         $user->forceFill(['last_login_at' => now()])->saveQuietly();
-        \App\Support\Analytics::track('signup', null, ['role' => $data['role']], $user->id);
+        \App\Support\Analytics::track('signup', null, ['role' => in_array($data['role'] ?? null, ['freelancer', 'client'], true) ? $data['role'] : 'member'], $user->id);
 
         return redirect()->route('verification.notice');
     }

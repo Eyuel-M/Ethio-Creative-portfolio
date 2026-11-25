@@ -20,7 +20,7 @@
                 </h1>
                 <p class="mx-auto mt-5 max-w-xl text-base text-ink-soft sm:text-lg">Ethiopian designers, illustrators, photographers and animators — discovered by their work, hired through clear agreements.</p>
                 <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-                    <a href="{{ route('register', ['role' => 'freelancer']) }}" class="btn btn-dark btn-pill h-12 pl-6 pr-2">Join for free <span class="grid size-8 place-items-center rounded-full bg-white text-ink"><x-icon name="arrow-up-right" class="size-4"/></span></a>
+                    <a href="{{ route('register') }}" class="btn btn-dark btn-pill h-12 pl-6 pr-2">Join for free <span class="grid size-8 place-items-center rounded-full bg-white text-ink"><x-icon name="arrow-up-right" class="size-4"/></span></a>
                     <a href="{{ route('register', ['role' => 'client']) }}" class="btn btn-pill h-12 bg-white/80 px-6 text-ink backdrop-blur hover:bg-white">Hire talent</a>
                 </div>
             </div>

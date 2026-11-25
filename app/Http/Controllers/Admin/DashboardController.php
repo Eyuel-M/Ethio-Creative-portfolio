@@ -42,6 +42,14 @@ class DashboardController extends Controller
             ['Revenue', \App\Support\Money::format($revenue, 'ETB'), $change($revenue, $revenuePrev), 'admin.orders', 'finance'],
         ];
 
+        // Who's joining: which path members picked, and who's still deciding.
+        $members = [
+            'freelancer' => User::where('is_freelancer', true)->whereNull('admin_role')->count(),
+            'client' => User::where('is_client', true)->whereNull('admin_role')->count(),
+            'member' => User::undecided()->count(),
+            'member_active' => User::undecided()->where('last_seen_at', '>=', now()->subDays(7))->count(),
+        ];
+
         $oldest = fn ($table, $where) => ($d = DB::table($table)->where($where)->min('created_at')) ? \Illuminate\Support\Carbon::parse($d)->diffForHumans(null, true) : null;
         $queues = [
             ['Open reports', $counts['reports'], $oldest('reports', ['status' => 'open']), 'admin.reports', 'reports', 'flag'],
@@ -60,6 +68,6 @@ class DashboardController extends Controller
         $activity = AuditLog::with('actor')->whereHas('actor', fn ($q) => $q->whereNotNull('admin_role'))
             ->whereNotIn('action', ['admin.login', 'admin.verified'])->latest('created_at')->take(8)->get();
 
-        return view('admin.dashboard', compact('kpis', 'queues', 'visitorsDaily', 'signupsDaily', 'recentUsers', 'activity', 'traffic'));
+        return view('admin.dashboard', compact('kpis', 'members', 'queues', 'visitorsDaily', 'signupsDaily', 'recentUsers', 'activity', 'traffic'));
     }
 }

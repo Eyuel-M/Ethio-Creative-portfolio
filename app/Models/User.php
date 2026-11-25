@@ -120,6 +120,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->isAdmin() && ! (session('member_mode') && $this->hasMemberWorkspace());
     }
 
+    /** Members who signed up but haven't chosen freelancer or client yet (staff excluded). */
+    public function scopeUndecided($query)
+    {
+        return $query->where('is_freelancer', false)->where('is_client', false)->whereNull('admin_role');
+    }
+
     public function hasMemberWorkspace(): bool
     {
         return $this->is_freelancer || $this->is_client;

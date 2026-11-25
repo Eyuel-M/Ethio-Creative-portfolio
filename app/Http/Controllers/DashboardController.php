@@ -21,7 +21,8 @@ class DashboardController extends Controller
         return match ($user->workspace()) {
             'client' => $this->client($request),
             'freelancer' => $this->freelancer($request),
-            default => redirect()->route('settings'),
+            // Members who haven't picked a path yet: a welcome page to choose freelancer or client.
+            default => view('dashboard.welcome', ['need' => $request->query('need')]),
         };
     }
 

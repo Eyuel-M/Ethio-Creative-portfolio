@@ -210,7 +210,7 @@ class Insights
 
     /** Everything the platform records as an interaction, with a human label. */
     public const EVENTS = [
-        'signup' => 'Signed up', 'login' => 'Signed in', 'email_verified' => 'Verified email',
+        'signup' => 'Signed up', 'role_chosen' => 'Chose freelancer or client', 'login' => 'Signed in', 'email_verified' => 'Verified email',
         'portfolio_view' => 'Viewed a portfolio project', 'profile_view' => 'Viewed a freelancer profile', 'job_view' => 'Viewed a job',
         'like' => 'Appreciated a project', 'unlike' => 'Removed an appreciation', 'save' => 'Saved a project', 'unsave' => 'Removed a saved project', 'share_open' => 'Opened the share menu', 'share_click' => 'Shared to a platform', 'copy_link' => 'Copied a link',
         'search' => 'Searched', 'filter_used' => 'Used filters', 'outbound_click' => 'Clicked an outside link', 'cta_click' => 'Clicked a call to action',

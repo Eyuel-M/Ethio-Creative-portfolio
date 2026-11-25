@@ -22,7 +22,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $f = $request->validate([
-            'q' => 'nullable|string|max:120', 'role' => 'nullable|in:freelancer,client,admin', 'status' => 'nullable|in:active,restricted,suspended,banned,deleted',
+            'q' => 'nullable|string|max:120', 'role' => 'nullable|in:freelancer,client,admin,member', 'status' => 'nullable|in:active,restricted,suspended,banned,deleted',
             'plan' => 'nullable|in:free,professional', 'sort' => 'nullable|in:newest,oldest,last_seen,name',
         ]);
         $users = User::query()->with(['freelancerProfile', 'clientProfile'])
@@ -30,6 +30,8 @@ class UserController extends Controller
             ->when(($f['role'] ?? null) === 'freelancer', fn ($q) => $q->where('is_freelancer', true))
             ->when(($f['role'] ?? null) === 'client', fn ($q) => $q->where('is_client', true))
             ->when(($f['role'] ?? null) === 'admin', fn ($q) => $q->whereNotNull('admin_role'))
+            // Signed up but hasn't picked freelancer or client yet.
+            ->when(($f['role'] ?? null) === 'member', fn ($q) => $q->undecided())
             ->when($f['status'] ?? null, fn ($q, $s) => $q->where('status', $s))
             ->when($f['plan'] ?? null, fn ($q, $p) => $q->whereHas('freelancerProfile', fn ($w) => $w->where('plan', $p)))
             ->tap(fn ($q) => match ($f['sort'] ?? 'newest') {

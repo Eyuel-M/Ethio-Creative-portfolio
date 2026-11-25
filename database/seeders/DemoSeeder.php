@@ -28,7 +28,8 @@ use Illuminate\Support\Str;
  * Placeholder (demo) content: creatives, portfolios, jobs, applications, projects, reviews, messages.
  * Every placeholder account uses an @demo.test email so `php artisan demo:clear` can remove it all
  * without touching real accounts. Synthetic development data only — never run against production.
- * Demo logins (password: "password"): freelancer@demo.test, client@demo.test, admin@demo.test
+ * Demo logins (password: "password"): freelancer@demo.test, client@demo.test, admin@demo.test,
+ * member@demo.test (signed up, hasn't chosen freelancer or client yet)
  */
 class DemoSeeder extends Seeder
 {
@@ -95,6 +96,11 @@ class DemoSeeder extends Seeder
         // --- Admin ---
         $admin = $this->user('Selam Admin', 'admin@demo.test');
         $admin->forceFill(['admin_role' => 'super_admin'])->save();
+
+        // --- Members who signed up but haven't picked freelancer or client yet ---
+        foreach ([['Dawit Alemayehu', 'member@demo.test', 1], ['Mahlet Girma', 'mahlet@demo.test', 3], ['Yared Tesfaye', 'yared@demo.test', 20]] as [$n, $e, $seen]) {
+            $this->user($n, $e)->forceFill(['created_at' => now()->subDays($seen + 2), 'last_seen_at' => now()->subDays($seen), 'last_login_at' => now()->subDays($seen)])->save();
+        }
 
         // --- Freelancers ---
         $people = [

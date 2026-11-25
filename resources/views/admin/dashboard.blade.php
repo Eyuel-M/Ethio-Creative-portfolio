@@ -32,6 +32,17 @@
     </div>
 </section>
 
+{{-- Members by path --}}
+<section>
+    <h2 class="mb-3 text-[13px] font-semibold uppercase tracking-wider text-muted">Members <span class="font-normal normal-case tracking-normal">· which path they chose</span></h2>
+    @php $canUsers = auth()->user()->canAdmin('users'); @endphp
+    <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+        <x-admin.stat label="Freelancers" :value="number_format($members['freelancer'])" :href="$canUsers ? route('admin.users', ['role' => 'freelancer']) : null"/>
+        <x-admin.stat label="Clients" :value="number_format($members['client'])" :href="$canUsers ? route('admin.users', ['role' => 'client']) : null"/>
+        <x-admin.stat label="Undecided" :value="number_format($members['member'])" :hint="number_format($members['member_active']).' browsed in the last 7 days'" :href="$canUsers ? route('admin.users', ['role' => 'member', 'sort' => 'last_seen']) : null" class="col-span-2 md:col-span-1"/>
+    </div>
+</section>
+
 <div class="grid grid-cols-1 gap-5 xl:grid-cols-2">
     <x-admin.panel title="Daily visitors" subtitle="Unique visitors per day">
         <x-admin.columns :series="$visitorsDaily" label="Visitors"/>

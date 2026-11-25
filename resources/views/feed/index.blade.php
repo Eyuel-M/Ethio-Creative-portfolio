@@ -108,6 +108,21 @@
     @endforeach
 </nav>
 
+{{-- Members who haven't picked a path: a gentle, dismissible nudge --}}
+@if($user && $ws === 'none' && ! $user->inAdminMode() && ! $filtered)
+<div x-data="{ show: (() => { try { return localStorage.getItem('nudge-member') !== 'hidden' } catch (e) { return true } })() }" x-show="show" x-cloak class="px-4 sm:px-6">
+    <div class="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-gradient-to-r from-[#eef3ff] via-white to-[#f4efff] px-4 py-3 sm:px-5">
+        <span class="grid size-9 shrink-0 place-items-center rounded-full bg-ink text-white"><x-icon name="sparkles" class="size-4"/></span>
+        <p class="min-w-0 flex-1 text-sm"><span class="font-semibold">You're browsing as a member.</span> <span class="text-ink-soft">Share your own work as a freelancer, or post a job as a client — whenever you're ready.</span></p>
+        <div class="flex items-center gap-2">
+            <form method="POST" action="{{ route('workspace.enable') }}">@csrf<input type="hidden" name="role" value="freelancer"><button class="btn btn-dark btn-pill h-9 px-4 text-[13px]">Become a freelancer</button></form>
+            <form method="POST" action="{{ route('workspace.enable') }}">@csrf<input type="hidden" name="role" value="client"><button class="btn btn-light btn-pill h-9 px-4 text-[13px]">Hire talent</button></form>
+            <button type="button" @click="show = false; try { localStorage.setItem('nudge-member', 'hidden') } catch (e) {}" class="grid size-8 place-items-center rounded-full text-muted hover:bg-white hover:text-ink" aria-label="Dismiss"><x-icon name="x" class="size-4"/></button>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Promo strip (dismissible) --}}
 @if($promo && ! $filtered)
 <section x-data="{ show: (() => { try { return localStorage.getItem('promo-{{ $promo }}') !== 'hidden' } catch (e) { return true } })() }" x-show="show" x-cloak

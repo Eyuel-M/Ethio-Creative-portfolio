@@ -75,6 +75,12 @@ class SettingsController extends Controller
         $data = $request->validate(['role' => 'required|in:freelancer,client']);
         AuthController::enableRole($request->user(), $data['role']);
         $request->user()->forceFill(['active_workspace' => $data['role']])->save();
+        \App\Support\Analytics::track('role_chosen', null, ['role' => $data['role']]);
+
+        // Came here from something that needed this role (e.g. Apply)? Go back to it.
+        if ($back = $request->session()->pull('after_enable')) {
+            return redirect()->to($back)->with('status', ucfirst($data['role']).' workspace enabled.');
+        }
 
         return redirect()->route('settings', ['tab' => $data['role'] === 'client' ? 'client' : 'profile'])->with('status', ucfirst($data['role']).' workspace enabled.');
     }

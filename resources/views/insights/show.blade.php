@@ -115,10 +115,10 @@
                     return view('insights._toc', ['items' => $items, 'post' => $post, 'compact' => $compact])->render();
                 };
             @endphp
-            {{-- Very wide screens: a contents card in the left margin --}}
-            <aside class="absolute inset-y-0 left-5 hidden w-[216px] min-[1600px]:block" aria-label="On this page">
-                <nav class="sticky top-24 overflow-hidden rounded-2xl border border-line bg-white/90 shadow-[0_18px_40px_-28px_rgba(12,12,16,.35)] backdrop-blur">
-                    <div class="flex items-center gap-3 border-b border-line px-4 py-3.5">
+            {{-- Laptops and up: a floating contents button with progress --}}
+            <div class="fixed bottom-14 left-5 z-40 hidden lg:block" @keydown.escape.window="open = false" @click.outside="open = false">
+                <div x-show="open" x-cloak x-transition.origin.bottom.left class="mb-3 w-[290px] overflow-hidden rounded-2xl border border-line bg-white shadow-xl">
+                    <div class="flex items-center gap-3 border-b border-line px-4 py-3">
                         <span class="relative grid size-10 shrink-0 place-items-center">
                             <svg viewBox="0 0 36 36" class="absolute inset-0 size-full -rotate-90"><circle cx="18" cy="18" r="15.5" fill="none" stroke="#ececef" stroke-width="3"/><circle cx="18" cy="18" r="15.5" fill="none" stroke="{{ $hex }}" stroke-width="3" stroke-linecap="round" stroke-dasharray="97.4" :stroke-dashoffset="97.4 - 97.4 * pct / 100" class="transition-[stroke-dashoffset] duration-200"/></svg>
                             <span class="text-[10px] font-bold tabular-nums" x-text="pct + '%'">0%</span>
@@ -129,15 +129,7 @@
                         </span>
                     </div>
                     {!! $tocList() !!}
-                    <button type="button" @click="window.scrollTo({ top: 0, behavior: 'smooth' })" class="flex w-full items-center justify-center gap-1.5 border-t border-line py-2.5 text-xs font-medium text-muted transition hover:bg-zinc-50 hover:text-ink"><x-icon name="chevron-down" class="size-3.5 rotate-180"/> Back to top</button>
-                </nav>
-            </aside>
-
-            {{-- Laptops: a floating contents button --}}
-            <div class="fixed bottom-14 left-5 z-40 hidden lg:block min-[1600px]:hidden" @keydown.escape.window="open = false" @click.outside="open = false">
-                <div x-show="open" x-cloak x-transition.origin.bottom.left class="mb-3 w-[280px] overflow-hidden rounded-2xl border border-line bg-white shadow-xl">
-                    <p class="border-b border-line px-4 py-3 text-[13px] font-semibold">On this page</p>
-                    {!! $tocList() !!}
+                    <button type="button" @click="open = false; window.scrollTo({ top: 0, behavior: 'smooth' })" class="flex w-full items-center justify-center gap-1.5 border-t border-line py-2.5 text-xs font-medium text-muted transition hover:bg-zinc-50 hover:text-ink"><x-icon name="chevron-down" class="size-3.5 rotate-180"/> Back to top</button>
                 </div>
                 <button type="button" @click="open = !open" :aria-expanded="open" class="flex items-center gap-2.5 rounded-full border border-line bg-white py-1.5 pl-1.5 pr-4 text-[13px] font-medium shadow-[0_12px_30px_-14px_rgba(12,12,16,.45)] transition hover:border-zinc-300">
                     <span class="relative grid size-8 place-items-center">

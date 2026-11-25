@@ -90,30 +90,71 @@
     @endif
 
     {{-- ───────── Body ───────── --}}
-    <div class="relative pb-6 pt-8 sm:pt-12" @if($showToc) x-data="{ active: null }" x-init="
-            const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) active = e.target.id }), { rootMargin: '-20% 0px -70% 0px' });
-            document.querySelectorAll('article h2[id], article h3[id]').forEach((h) => io.observe(h))" @endif>
+    <div class="relative pb-6 pt-8 sm:pt-12" @if($showToc) x-data="{
+            ids: @js(array_column($outline, 'id')), active: null, pct: 0, open: false,
+            get index() { return this.ids.indexOf(this.active) },
+            get left() { return Math.max(1, Math.ceil({{ $post->reading_minutes }} * (1 - this.pct / 100))) },
+            go(id) { this.open = false; document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); history.replaceState(null, '', '#' + id) },
+        }" x-init="
+            const body = $el;
+            const heads = ids.map((id) => document.getElementById(id)).filter(Boolean);
+            // Current section = the last heading that has passed the top third of the screen.
+            const f = () => {
+                const r = body.getBoundingClientRect();
+                pct = Math.round(Math.min(100, Math.max(0, (innerHeight * .35 - r.top) / (r.height - innerHeight * .4) * 100)));
+                let cur = null;
+                for (const h of heads) { if (h.getBoundingClientRect().top < innerHeight * .33) cur = h.id; }
+                active = cur;
+            };
+            f(); addEventListener('scroll', f, { passive: true })" @endif>
         @if($showToc)
-            {{-- Wide screens: contents in the left margin --}}
-            <aside class="absolute inset-y-0 left-6 hidden w-52 2xl:block" aria-label="On this page">
-                <nav class="sticky top-28">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">On this page</p>
-                    <ol class="mt-3 space-y-1 border-l border-line text-sm">
-                        @foreach($outline as $h)
-                            <li><a href="#{{ $h['id'] }}" class="-ml-px block border-l-2 py-1 leading-snug transition {{ $h['level'] === 'h3' ? 'pl-6 text-[13px]' : 'pl-3' }}" :class="active === @js($h['id']) ? 'font-semibold text-ink' : 'border-transparent text-muted hover:text-ink'" :style="active === @js($h['id']) ? 'border-color: {{ $hex }}' : ''">{{ $h['text'] }}</a></li>
-                        @endforeach
-                    </ol>
+            @php
+                $h2 = 0;
+                $items = collect($outline)->map(function ($h) use (&$h2) { if ($h['level'] !== 'h3') { $h2++; } return $h + ['n' => $h['level'] === 'h3' ? null : str_pad((string) $h2, 2, '0', STR_PAD_LEFT)]; });
+                $tocList = function (bool $compact = false) use ($items, $post) {
+                    return view('insights._toc', ['items' => $items, 'post' => $post, 'compact' => $compact])->render();
+                };
+            @endphp
+            {{-- Very wide screens: a contents card in the left margin --}}
+            <aside class="absolute inset-y-0 left-5 hidden w-[216px] min-[1600px]:block" aria-label="On this page">
+                <nav class="sticky top-24 overflow-hidden rounded-2xl border border-line bg-white/90 shadow-[0_18px_40px_-28px_rgba(12,12,16,.35)] backdrop-blur">
+                    <div class="flex items-center gap-3 border-b border-line px-4 py-3.5">
+                        <span class="relative grid size-10 shrink-0 place-items-center">
+                            <svg viewBox="0 0 36 36" class="absolute inset-0 size-full -rotate-90"><circle cx="18" cy="18" r="15.5" fill="none" stroke="#ececef" stroke-width="3"/><circle cx="18" cy="18" r="15.5" fill="none" stroke="{{ $hex }}" stroke-width="3" stroke-linecap="round" stroke-dasharray="97.4" :stroke-dashoffset="97.4 - 97.4 * pct / 100" class="transition-[stroke-dashoffset] duration-200"/></svg>
+                            <span class="text-[10px] font-bold tabular-nums" x-text="pct + '%'">0%</span>
+                        </span>
+                        <span class="min-w-0 leading-tight">
+                            <span class="block text-[13px] font-semibold">On this page</span>
+                            <span class="block text-[11px] text-muted" x-text="pct >= 98 ? 'Finished — thanks for reading' : left + ' min left'">{{ $post->reading_minutes }} min read</span>
+                        </span>
+                    </div>
+                    {!! $tocList() !!}
+                    <button type="button" @click="window.scrollTo({ top: 0, behavior: 'smooth' })" class="flex w-full items-center justify-center gap-1.5 border-t border-line py-2.5 text-xs font-medium text-muted transition hover:bg-zinc-50 hover:text-ink"><x-icon name="chevron-down" class="size-3.5 rotate-180"/> Back to top</button>
                 </nav>
             </aside>
-            {{-- Other screens: a collapsible box at the top --}}
-            <details class="group mx-auto mb-6 max-w-[720px] px-5 2xl:hidden">
+
+            {{-- Laptops: a floating contents button --}}
+            <div class="fixed bottom-14 left-5 z-40 hidden lg:block min-[1600px]:hidden" @keydown.escape.window="open = false" @click.outside="open = false">
+                <div x-show="open" x-cloak x-transition.origin.bottom.left class="mb-3 w-[280px] overflow-hidden rounded-2xl border border-line bg-white shadow-xl">
+                    <p class="border-b border-line px-4 py-3 text-[13px] font-semibold">On this page</p>
+                    {!! $tocList() !!}
+                </div>
+                <button type="button" @click="open = !open" :aria-expanded="open" class="flex items-center gap-2.5 rounded-full border border-line bg-white py-1.5 pl-1.5 pr-4 text-[13px] font-medium shadow-[0_12px_30px_-14px_rgba(12,12,16,.45)] transition hover:border-zinc-300">
+                    <span class="relative grid size-8 place-items-center">
+                        <svg viewBox="0 0 36 36" class="absolute inset-0 size-full -rotate-90"><circle cx="18" cy="18" r="15.5" fill="none" stroke="#ececef" stroke-width="3.5"/><circle cx="18" cy="18" r="15.5" fill="none" stroke="{{ $hex }}" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="97.4" :stroke-dashoffset="97.4 - 97.4 * pct / 100"/></svg>
+                        <x-icon name="list" class="size-3.5"/>
+                    </span>
+                    <span class="max-w-[200px] truncate" x-text="index >= 0 ? @js($items->pluck('text')->all())[index] : 'On this page'">On this page</span>
+                </button>
+            </div>
+
+            {{-- Phones & tablets: a collapsible box at the top --}}
+            <details class="group mx-auto mb-6 max-w-[720px] px-5 lg:hidden">
                 <summary class="flex cursor-pointer list-none items-center justify-between rounded-2xl border border-line bg-white px-4 py-3 text-sm font-semibold [&::-webkit-details-marker]:hidden">
-                    <span class="flex items-center gap-2"><x-icon name="list" class="size-4 text-muted"/> On this page</span>
+                    <span class="flex items-center gap-2"><x-icon name="list" class="size-4 text-muted"/> On this page <span class="font-normal text-muted">· {{ $items->whereNotNull('n')->count() }} sections</span></span>
                     <x-icon name="chevron-down" class="size-4 transition group-open:rotate-180"/>
                 </summary>
-                <ol class="mt-2 space-y-1 rounded-2xl border border-line bg-white p-3 text-sm">
-                    @foreach($outline as $h)<li><a href="#{{ $h['id'] }}" class="block rounded-lg px-2 py-1.5 text-ink-soft hover:bg-zinc-50 hover:text-ink {{ $h['level'] === 'h3' ? 'pl-6' : '' }}">{{ $h['text'] }}</a></li>@endforeach
-                </ol>
+                <div class="mt-2 overflow-hidden rounded-2xl border border-line bg-white">{!! $tocList(true) !!}</div>
             </details>
         @endif
 

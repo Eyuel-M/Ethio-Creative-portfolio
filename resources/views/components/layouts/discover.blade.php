@@ -22,6 +22,7 @@
     <div class="flex h-10 items-center gap-5 px-6 text-xs text-ink-soft">
         <a href="{{ route('how') }}" class="font-medium hover:text-ink">How it works</a>
         <span class="h-4 w-px bg-line"></span>
+        <a href="{{ route('insights.index') }}" class="hover:text-ink">Insights</a>
         <a href="{{ route('pricing') }}" class="hover:text-ink">Pricing</a>
         <a href="{{ route('how') }}#trust" class="hover:text-ink">Trust &amp; safety</a>
         <a href="{{ route('how') }}#faq" class="hover:text-ink">Help</a>

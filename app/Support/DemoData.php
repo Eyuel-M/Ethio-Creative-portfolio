@@ -79,6 +79,7 @@ class DemoData
             $reviews = Review::where(fn ($q) => $either($q, 'reviewer_id', 'reviewee_id'))->delete();
             $agreements = AgreementVersion::whereIn('created_by', $ids)->delete();
             Entitlement::whereIn('user_id', $ids)->delete();
+            \App\Models\Post::whereIn('author_id', $ids)->delete(); // sample Insights posts (blocks cascade)
             $orders = Order::whereIn('user_id', $ids)->delete();
             DB::table('notifications')->where('notifiable_type', User::class)->whereIn('notifiable_id', $ids)->delete();
 

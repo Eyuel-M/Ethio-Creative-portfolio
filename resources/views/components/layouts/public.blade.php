@@ -10,8 +10,9 @@
     <div class="mx-auto flex h-16 max-w-[1320px] items-center justify-between gap-4 px-4 sm:mx-4 sm:px-5 lg:mx-auto lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
         <div class="flex min-w-0 items-center justify-self-start"><x-logo/></div>
         <nav class="hidden items-center justify-self-center gap-1 rounded-full border border-line bg-white p-1 text-sm shadow-[0_2px_10px_-4px_rgba(12,12,16,.15)] lg:flex">
-            @foreach([['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
-                <a href="{{ route($route) }}" class="rounded-full px-4 py-2 transition {{ request()->routeIs($route) ? 'bg-ink font-medium text-white' : 'text-ink-soft hover:bg-zinc-100 hover:text-ink' }}" @if(request()->routeIs($route)) aria-current="page" @endif>{{ $label }}</a>
+            @foreach([['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['Insights', 'insights.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
+                @php $on = request()->routeIs($route, \Illuminate\Support\Str::before($route, '.index').'.*'); @endphp
+                <a href="{{ route($route) }}" class="whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] transition xl:px-4 xl:text-sm {{ $on ? 'bg-ink font-medium text-white' : 'text-ink-soft hover:bg-zinc-100 hover:text-ink' }}" @if($on) aria-current="page" @endif>{{ $label }}</a>
             @endforeach
         </nav>
         <div class="flex items-center gap-2 justify-self-end">
@@ -28,7 +29,7 @@
         </div>
     </div>
     <div x-show="nav" x-cloak x-transition class="mx-4 mb-3 rounded-2xl border border-line bg-white p-2 shadow-lg lg:hidden">
-        @foreach([['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
+        @foreach([['Talent', 'freelancers.index'], ['Jobs', 'jobs.index'], ['Insights', 'insights.index'], ['How it works', 'how'], ['Pricing', 'pricing']] as [$label, $route])
             <a href="{{ route($route) }}" class="block rounded-xl px-3 py-2.5 text-sm hover:bg-zinc-50">{{ $label }}</a>
         @endforeach
         <div class="mt-2 grid grid-cols-2 gap-2">
@@ -50,7 +51,7 @@
             <x-logo/>
             <p class="mt-4 max-w-xs text-sm leading-relaxed text-muted">A portfolio-first home for Ethiopian creative talent. Clients pay directly — we never hold or take a cut of project payments.</p>
         </div>
-        <div><p class="text-sm font-semibold">Discover</p><ul class="mt-3 space-y-2 text-sm text-muted"><li><a class="hover:text-ink" href="{{ route('freelancers.index') }}">Browse talent</a></li><li><a class="hover:text-ink" href="{{ route('jobs.index') }}">Find jobs</a></li><li><a class="hover:text-ink" href="{{ route('pricing') }}">Pricing</a></li></ul></div>
+        <div><p class="text-sm font-semibold">Discover</p><ul class="mt-3 space-y-2 text-sm text-muted"><li><a class="hover:text-ink" href="{{ route('freelancers.index') }}">Browse talent</a></li><li><a class="hover:text-ink" href="{{ route('jobs.index') }}">Find jobs</a></li><li><a class="hover:text-ink" href="{{ route('pricing') }}">Pricing</a></li><li><a class="hover:text-ink" href="{{ route('insights.index') }}">Insights</a></li></ul></div>
         <div><p class="text-sm font-semibold">Platform</p><ul class="mt-3 space-y-2 text-sm text-muted"><li><a class="hover:text-ink" href="{{ route('how') }}">How it works</a></li><li><a class="hover:text-ink" href="{{ route('how') }}#trust">Trust &amp; safety</a></li><li><a class="hover:text-ink" href="{{ route('how') }}#faq">FAQ</a></li></ul></div>
         <div><p class="text-sm font-semibold">Get started</p><ul class="mt-3 space-y-2 text-sm text-muted"><li><a class="hover:text-ink" href="{{ route('register', ['role' => 'freelancer']) }}">Join as freelancer</a></li><li><a class="hover:text-ink" href="{{ route('register', ['role' => 'client']) }}">Hire talent</a></li><li><a class="hover:text-ink" href="{{ route('login') }}">Sign in</a></li></ul></div>
     </div>

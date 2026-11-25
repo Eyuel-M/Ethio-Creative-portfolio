@@ -169,6 +169,23 @@
     </section>
     @endif
 
+    {{-- From Insights --}}
+    @if(($insights ?? collect())->isNotEmpty())
+    <section class="mx-auto max-w-[1320px] px-4 pb-20 sm:px-6">
+        <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div>
+                <span class="chip bg-white">Insights</span>
+                <h2 class="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">Studies, guides & news</h2>
+                <p class="mt-3 max-w-xl text-ink-soft">What creative work costs in Ethiopia, how to win better clients, and what's new on {{ config('marketplace.brand') }}.</p>
+            </div>
+            <a href="{{ route('insights.index') }}" class="btn btn-light btn-pill h-11 px-5">All Insights <x-icon name="arrow-right" class="size-4"/></a>
+        </div>
+        <div class="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach($insights as $p)<x-post-card :post="$p"/>@endforeach
+        </div>
+    </section>
+    @endif
+
     {{-- CTA --}}
     <section class="mx-auto max-w-[1320px] px-4 sm:px-6">
         <div class="relative overflow-hidden rounded-[28px] bg-ink px-6 py-16 text-center text-white sm:px-12">

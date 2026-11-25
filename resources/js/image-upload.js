@@ -33,11 +33,11 @@ export async function compressImage(file) {
 }
 
 /** Uploads one image; resolves with the server's { path, url, bytes, original_bytes }. */
-export function uploadImage(endpoint, file, onProgress = () => {}) {
+export function uploadImage(endpoint, file, onProgress = () => {}, field = 'image') {
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         const form = new FormData();
-        form.append('image', file);
+        form.append(field, file);
         xhr.open('POST', endpoint);
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name=csrf-token]')?.content || '');
@@ -46,7 +46,7 @@ export function uploadImage(endpoint, file, onProgress = () => {}) {
             let body = {};
             try { body = JSON.parse(xhr.responseText); } catch { /* not JSON */ }
             if (xhr.status >= 200 && xhr.status < 300) return resolve(body);
-            const msg = body?.errors?.image?.[0] || body?.message
+            const msg = body?.errors?.[field]?.[0] || body?.message
                 || (xhr.status === 413 ? 'This image is too large for the server.' : xhr.status === 429 ? 'Too many uploads at once — retry in a moment.' : 'Upload failed.');
             reject(new Error(msg));
         };

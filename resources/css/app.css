@@ -167,3 +167,25 @@ html { scrollbar-gutter: stable; }
 ::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
 .scroll-dark::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, .18); }
 .scroll-dark::-webkit-scrollbar-thumb:hover { background-color: rgba(255, 255, 255, .34); }
+
+/* ── Insights article typography (output of App\Support\RichText) ── */
+.prose-post { --accent: #2a78d6; font-size: 18px; line-height: 1.75; color: var(--color-ink-soft); }
+.prose-post.prose-lg { font-size: 21px; line-height: 1.7; }
+.prose-post.prose-tight { font-size: inherit; line-height: 1.65; }
+.prose-post > * + * { margin-top: 1.1em; }
+.prose-post p { text-wrap: pretty; }
+.prose-post strong { color: var(--color-ink); font-weight: 600; }
+.prose-post a, .prose-inline a { color: var(--color-ink); text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 3px; transition: color .15s; }
+.prose-post a:hover, .prose-inline a:hover { color: var(--accent); }
+.prose-post mark, .prose-inline mark { background: color-mix(in srgb, var(--accent) 16%, transparent); color: inherit; padding: 0 .2em; border-radius: .25em; }
+.prose-post code, .prose-inline code { font-size: .88em; background: rgba(12, 12, 16, .06); padding: .12em .38em; border-radius: .35em; color: var(--color-ink); }
+.prose-post ul, .prose-post ol { padding-left: 1.35em; }
+.prose-post ul { list-style: disc; }
+.prose-post ol { list-style: decimal; }
+.prose-post li { padding-left: .3em; }
+.prose-post li + li { margin-top: .45em; }
+.prose-post li::marker { color: var(--accent); font-weight: 600; }
+.prose-post.has-dropcap > p:first-child::first-letter { float: left; font-family: var(--font-display); font-weight: 700; font-size: 4.1em; line-height: .82; margin: .08em .1em 0 0; color: var(--color-ink); }
+.prose-post.prose-dark, .prose-post.prose-dark strong, .prose-post.prose-dark a { color: rgba(255, 255, 255, .85); }
+.prose-post.prose-dark strong, .prose-post.prose-dark a { color: #fff; }
+.prose-post.prose-dark code { background: rgba(255, 255, 255, .12); color: #fff; }

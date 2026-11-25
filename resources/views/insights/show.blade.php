@@ -1,0 +1,179 @@
+@php
+    use App\Models\Post;
+    $guest = ! auth()->check();
+    $layout = $post->opt('layout');
+    $coverStyle = $layout === 'minimal' ? 'none' : $post->opt('cover');
+    $outline = $post->outline();
+    $showToc = $post->shows('toc') && $layout !== 'minimal' && count($outline) >= 2;
+    $hex = Post::ACCENTS[$post->opt('accent')]['hex'];
+    $url = route('insights.show', $post);
+    $byAuthor = $post->author && ! $post->author_label;
+@endphp
+<x-dynamic-component :component="$guest ? 'layouts.public' : 'layouts.discover'" :title="$post->metaTitle()">
+@push('meta')
+<meta name="description" content="{{ $post->metaDescription() }}">
+<link rel="canonical" href="{{ $url }}">
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ $post->metaTitle() }}">
+<meta property="og:description" content="{{ $post->metaDescription() }}">
+<meta property="og:url" content="{{ $url }}">
+@if($post->coverUrl())<meta property="og:image" content="{{ $post->coverUrl() }}"><meta name="twitter:card" content="summary_large_image">@endif
+@if($post->published_at)<meta property="article:published_time" content="{{ $post->published_at->toIso8601String() }}">@endif
+<link rel="alternate" type="application/rss+xml" title="{{ config('marketplace.brand') }} Insights" href="{{ route('insights.feed') }}">
+@if(! $post->isPublic())<meta name="robots" content="noindex">@endif
+<script type="application/ld+json">{!! json_encode(array_filter([
+    '@context' => 'https://schema.org', '@type' => $post->type === 'study' ? 'Report' : 'Article',
+    'headline' => $post->title, 'description' => $post->metaDescription(), 'image' => $post->coverUrl(),
+    'datePublished' => $post->published_at?->toIso8601String(), 'dateModified' => $post->updated_at?->toIso8601String(),
+    'author' => ['@type' => $byAuthor ? 'Person' : 'Organization', 'name' => $post->byline()],
+    'publisher' => ['@type' => 'Organization', 'name' => config('marketplace.brand')],
+    'mainEntityOfPage' => $url, 'keywords' => implode(', ', $post->topics ?? []) ?: null,
+]), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>
+@endpush
+
+{{-- Reading progress --}}
+<div x-data="{ p: 0 }" x-init="const f = () => { const h = document.documentElement; p = Math.min(100, Math.max(0, h.scrollTop / ((h.scrollHeight - h.clientHeight) || 1) * 100)) }; f(); window.addEventListener('scroll', f, { passive: true })"
+     class="pointer-events-none fixed inset-x-0 top-0 z-[70] h-[3px]" aria-hidden="true">
+    <div class="h-full origin-left transition-[width] duration-75" :style="`width:${p}%; background:{{ $hex }}`"></div>
+</div>
+
+@if($staff)
+    <div class="sticky top-16 z-30 border-b px-4 py-2 text-center text-sm {{ $post->isPublic() ? 'border-line bg-white/95' : 'border-amber-200 bg-amber-50 text-amber-900' }} backdrop-blur">
+        @if($post->isScheduled())Scheduled — goes live {{ $post->published_at->format('M j, Y \a\t g:ia') }}. Only admins can see this preview.
+        @elseif(! $post->isPublic())Preview — this post is {{ $post->status === 'archived' ? 'archived' : 'a draft' }}. Only admins can see it.
+        @else You're viewing a live post · {{ number_format($post->views) }} reads.@endif
+        <a href="{{ route('admin.posts.edit', $post) }}" class="ml-2 font-semibold underline underline-offset-2">Edit post</a>
+    </div>
+@endif
+
+<article style="--accent: {{ $hex }}">
+    {{-- ───────── Header ───────── --}}
+    @if($layout === 'feature')
+        <header class="px-3 pt-3 sm:px-4 sm:pt-4">
+            <div class="relative isolate flex min-h-[min(78svh,720px)] items-end overflow-hidden rounded-[28px] bg-gradient-to-br {{ $post->accent('grad') }}">
+                @if($post->coverUrl() && $coverStyle !== 'none')
+                    <img src="{{ $post->coverUrl() }}" alt="{{ $post->cover_alt ?? '' }}" class="absolute inset-0 -z-10 size-full object-cover">
+                    <div class="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/50 to-black/20"></div>
+                @else
+                    <div class="absolute inset-0 -z-10 grid-lines"></div>
+                @endif
+                @php $onImage = $post->coverUrl() && $coverStyle !== 'none'; @endphp
+                <div class="mx-auto w-full max-w-[1120px] px-6 pb-10 pt-32 sm:px-10 sm:pb-14 {{ $onImage ? 'text-white' : '' }}">
+                    <a href="{{ route('insights.index', ['type' => $post->type]) }}" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold {{ $onImage ? 'bg-white/15 text-white backdrop-blur' : 'bg-white/80 '.$post->accent('text') }}"><x-icon :name="$post->typeIcon()" class="size-3.5"/> {{ $post->typeLabel() }}</a>
+                    <h1 class="mt-4 max-w-4xl font-display text-4xl font-bold leading-[1.04] tracking-[-0.03em] sm:text-6xl lg:text-[68px]">{{ $post->title }}</h1>
+                    @if($post->excerpt)<p class="mt-5 max-w-2xl text-lg leading-relaxed sm:text-xl {{ $onImage ? 'text-white/80' : 'text-ink-soft' }}">{{ $post->excerpt }}</p>@endif
+                    @include('insights._meta', ['light' => $onImage])
+                </div>
+            </div>
+            @if($post->cover_caption && $onImage)<p class="mx-auto max-w-[1120px] px-6 pt-3 text-xs text-muted sm:px-10">{{ $post->cover_caption }}</p>@endif
+        </header>
+    @else
+        <header class="relative overflow-hidden">
+            <div class="absolute inset-x-0 top-0 -z-10 h-[420px] bg-gradient-to-b {{ $post->accent('grad') }}"></div>
+            <div class="mx-auto max-w-[820px] px-5 pb-8 pt-12 sm:pt-16 {{ $layout === 'minimal' ? 'text-center' : '' }}">
+                <nav class="flex items-center gap-2 text-sm {{ $layout === 'minimal' ? 'justify-center' : '' }}" aria-label="Breadcrumb">
+                    <a href="{{ route('insights.index') }}" class="font-medium text-muted hover:text-ink">Insights</a>
+                    <x-icon name="chevron-right" class="size-3.5 text-faint"/>
+                    <a href="{{ route('insights.index', ['type' => $post->type]) }}" class="inline-flex items-center gap-1.5 font-semibold {{ $post->accent('text') }}"><x-icon :name="$post->typeIcon()" class="size-4"/> {{ $post->typeLabel() }}</a>
+                </nav>
+                <h1 class="mt-5 font-display text-[38px] font-bold leading-[1.06] tracking-[-0.03em] sm:text-[54px]">{{ $post->title }}</h1>
+                @if($post->excerpt)<p class="mt-5 text-lg leading-relaxed text-ink-soft sm:text-xl">{{ $post->excerpt }}</p>@endif
+                @include('insights._meta', ['light' => false])
+            </div>
+            @if($post->coverUrl() && $coverStyle !== 'none')
+                <figure class="{{ $coverStyle === 'hero' ? 'mx-auto max-w-[1320px] px-3 sm:px-4' : 'mx-auto max-w-[1120px] px-5' }}">
+                    <img src="{{ $post->coverUrl() }}" alt="{{ $post->cover_alt ?? '' }}" class="block aspect-[16/8] w-full rounded-[24px] object-cover">
+                    @if($post->cover_caption)<figcaption class="pt-3 text-center text-xs text-muted">{{ $post->cover_caption }}</figcaption>@endif
+                </figure>
+            @endif
+        </header>
+    @endif
+
+    {{-- ───────── Body ───────── --}}
+    <div class="relative pb-6 pt-8 sm:pt-12" @if($showToc) x-data="{ active: null }" x-init="
+            const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) active = e.target.id }), { rootMargin: '-20% 0px -70% 0px' });
+            document.querySelectorAll('article h2[id], article h3[id]').forEach((h) => io.observe(h))" @endif>
+        @if($showToc)
+            {{-- Wide screens: contents in the left margin --}}
+            <aside class="absolute inset-y-0 left-6 hidden w-52 2xl:block" aria-label="On this page">
+                <nav class="sticky top-28">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">On this page</p>
+                    <ol class="mt-3 space-y-1 border-l border-line text-sm">
+                        @foreach($outline as $h)
+                            <li><a href="#{{ $h['id'] }}" class="-ml-px block border-l-2 py-1 leading-snug transition {{ $h['level'] === 'h3' ? 'pl-6 text-[13px]' : 'pl-3' }}" :class="active === @js($h['id']) ? 'font-semibold text-ink' : 'border-transparent text-muted hover:text-ink'" :style="active === @js($h['id']) ? 'border-color: {{ $hex }}' : ''">{{ $h['text'] }}</a></li>
+                        @endforeach
+                    </ol>
+                </nav>
+            </aside>
+            {{-- Other screens: a collapsible box at the top --}}
+            <details class="group mx-auto mb-6 max-w-[720px] px-5 2xl:hidden">
+                <summary class="flex cursor-pointer list-none items-center justify-between rounded-2xl border border-line bg-white px-4 py-3 text-sm font-semibold [&::-webkit-details-marker]:hidden">
+                    <span class="flex items-center gap-2"><x-icon name="list" class="size-4 text-muted"/> On this page</span>
+                    <x-icon name="chevron-down" class="size-4 transition group-open:rotate-180"/>
+                </summary>
+                <ol class="mt-2 space-y-1 rounded-2xl border border-line bg-white p-3 text-sm">
+                    @foreach($outline as $h)<li><a href="#{{ $h['id'] }}" class="block rounded-lg px-2 py-1.5 text-ink-soft hover:bg-zinc-50 hover:text-ink {{ $h['level'] === 'h3' ? 'pl-6' : '' }}">{{ $h['text'] }}</a></li>@endforeach
+                </ol>
+            </details>
+        @endif
+
+        @forelse($post->blocks as $block)
+            @include('insights._block', ['block' => $block, 'post' => $post])
+        @empty
+            <p class="mx-auto max-w-[720px] px-5 text-muted">This post has no content yet.</p>
+        @endforelse
+    </div>
+
+    {{-- ───────── Footer: topics, share, author ───────── --}}
+    <footer class="mx-auto max-w-[720px] px-5 pb-12">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-t border-line pt-6">
+            <div class="flex flex-wrap gap-2">
+                @foreach($post->topics ?? [] as $t)<a href="{{ route('insights.index', ['topic' => $t]) }}" class="chip hover:border-ink">{{ $t }}</a>@endforeach
+            </div>
+            @if($post->shows('share') && $post->isPublic())
+                <x-share :url="$url" :title="$post->title" :image="$post->coverUrl()" :subtitle="$post->typeLabel().' · '.config('marketplace.brand').' Insights'" :pill="true"/>
+            @endif
+        </div>
+
+        @if($post->shows('author_box'))
+            <div class="mt-8 flex items-center gap-4 rounded-3xl bg-zinc-50 p-5 sm:p-6">
+                @if($byAuthor)<x-avatar :user="$post->author" size="size-14" class="text-base"/>@else<span class="grid size-14 shrink-0 place-items-center rounded-2xl bg-ink text-white"><x-logo-mark class="size-7"/></span>@endif
+                <div class="min-w-0">
+                    <p class="text-xs font-semibold uppercase tracking-[0.12em] text-faint">Written by</p>
+                    <p class="font-display text-lg font-bold">{{ $post->byline() }}</p>
+                    <p class="text-sm text-muted">{{ $byAuthor ? 'Team '.config('marketplace.brand') : 'From the '.config('marketplace.brand').' team' }} · <a href="{{ route('insights.index') }}" class="font-medium text-ink hover:underline">More Insights</a></p>
+                </div>
+            </div>
+        @endif
+    </footer>
+</article>
+
+{{-- ───────── Related ───────── --}}
+@if($related->isNotEmpty())
+    <section class="border-t border-line bg-[#fbfbfd] py-14">
+        <div class="mx-auto max-w-[1120px] px-5">
+            <div class="mb-8 flex items-end justify-between gap-3">
+                <h2 class="font-display text-2xl font-bold tracking-tight sm:text-[28px]">Keep reading</h2>
+                <a href="{{ route('insights.index') }}" class="text-sm font-semibold hover:underline">All Insights</a>
+            </div>
+            <div class="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach($related as $r)<x-post-card :post="$r" size="compact"/>@endforeach
+            </div>
+        </div>
+    </section>
+@endif
+
+@if($guest)
+    <section class="px-3 pb-3 sm:px-4">
+        <div class="relative mx-auto max-w-[1320px] overflow-hidden rounded-[28px] bg-ink px-6 py-14 text-center text-white sm:px-12">
+            <div class="pointer-events-none absolute -left-24 -top-24 size-80 rounded-full opacity-30 blur-3xl" style="background: {{ $hex }}"></div>
+            <h2 class="relative font-display text-3xl font-bold tracking-tight sm:text-4xl">Where Ethiopian creative work gets discovered</h2>
+            <p class="relative mx-auto mt-3 max-w-xl text-white/65">Free portfolios for creatives. Clear agreements for clients. No commission on project payments.</p>
+            <div class="relative mt-7 flex flex-wrap justify-center gap-3">
+                <a href="{{ route('register', ['role' => 'freelancer']) }}" class="btn btn-pill h-12 bg-white px-6 text-ink hover:bg-zinc-100">Create your portfolio</a>
+                <a href="{{ route('register', ['role' => 'client']) }}" class="btn btn-pill h-12 border border-white/25 px-6 text-white hover:bg-white/10">Post a job</a>
+            </div>
+        </div>
+    </section>
+@endif
+</x-dynamic-component>

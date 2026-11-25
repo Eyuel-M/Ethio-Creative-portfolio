@@ -16,7 +16,7 @@ return [
 
     'role_descriptions' => [
         'super_admin' => 'Everything, including the admin team, settings and system health.',
-        'moderator' => 'Reports, job & portfolio moderation, verification, content.',
+        'moderator' => 'Reports, job & portfolio moderation, verification, content and Insights posts.',
         'support' => 'Users, reports, verification, data requests, view-as-user.',
         'finance' => 'Orders, subscriptions, plans & fees, refunds, revenue insights.',
         'dispute_reviewer' => 'Reports, agreements, payment-detail log, audit log.',
@@ -39,6 +39,7 @@ return [
         'reviews' => ['moderator'],
         'finance' => ['finance'],
         'content' => ['moderator'],
+        'posts' => ['moderator'],
         'settings' => [],
         'data_requests' => ['support'],
         'health' => [],

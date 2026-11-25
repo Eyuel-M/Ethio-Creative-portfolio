@@ -34,7 +34,10 @@ class PageController extends Controller
             'jobs' => JobPost::live()->count(),
         ];
 
-        return view('public.home', compact('categories', 'featuredTalent', 'showcase', 'jobs', 'stats'));
+        $insights = \App\Models\Post::public()->with('author')
+            ->orderByRaw('CASE WHEN featured_at IS NULL THEN 1 ELSE 0 END')->latest('published_at')->take(3)->get();
+
+        return view('public.home', compact('categories', 'featuredTalent', 'showcase', 'jobs', 'stats', 'insights'));
     }
 
     public function pricing()

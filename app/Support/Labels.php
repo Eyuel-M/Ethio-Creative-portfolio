@@ -22,7 +22,7 @@ class Labels
             'verification.approved' => 'approved a verification', 'verification.rejected' => 'rejected a verification',
             'order.refunded' => 'refunded an order', 'product.updated' => 'updated a plan or fee', 'review.hidden' => 'hid a review', 'review.restored' => 'restored a review',
             'category.created' => 'created a category', 'category.updated' => 'updated a category', 'category.deleted' => 'deleted a category', 'skill.created' => 'added a skill', 'skill.deleted' => 'deleted a skill',
-            'announcement.updated' => 'updated the announcement', 'settings.updated' => 'changed platform switches', 'profile.feature' => 'featured a freelancer', 'profile.unfeature' => 'unfeatured a freelancer',
+            'announcement.updated' => 'updated the announcement', 'post.created' => 'created an Insights post', 'post.updated' => 'edited an Insights post', 'post.published' => 'published an Insights post', 'post.scheduled' => 'scheduled an Insights post', 'post.unpublished' => 'unpublished an Insights post', 'post.archived' => 'archived an Insights post', 'post.featured' => 'pinned an Insights post', 'post.unfeatured' => 'unpinned an Insights post', 'post.duplicated' => 'duplicated an Insights post', 'post.deleted' => 'deleted an Insights post', 'settings.updated' => 'changed platform switches', 'profile.feature' => 'featured a freelancer', 'profile.unfeature' => 'unfeatured a freelancer',
             'data_request.completed' => 'completed a data request', 'data_request.rejected' => 'rejected a data request',
             'admin.login' => 'signed in as an admin', 'admin.verified' => 'confirmed their admin sign-in code',
             'agreement.confirmed' => 'an agreement was confirmed', 'agreement.proposed' => 'an agreement was proposed',
@@ -38,7 +38,7 @@ class Labels
     {
         return match ($status) {
             'published', 'approved', 'actioned', 'accepted', 'confirmed', 'completed', 'paid', 'active', 'available', 'receipt_confirmed', 'delivered' => 'bg-emerald-50 text-emerald-700 ring-emerald-600/15',
-            'shortlisted', 'discussion', 'negotiation', 'in_progress', 'submitted_for_review', 'submitted', 'viewed', 'awaiting_confirmations' => 'bg-indigo-50 text-indigo-700 ring-indigo-600/15',
+            'scheduled', 'shortlisted', 'discussion', 'negotiation', 'in_progress', 'submitted_for_review', 'submitted', 'viewed', 'awaiting_confirmations' => 'bg-indigo-50 text-indigo-700 ring-indigo-600/15',
             'pending', 'restricted', 'pending_payment', 'pending_provider', 'draft', 'paused', 'revision_requested', 'not_started', 'created', 'busy', 'partial' => 'bg-amber-50 text-amber-700 ring-amber-600/20',
             'rejected', 'deleted', 'refunded', 'withdrawn', 'cancelled', 'failed', 'removed', 'declined', 'expired', 'closed', 'suspended', 'banned', 'cancellation_requested', 'problem_reported', 'unavailable', 'not_provided' => 'bg-rose-50 text-rose-700 ring-rose-600/15',
             default => 'bg-zinc-100 text-zinc-700 ring-zinc-500/15',

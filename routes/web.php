@@ -30,6 +30,9 @@ Route::get('/freelancers', [FreelancerDirectoryController::class, 'index'])->nam
 Route::get('/freelancers/{profile:slug}', [FreelancerDirectoryController::class, 'show'])->name('freelancers.show');
 Route::get('/portfolio/{project}', [PortfolioController::class, 'show'])->name('portfolio.show');
 Route::get('/jobs', [JobBoardController::class, 'index'])->name('jobs.index');
+Route::get('/insights', [\App\Http\Controllers\InsightsController::class, 'index'])->name('insights.index');
+Route::get('/insights/feed.xml', [\App\Http\Controllers\InsightsController::class, 'feed'])->name('insights.feed');
+Route::get('/insights/{post}', [\App\Http\Controllers\InsightsController::class, 'show'])->name('insights.show');
 Route::get('/jobs/{job}', [JobBoardController::class, 'show'])->name('jobs.show');
 
 Route::post('/a/beacon', [\App\Http\Controllers\AnalyticsBeaconController::class, 'beacon'])->middleware('throttle:120,1')->name('analytics.beacon');
@@ -242,6 +245,20 @@ Route::middleware(['auth', 'active'])->group(function () {
                 Route::get('/featured', [A\ContentController::class, 'featured'])->name('featured');
                 Route::get('/announcement', [A\ContentController::class, 'announcement'])->name('announcement');
                 Route::put('/announcement', [A\ContentController::class, 'updateAnnouncement'])->name('announcement.update');
+            });
+
+            // Publishing: Insights posts
+            Route::middleware('admin.can:posts')->prefix('posts')->name('posts')->group(function () {
+                Route::get('/', [A\PostController::class, 'index'])->name('');
+                Route::get('/create', [A\PostController::class, 'create'])->name('.create');
+                Route::post('/', [A\PostController::class, 'store'])->name('.store');
+                Route::post('/uploads', [A\PostController::class, 'uploadImage'])->middleware('throttle:image-uploads')->name('.upload');
+                Route::post('/files', [A\PostController::class, 'uploadFile'])->middleware('throttle:image-uploads')->name('.file');
+                Route::get('/{post:id}/edit', [A\PostController::class, 'edit'])->name('.edit');
+                Route::put('/{post:id}', [A\PostController::class, 'update'])->name('.update');
+                Route::post('/{post:id}/duplicate', [A\PostController::class, 'duplicate'])->name('.duplicate');
+                Route::post('/{post:id}/status', [A\PostController::class, 'status'])->name('.status');
+                Route::delete('/{post:id}', [A\PostController::class, 'destroy'])->name('.destroy');
             });
 
             // System

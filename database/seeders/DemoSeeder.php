@@ -50,6 +50,7 @@ class DemoSeeder extends Seeder
         Storage::disk('public')->deleteDirectory('seed');
         \Illuminate\Support\Facades\DB::transaction(fn () => $this->load());
         $this->adminQueues();
+        (new InsightsSeeder)->run();
         \App\Support\DemoAnalytics::seed();
     }
 

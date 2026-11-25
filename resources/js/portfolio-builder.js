@@ -9,7 +9,7 @@ export function portfolioBuilder({ blocks, defaults, labels, uploadUrl, cover, c
     let n = 0;
     const clone = (o) => JSON.parse(JSON.stringify(o));
     const fresh = (type) => ({
-        key: ++n, type, body: '', caption: '', alt: '', embed_url: '',
+        key: ++n, type, body: '', caption: '', alt: '', embed_url: '', title: '', url: '', size: '', items: [],
         existing: null, preview: null, up: null, gallery: [],
         settings: clone(defaults[type] || {}),
     });
@@ -19,6 +19,7 @@ export function portfolioBuilder({ blocks, defaults, labels, uploadUrl, cover, c
         blocks: blocks.map((b) => ({
             ...fresh(b.type), ...b, key: ++n, up: null,
             gallery: (b.gallery || []).map((g) => ({ ...g, id: ++n, up: null })),
+            items: (b.items || []).map((it) => ({ a: '', b: '', ...it, id: ++n })),
             settings: { ...clone(defaults[b.type] || {}), ...(b.settings || {}) },
         })),
         cover: { preview: cover, path: coverPath, up: null },
@@ -55,6 +56,7 @@ export function portfolioBuilder({ blocks, defaults, labels, uploadUrl, cover, c
         duplicate(i) {
             const src = this.blocks[i];
             const copy = { ...clone({ ...src, up: null, gallery: [] }), key: ++n, up: null };
+            copy.items = (src.items || []).map((it) => ({ ...it, id: ++n }));
             if (!copy.existing) copy.preview = null; // an image still uploading can't be copied
             copy.gallery = (src.gallery || []).filter((g) => g.path && !g.up).map((g) => ({ path: g.path, url: g.url, alt: g.alt, id: ++n, up: null }));
             this.blocks.splice(i + 1, 0, copy);

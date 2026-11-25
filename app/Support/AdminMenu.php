@@ -46,6 +46,9 @@ class AdminMenu
                 ['Marketplace health', 'admin.insights.marketplace', 'pencil-ruler', 'insights', null],
                 ['Data export', 'admin.insights.export', 'download', 'exports', null],
             ],
+            'Publishing' => [
+                ['Posts', 'admin.posts', 'pen', 'posts', null],
+            ],
             'Content' => [
                 ['Categories & skills', 'admin.categories', 'palette', 'content', null],
                 ['Homepage & featured', 'admin.featured', 'sparkles', 'content', null],
